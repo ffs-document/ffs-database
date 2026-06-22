@@ -306,22 +306,13 @@
     <!-- Script สำหรับเชื่อม Supabase -->
     <script>
         // ==========================================
-        // นำ URL และ ANON KEY จาก Supabase มาใส่ตรงนี้ครับ 👇
+        // 1. ใส่ URL และ KEY ด้านล่างนี้ (ห้ามลบเครื่องหมาย ' ออก)
         // ==========================================
-        const SUPABASE_URL = 'https://cjhbuqplwezklititoxt.supabase.co'; // แก้ไขตรงนี้
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNqaGJ1cXBsd2V6a2xpdGl0b3h0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIxMjU4NDcsImV4cCI6MjA5NzcwMTg0N30.hUVV7JPoFUR0vk2FTYOPoR1cUipKSCBEPWdB11xTVGo'; // แก้ไขตรงนี้
+        const SUPABASE_URL = 'https://cjhbuqplwezklititoxt.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNqaGJ1cXBsd2V6a2xpdGl0b3h0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIxMjU4NDcsImV4cCI6MjA5NzcwMTg0N30.hUVV7JPoFUR0vk2FTYOPoR1cUipKSCBEPWdB11xTVGo';
         
-        let supabase;
-        try {
-            // เชื่อมต่อฐานข้อมูล
-            if (!SUPABASE_URL.includes('supabase.co')) {
-                alert("แจ้งเตือน: ยังไม่ได้ใส่ URL ของ Supabase หรือใส่ผิดรูปแบบครับ (ต้องมี https:// และลงท้ายด้วย supabase.co)");
-            }
-            supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        } catch (e) {
-            console.error("Supabase Init Error:", e);
-            alert("โค้ดมีปัญหา: ตรวจสอบการใส่ URL และ Key ว่ามีเครื่องหมายฟันหนูเดี่ยว '...' ครอบอยู่หรือไม่ครับ");
-        }
+        // 2. สร้างการเชื่อมต่อผ่านไลบรารีเบราว์เซอร์
+        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         let currentUser = null;
 
@@ -360,9 +351,8 @@
             loginError.classList.add('hidden');
 
             try {
-                if (!supabase) throw new Error("Supabase is not initialized.");
-
-                const { data: users, error } = await supabase
+                // เรียกใช้ฐานข้อมูลด้วย supabaseClient
+                const { data: users, error } = await supabaseClient
                     .from('users')
                     .select('*')
                     .eq('username', usernameInput)
@@ -429,9 +419,8 @@
             document.getElementById('searchBtnText').innerText = 'กำลังโหลด...';
 
             try {
-                if (!supabase) throw new Error("Supabase is not initialized.");
-
-                let query = supabase.from('documents').select('*');
+                // เรียกใช้ฐานข้อมูลด้วย supabaseClient
+                let query = supabaseClient.from('documents').select('*');
                 
                 if (category) query = query.eq('category', category);
                 if (department) query = query.ilike('department', `%${department}%`);
@@ -554,9 +543,8 @@
             errorDiv.classList.add('hidden');
 
             try {
-                if (!supabase) throw new Error("Supabase is not initialized.");
-
-                const { data, error } = await supabase
+                // เรียกใช้ฐานข้อมูลด้วย supabaseClient
+                const { data, error } = await supabaseClient
                     .from('documents')
                     .insert([newDoc]);
 

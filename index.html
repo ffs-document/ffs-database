@@ -38,7 +38,7 @@
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
                     </div>
                     <h2 class="text-xl font-bold text-gray-900">FFs Database</h2>
-                    <p class="text-sm text-gray-500 mt-1">ระบบบริหารจัดการข้อมูลองค์กร</p>
+                    <p class="text-sm text-gray-500 mt-1">ระบบฐานข้อมูลองค์กร</p>
                 </div>
                 <div class="space-y-4">
                     <div><input type="text" id="userInput" placeholder="ชื่อผู้ใช้งาน" class="block w-full px-4 py-2.5 border border-gray-300 rounded-xl bg-gray-50 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"></div>
@@ -665,6 +665,24 @@
             logs.sort((a,b) => b.time - a.time); tb.innerHTML = '';
             if(logs.length === 0) tb.innerHTML = '<tr><td colspan="4" class="text-center py-5 text-gray-400">ไม่มีประวัติการลบ</td></tr>';
             else logs.forEach(l => tb.innerHTML += `<tr class="border-b"><td class="px-4 py-3"><span class="bg-gray-100 px-2 py-1 rounded text-xs">${l.type}</span></td><td class="px-4 py-3 font-medium">${l.title}</td><td class="px-4 py-3 text-red-600">${l.by||'-'}</td><td class="px-4 py-3 text-sm">${l.time.toLocaleString('th-TH')}</td></tr>`);
+        }
+
+        // --- เพิ่มฟังก์ชัน Logout ใหม่ ---
+        function logout() {
+            // ล้างข้อมูล User ออกจากเครื่อง
+            localStorage.removeItem('ffsUser'); 
+            currentUser = null;
+            
+            // ซ่อนหน้าเว็บหลัก
+            document.getElementById('mainSystem').classList.add('hidden'); 
+            document.getElementById('mainSystem').classList.remove('flex'); 
+            
+            // โชว์หน้า Login 
+            document.getElementById('loginGate').style.display = 'flex'; 
+            
+            // ล้างช่องกรอกรหัสผ่าน
+            document.getElementById('userInput').value = '';
+            document.getElementById('passwordInput').value = '';
         }
 
         function openAddModal() { document.getElementById('addDocForm').reset(); document.getElementById('addDocModal').classList.remove('hidden'); } function closeAddModal() { document.getElementById('addDocModal').classList.add('hidden'); }

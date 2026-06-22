@@ -5,23 +5,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FFs Database | ระบบฐานข้อมูลองค์กร</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- เตรียมติดตั้ง Supabase JS (รอการเชื่อมต่อฐานข้อมูล) -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Sarabun', sans-serif; }
         .animate-fade-in { animation: fadeIn 0.4s ease-out forwards; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        /* ซ่อน scrollbar สำหรับเมนูด้านซ้ายให้ดูสะอาดขึ้น */
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
 </head>
 <body class="bg-gray-50 h-screen overflow-hidden text-gray-900 selection:bg-orange-200 selection:text-orange-900">
 
-    <!-- ========================================== -->
-    <!-- 1. หน้าต่างเข้าสู่ระบบ (Login Gate) -->
-    <!-- ========================================== -->
+    <!-- หน้าต่างเข้าสู่ระบบ -->
     <div id="loginGate" class="fixed inset-0 bg-gray-900/40 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
         <div class="bg-white rounded-2xl shadow-xl w-full max-w-sm overflow-hidden animate-fade-in border border-gray-100">
             <div class="h-2 bg-orange-500 w-full"></div>
@@ -38,14 +34,22 @@
                 <div class="space-y-4">
                     <div>
                         <label class="block text-xs font-medium text-gray-700 mb-1">รหัสประจำตัวบุคลากร / ชื่อผู้ใช้งาน</label>
-                        <input type="text" id="userInput" placeholder="ระบุชื่อผู้ใช้งาน" class="block w-full px-4 py-2.5 border border-gray-300 rounded-xl bg-gray-50 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-sm transition-all">
+                        <input type="text" id="userInput" placeholder="ระบุชื่อผู้ใช้งาน (เช่น admin)" class="block w-full px-4 py-2.5 border border-gray-300 rounded-xl bg-gray-50 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-sm transition-all">
                     </div>
                     <div>
                         <label class="block text-xs font-medium text-gray-700 mb-1">รหัสผ่านความปลอดภัย</label>
-                        <input type="password" id="passwordInput" placeholder="••••••••" class="block w-full px-4 py-2.5 border border-gray-300 rounded-xl bg-gray-50 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-sm transition-all">
+                        <input type="password" id="passwordInput" placeholder="•••••••• (ลอง 12345678)" class="block w-full px-4 py-2.5 border border-gray-300 rounded-xl bg-gray-50 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-sm transition-all">
                     </div>
                     
-                    <button onclick="simulateLogin()" class="w-full bg-orange-500 hover:bg-orange-600 active:scale-[0.99] text-white font-medium py-2.5 rounded-xl text-sm transition-all flex items-center justify-center space-x-2 shadow-xs cursor-pointer mt-4">
+                    <div id="loginError" class="hidden text-[11px] text-red-600 bg-red-50 p-2 rounded-lg text-center border border-red-100">
+                        <span id="errorMessage">ข้อมูลไม่ถูกต้อง กรุณาลองใหม่</span>
+                    </div>
+
+                    <button id="loginBtn" onclick="handleLogin()" class="w-full bg-orange-500 hover:bg-orange-600 active:scale-[0.99] text-white font-medium py-2.5 rounded-xl text-sm transition-all flex items-center justify-center space-x-2 shadow-xs cursor-pointer mt-4">
+                        <svg id="loginSpinner" class="hidden animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
                         <span id="loginBtnText">เข้าสู่ระบบ</span>
                     </button>
                     <p class="text-center text-xs text-gray-400 mt-4">เฉพาะบุคลากรที่ได้รับอนุญาตเท่านั้น</p>
@@ -54,26 +58,109 @@
         </div>
     </div>
 
-    <!-- ========================================== -->
-    <!-- 2. โครงสร้างหลัก (Main Application Layout) -->
-    <!-- ========================================== -->
+    <!-- หน้าต่างป๊อปอัป เพิ่มเอกสารใหม่ (Modal) -->
+    <div id="addDocModal" class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm z-[110] hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden animate-fade-in">
+            <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
+                <h3 class="text-lg font-bold text-gray-900 flex items-center">
+                    <svg class="w-5 h-5 mr-2 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 13h6m-3-3v6m5 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                    นำเข้าเอกสารใหม่
+                </h3>
+                <button onclick="closeAddModal()" class="text-gray-400 hover:text-gray-600 focus:outline-none transition-colors">
+                    <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+            </div>
+            
+            <div class="p-6 overflow-y-auto flex-1">
+                <form id="addDocForm" onsubmit="submitNewDocument(event)" class="space-y-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-medium text-gray-700 mb-1">หมวดหมู่ <span class="text-red-500">*</span></label>
+                            <select id="modalCat" required class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-orange-500 focus:outline-none bg-gray-50">
+                                <option value="">เลือกหมวดหมู่</option>
+                                <option value="01">01 - ทั่วไป</option>
+                                <option value="02">02 - รับรองการทำกิจกรรม</option>
+                                <option value="03">03 - รับรองสมาชิก</option>
+                                <option value="04">04 - ลาเรียน</option>
+                                <option value="05">05 - เยี่ยมชม</option>
+                                <option value="06">06 - ขอข้อมูล</option>
+                                <option value="07">07 - ขอเข้าพบ</option>
+                                <option value="08">08 - ประชาสัมพันธ์</option>
+                                <option value="09">09 - ขอเชิญเข้าร่วม</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-gray-700 mb-1">ส่วนงาน/ฝ่าย <span class="text-red-500">*</span></label>
+                            <select id="modalDept" required class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-orange-500 focus:outline-none bg-gray-50">
+                                <option value="">เลือกฝ่าย</option>
+                                <option value="อสพ">เอกสารสัมพันธ์ (อสพ.)</option>
+                                <option value="สมช">ฝ่ายสมาชิกสัมพันธ์ (สมช.)</option>
+                                <option value="สธส">ฝ่ายสาธารณสุขสัมพันธ์ (สธส.)</option>
+                                <option value="วนธ">ฝ่ายวัฒนธรรม (วนธ.)</option>
+                                <option value="กษส">ฝ่ายเกษตรสัมพันธ์ (กษส.)</option>
+                                <option value="ชสพ">ฝ่ายชุมชนสัมพันธ์ (ชสพ.)</option>
+                                <option value="กกส">ฝ่ายกิจกรรมสัมพันธ์ (กกส.)</option>
+                                <option value="ศสพ">ฝ่ายศึกษาสัมพันธ์ (ศสพ.)</option>
+                                <option value="อกป">ฝ่ายอำนวยการและปฏิสัมพันธ์ (อกป.)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-gray-700 mb-1">เลขที่เอกสาร <span class="text-red-500">*</span></label>
+                            <input type="text" id="modalDocId" required placeholder="เช่น 1001/2569" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-orange-500 focus:outline-none bg-gray-50">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-gray-700 mb-1">วันที่ลงเอกสาร <span class="text-red-500">*</span></label>
+                            <input type="text" id="modalDate" required placeholder="เช่น 25 มิ.ย. 2569" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-orange-500 focus:outline-none bg-gray-50">
+                        </div>
+                        <div class="md:col-span-2">
+                            <label class="block text-xs font-medium text-gray-700 mb-1">ชื่อเรื่อง <span class="text-red-500">*</span></label>
+                            <input type="text" id="modalTitle" required placeholder="ระบุชื่อเรื่องเอกสาร" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-orange-500 focus:outline-none bg-gray-50">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-gray-700 mb-1">เรียน</label>
+                            <input type="text" id="modalAttention" placeholder="ผู้รับเอกสาร (ถ้ามี)" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-orange-500 focus:outline-none bg-gray-50">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-gray-700 mb-1">ผู้ประสานงาน</label>
+                            <input type="text" id="modalCoordinator" placeholder="ชื่อผู้ประสานงาน (ถ้ามี)" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-orange-500 focus:outline-none bg-gray-50">
+                        </div>
+                        <div class="md:col-span-2">
+                            <label class="block text-xs font-medium text-gray-700 mb-1">เนื้อหาโดยย่อ</label>
+                            <textarea id="modalContent" rows="3" placeholder="สรุปเนื้อหาสำคัญ..." class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-orange-500 focus:outline-none bg-gray-50"></textarea>
+                        </div>
+                        <div class="md:col-span-2">
+                            <label class="block text-xs font-medium text-gray-700 mb-1">ลิงก์ PDF (Google Drive)</label>
+                            <input type="url" id="modalPdf" placeholder="วางลิงก์ Google Drive ที่นี่" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-orange-500 focus:outline-none bg-gray-50">
+                            <p class="text-[10px] text-gray-400 mt-1">*อย่าลืมเปิดสิทธิ์การเข้าถึงไฟล์เป็น "ทุกคนที่มีลิงก์ (Viewer)"</p>
+                        </div>
+                    </div>
+                    
+                    <div id="addError" class="hidden text-xs text-red-600 bg-red-50 p-2 rounded text-center border border-red-100"></div>
+
+                    <div class="mt-6 flex justify-end gap-3 pt-4 border-t border-gray-100">
+                        <button type="button" onclick="closeAddModal()" class="px-5 py-2 text-sm font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors">ยกเลิก</button>
+                        <button type="submit" id="saveDocBtn" class="px-5 py-2 text-sm font-bold text-white bg-orange-500 hover:bg-orange-600 rounded-lg shadow-sm transition-colors flex items-center">
+                            บันทึกข้อมูล
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- โครงสร้างหลักของระบบ -->
     <div id="mainSystem" class="hidden h-screen w-full flex bg-gray-50 overflow-hidden">
         
-        <!-- Sidebar (แถบเมนูด้านซ้าย) -->
+        <!-- Sidebar -->
         <aside id="sidebar" class="bg-white w-64 border-r border-gray-200 flex-col hidden md:flex transition-all duration-300 relative z-40 shadow-sm">
-            <!-- โลโก้ด้านบน -->
             <div class="h-16 flex items-center px-6 border-b border-gray-100">
                 <div class="bg-orange-500 text-white p-1.5 rounded-lg mr-3">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2" />
-                    </svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2" /></svg>
                 </div>
                 <h1 class="text-lg font-bold text-gray-800 tracking-tight">FFs Database</h1>
             </div>
             
-            <!-- เมนูนำทาง -->
             <nav class="flex-1 overflow-y-auto no-scrollbar py-6 px-4 space-y-8">
-                <!-- หมวดระบบปฏิบัติการ -->
                 <div>
                     <p class="px-3 text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2">ระบบปฏิบัติการ</p>
                     <ul class="space-y-1">
@@ -98,7 +185,6 @@
                     </ul>
                 </div>
 
-                <!-- หมวดการจัดการระบบ -->
                 <div>
                     <p class="px-3 text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2">การจัดการระบบ</p>
                     <ul class="space-y-1">
@@ -112,7 +198,6 @@
                 </div>
             </nav>
 
-            <!-- ข้อมูลผู้ใช้ด้านล่างสุด -->
             <div class="p-4 border-t border-gray-100 bg-gray-50/50">
                 <div class="flex items-center text-sm">
                     <div class="w-9 h-9 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center font-bold mr-3 border border-orange-200">
@@ -120,25 +205,22 @@
                     </div>
                     <div class="flex-1 min-w-0">
                         <p class="font-bold text-gray-800 truncate" id="userFullName">ระบุตัวตนผู้ใช้</p>
-                        <p class="text-[10px] text-gray-500 font-medium">สิทธิ์ระดับปฏิบัติการ</p>
+                        <p class="text-[10px] text-gray-500 font-medium" id="userRole">สิทธิ์ระดับปฏิบัติการ</p>
                     </div>
                 </div>
             </div>
         </aside>
 
-        <!-- คอลัมน์ขวา: ส่วนแสดงข้อมูลหลัก -->
+        <!-- พื้นที่หน้าจอหลัก -->
         <div class="flex-1 flex flex-col h-full overflow-hidden relative">
-            
-            <!-- Topbar (แถบด้านบน) -->
             <header class="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-4 sm:px-6 z-30">
                 <div class="flex items-center">
                     <button onclick="toggleSidebar()" class="text-gray-500 hover:text-orange-500 focus:outline-none md:hidden mr-4 transition-colors">
                         <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" /></svg>
                     </button>
-                    <!-- แถบสถานะระบบจำลอง -->
                     <div class="hidden md:flex items-center space-x-2 text-xs bg-emerald-50 px-3 py-1.5 rounded-full border border-emerald-100">
                         <span class="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></span>
-                        <span class="font-medium text-emerald-700">ระบบเชื่อมต่อสมบูรณ์</span>
+                        <span class="font-medium text-emerald-700">ฐานข้อมูล: เชื่อมต่อแล้ว</span>
                     </div>
                 </div>
                 <div>
@@ -148,28 +230,25 @@
                 </div>
             </header>
 
-            <!-- พื้นที่หน้าจอหลัก (Main Content: ค้นหาเอกสาร UI เดิม) -->
             <main class="flex-1 overflow-y-auto p-4 sm:p-8">
                 <div class="max-w-5xl mx-auto">
-                    
-                    <!-- ส่วนค้นหาเอกสาร (UI สีส้ม-ขาว เหมือนเดิมเป๊ะ) -->
+                    <!-- ค้นหาและเครื่องมือจัดการ -->
                     <div class="bg-white rounded-2xl border border-gray-200 p-6 shadow-xs mb-6">
                         <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-4">
                             <div>
                                 <h2 class="text-lg font-bold text-gray-900">ฐานข้อมูลเอกสารอ้างอิง</h2>
                                 <p class="text-xs text-gray-500">ระบุคำค้นหา หรือ เลขที่เอกสาร (สามารถกรองตามหมวดหมู่ได้)</p>
                             </div>
-                            <!-- ปุ่มแอดมินนำเข้าเอกสาร -->
-                            <button class="bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-bold px-4 py-2 rounded-lg flex items-center transition-colors">
+                            <!-- ปุ่มแอดมินนำเข้าเอกสาร (เรียกใช้ฟังก์ชันป๊อปอัป) -->
+                            <button id="addDocBtnUI" onclick="openAddModal()" class="hidden bg-gray-100 hover:bg-orange-50 hover:text-orange-600 text-gray-700 text-xs font-bold px-4 py-2 rounded-lg items-center border border-gray-200 transition-colors">
                                 <svg class="w-4 h-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
                                 นำเข้าเอกสารใหม่
                             </button>
                         </div>
                         
                         <div class="flex flex-col sm:flex-row gap-3">
-                            <!-- Dropdown เลือกฝ่าย -->
                             <div class="w-full sm:w-1/4">
-                                <select class="block w-full px-3 py-2.5 border border-gray-300 rounded-xl bg-gray-50 text-gray-900 text-sm focus:ring-2 focus:ring-orange-500 focus:outline-none transition-all cursor-pointer">
+                                <select id="docDepartment" class="block w-full px-3 py-2.5 border border-gray-300 rounded-xl bg-gray-50 text-gray-900 text-sm focus:ring-2 focus:ring-orange-500 focus:outline-none transition-all cursor-pointer">
                                     <option value="">ทุกส่วนงาน (All)</option>
                                     <option value="อสพ">เอกสารสัมพันธ์ (อสพ.)</option>
                                     <option value="สมช">ฝ่ายสมาชิกสัมพันธ์ (สมช.)</option>
@@ -183,9 +262,8 @@
                                 </select>
                             </div>
 
-                            <!-- Dropdown เลือกหมวดหมู่ -->
                             <div class="w-full sm:w-1/4">
-                                <select class="block w-full px-3 py-2.5 border border-gray-300 rounded-xl bg-gray-50 text-gray-900 text-sm focus:ring-2 focus:ring-orange-500 focus:outline-none transition-all cursor-pointer">
+                                <select id="docCategory" class="block w-full px-3 py-2.5 border border-gray-300 rounded-xl bg-gray-50 text-gray-900 text-sm focus:ring-2 focus:ring-orange-500 focus:outline-none transition-all cursor-pointer">
                                     <option value="">ทุกหมวดหมู่ (All)</option>
                                     <option value="01">01 - ทั่วไป</option>
                                     <option value="02">02 - รับรองการทำกิจกรรม</option>
@@ -199,116 +277,276 @@
                                 </select>
                             </div>
 
-                            <!-- ช่องพิมพ์ค้นหา -->
                             <div class="relative flex-grow">
                                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                                     </svg>
                                 </div>
-                                <input type="text" placeholder="ระบุเลขเอกสาร หรือ ชื่อเรื่อง..." class="block w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-xl bg-gray-50 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-sm transition-all">
+                                <input type="text" id="docSearchInput" placeholder="ระบุเลขเอกสาร หรือ ชื่อเรื่อง..." class="block w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-xl bg-gray-50 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-sm transition-all">
                             </div>
 
-                            <!-- ปุ่มค้นหา -->
-                            <button class="w-full sm:w-auto bg-orange-500 hover:bg-orange-600 active:scale-[0.99] text-white font-medium px-6 py-2.5 rounded-xl text-sm transition-all flex items-center justify-center shadow-xs cursor-pointer">
-                                ค้นหา
-                            </button>
-                        </div>
-
-                        <!-- แถบค้นหาด่วนแบบเดิม -->
-                        <div class="mt-3 pt-3 border-t border-gray-100 flex flex-wrap items-center gap-2 text-xs">
-                            <span class="text-gray-400 flex items-center gap-1">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
-                                ค้นหาด่วน:
-                            </span>
-                            <button class="bg-gray-100 hover:bg-orange-50 hover:text-orange-600 border border-gray-200 hover:border-orange-200 text-gray-600 px-2 py-1 rounded-md transition-all cursor-pointer">
-                                หมวดลาเรียน
-                            </button>
-                            <button class="bg-gray-100 hover:bg-orange-50 hover:text-orange-600 border border-gray-200 hover:border-orange-200 text-gray-600 px-2 py-1 rounded-md transition-all cursor-pointer">
-                                หมวดขอข้อมูล
+                            <button id="searchBtn" onclick="searchDocument()" class="w-full sm:w-auto bg-orange-500 hover:bg-orange-600 active:scale-[0.99] text-white font-medium px-6 py-2.5 rounded-xl text-sm transition-all flex items-center justify-center shadow-xs cursor-pointer">
+                                <span id="searchBtnText">ค้นหา</span>
                             </button>
                         </div>
                     </div>
 
-                    <!-- พื้นที่แสดงผลการค้นหา (Card แบบเดิม) -->
-                    <div class="space-y-4">
-                        
-                        <!-- Card จำลอง (ดีไซน์ส้ม-ขาว โค้งมน) -->
-                        <div class="bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-xs hover:border-orange-300 transition-colors">
-                            <div class="p-6 md:p-8 relative bg-white">
-                                <div class="flex flex-col md:flex-row justify-between items-start border-b border-gray-200 pb-4 mb-4 gap-4">
-                                    <div>
-                                        <span class="text-xs font-bold text-orange-600 bg-orange-50 px-2 py-0.5 rounded uppercase mb-2 inline-block border border-orange-100">หมวด: 01 - ทั่วไป</span>
-                                        <h3 class="text-lg font-bold text-gray-900 mb-1">เรื่อง นโยบายการคุ้มครองส่วนบุคคล สมาคมยุวชนเพื่อการพัฒนาที่ยั่งยืนเพื่อไทย</h3>
-                                        <div class="flex items-center gap-3 mt-1">
-                                            <p class="text-sm text-gray-600">เลขที่: <span class="font-mono font-bold text-gray-800">สมช. 1001/2569</span></p>
-                                            <span class="text-[10px] text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">ลำดับอ้างอิง: 1</span>
-                                        </div>
-                                    </div>
-                                    <div class="text-left md:text-right text-xs shrink-0 bg-gray-50 p-2 rounded-lg border border-gray-100">
-                                        <p class="text-gray-400">วันที่ลงเอกสาร</p>
-                                        <p class="font-semibold text-gray-800">22 มิ.ย. 2569</p>
-                                    </div>
-                                </div>
-                                
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-3 text-sm mb-4">
-                                    <div class="flex items-start border-b border-gray-50 pb-2">
-                                        <span class="text-gray-400 w-24 shrink-0">ส่วนงาน/ฝ่าย:</span>
-                                        <span class="text-gray-800 font-medium">ฝ่ายสมาชิกสัมพันธ์ (สมช.)</span>
-                                    </div>
-                                    <div class="flex items-start border-b border-gray-50 pb-2">
-                                        <span class="text-gray-400 w-24 shrink-0">เรียน:</span>
-                                        <span class="text-gray-800 font-medium">-</span>
-                                    </div>
-                                    <div class="flex items-start border-b border-gray-50 pb-2">
-                                        <span class="text-gray-400 w-24 shrink-0">ผู้ประสานงาน:</span>
-                                        <span class="text-gray-800">-</span>
-                                    </div>
-                                </div>
-
-                                <div>
-                                    <span class="text-xs font-bold text-gray-800 block mb-2">เนื้อหาโดยย่อ:</span>
-                                    <div class="bg-gray-50/70 p-4 rounded-xl border border-gray-200 text-gray-600 text-sm leading-relaxed">-</div>
-                                </div>
-
-                                <!-- ปุ่มดาวน์โหลด (สีส้ม) -->
-                                <div class="mt-6 pt-4 border-t border-gray-100 flex flex-wrap gap-3">
-                                    <button class="bg-orange-50 hover:bg-orange-100 text-orange-600 font-bold px-4 py-2 rounded-lg text-xs flex items-center transition-all border border-orange-100">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
-                                        ดูตัวอย่างเอกสาร
-                                    </button>
-                                    <button class="bg-orange-500 hover:bg-orange-600 text-white font-bold px-4 py-2 rounded-lg text-xs flex items-center shadow-xs transition-all">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
-                                        ดาวน์โหลด PDF
-                                    </button>
-                                </div>
-                            </div>
+                    <!-- พื้นที่แสดงผลการค้นหา -->
+                    <div id="resultsContainer" class="space-y-4">
+                        <div id="placeholderState" class="text-center py-10 text-gray-400 text-sm">
+                            กรุณากดค้นหาเพื่อดึงข้อมูลจากระบบ
                         </div>
-
                     </div>
                 </div>
             </main>
         </div>
     </div>
 
-    <!-- สคริปต์ควบคุมการทำงาน UI เบื้องต้น -->
+    <!-- Script สำหรับเชื่อม Supabase -->
     <script>
-        function simulateLogin() {
-            const btn = document.querySelector('button[onclick="simulateLogin()"]');
-            btn.innerHTML = 'กำลังตรวจสอบสิทธิ์...';
-            btn.classList.add('opacity-70', 'cursor-wait');
+        // ==========================================
+        // นำ URL และ ANON KEY จาก Supabase มาใส่ตรงนี้ครับ 👇
+        // ==========================================
+        const SUPABASE_URL = 'https://cjhbuqplwezklititoxt.supabase.co';
+        const SUPABASE_ANON_KEY = 'cjhbuqplwezklititoxt';
+        
+        // เชื่อมต่อฐานข้อมูล
+        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        let currentUser = null;
+
+        const deptNames = {
+            "อสพ": "เอกสารสัมพันธ์", "สมช": "ฝ่ายสมาชิกสัมพันธ์", "สธส": "ฝ่ายสาธารณสุขสัมพันธ์",
+            "วนธ": "ฝ่ายวัฒนธรรม", "กษส": "ฝ่ายเกษตรสัมพันธ์", "ชสพ": "ฝ่ายชุมชนสัมพันธ์",
+            "กกส": "ฝ่ายกิจกรรมสัมพันธ์", "ศสพ": "ฝ่ายศึกษาสัมพันธ์", "อกป": "ฝ่ายอำนวยการและปฏิสัมพันธ์"
+        };
+        const catNames = {
+            "01": "ทั่วไป", "02": "รับรองการทำกิจกรรม", "03": "รับรองสมาชิก",
+            "04": "ลาเรียน", "05": "เยี่ยมชม", "06": "ขอข้อมูล",
+            "07": "ขอเข้าพบ", "08": "ประชาสัมพันธ์", "09": "ขอเชิญเข้าร่วม"
+        };
+
+        async function handleLogin() {
+            const usernameInput = document.getElementById('userInput').value.trim();
+            const passwordInput = document.getElementById('passwordInput').value.trim();
+            const loginBtnText = document.getElementById('loginBtnText');
+            const loginError = document.getElementById('loginError');
+
+            if (!usernameInput || !passwordInput) return;
+
+            loginBtnText.innerText = 'กำลังตรวจสอบ...';
+            loginError.classList.add('hidden');
+
+            try {
+                const { data: users, error } = await supabase
+                    .from('users')
+                    .select('*')
+                    .eq('username', usernameInput)
+                    .eq('password', passwordInput);
+
+                if (users && users.length > 0) {
+                    const user = users[0];
+                    localStorage.setItem('ffsUser', JSON.stringify(user));
+                    showMainSystem(user);
+                } else {
+                    document.getElementById('errorMessage').innerText = "รหัสหรือพาสเวิร์ดผิดพลาด";
+                    loginError.classList.remove('hidden');
+                    loginBtnText.innerText = 'เข้าสู่ระบบ';
+                }
+            } catch (err) {
+                console.error(err);
+                document.getElementById('errorMessage').innerText = "ขัดข้อง ไม่สามารถเชื่อมต่อฐานข้อมูลได้";
+                loginError.classList.remove('hidden');
+                loginBtnText.innerText = 'เข้าสู่ระบบ';
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            const savedUser = localStorage.getItem('ffsUser');
+            if (savedUser) {
+                showMainSystem(JSON.parse(savedUser));
+            }
+        });
+
+        function showMainSystem(user) {
+            currentUser = user;
+            document.getElementById('loginGate').style.display = 'none';
+            document.getElementById('mainSystem').classList.remove('hidden');
+            document.getElementById('mainSystem').classList.add('flex');
             
-            setTimeout(() => {
-                document.getElementById('loginGate').style.display = 'none';
-                document.getElementById('mainSystem').classList.remove('hidden');
-                document.getElementById('userFullName').innerText = document.getElementById('userInput').value || 'Administrator';
-                document.getElementById('userInitial').innerText = (document.getElementById('userInput').value || 'A').charAt(0).toUpperCase();
-            }, 800);
+            document.getElementById('userFullName').innerText = user.fullname;
+            document.getElementById('userRole').innerText = user.role;
+            document.getElementById('userInitial').innerText = user.fullname.charAt(0);
+            
+            // เช็กสิทธิ์ ถ้าเป็น Admin ให้โชว์ปุ่ม "นำเข้าเอกสารใหม่"
+            if (user.role === 'Administrator' || user.role === 'Department Manager') {
+                document.getElementById('addDocBtnUI').classList.remove('hidden');
+                document.getElementById('addDocBtnUI').classList.add('flex');
+            }
+
+            searchDocument(true);
+        }
+
+        async function searchDocument(isInit = false) {
+            const searchKey = document.getElementById('docSearchInput').value.trim().toLowerCase();
+            const category = document.getElementById('docCategory').value;
+            const department = document.getElementById('docDepartment').value;
+            const resultsContainer = document.getElementById('resultsContainer');
+            
+            if(!isInit && !searchKey && !category && !department) {
+                alert("กรุณาระบุเงื่อนไขการค้นหาก่อนครับ");
+                return;
+            }
+
+            document.getElementById('searchBtnText').innerText = 'กำลังโหลด...';
+
+            try {
+                let query = supabase.from('documents').select('*');
+                
+                if (category) query = query.eq('category', category);
+                if (department) query = query.ilike('department', `%${department}%`);
+                if (searchKey) {
+                    query = query.or(`title.ilike.%${searchKey}%,doc_id.ilike.%${searchKey}%`);
+                }
+
+                const { data: documents, error } = await query.order('id', { ascending: false });
+
+                resultsContainer.innerHTML = '';
+
+                if (documents && documents.length > 0) {
+                    documents.forEach(record => {
+                        let rawCat = String(record.category).padStart(2, '0');
+                        let displayCategory = catNames[rawCat] ? `${rawCat} - ${catNames[rawCat]}` : record.category;
+                        let rawDept = String(record.department);
+                        let displayDepartment = deptNames[rawDept] ? `${deptNames[rawDept]} (${rawDept}.)` : record.department;
+                        let displayDocId = rawDept ? `${rawDept}. ${record.doc_id}` : record.doc_id;
+
+                        let pdfButtonsHTML = '';
+                        if (record.pdf_link && record.pdf_link !== "-") {
+                            pdfButtonsHTML = `
+                            <div class="mt-6 pt-4 border-t border-gray-100 flex flex-wrap gap-3">
+                                <a href="${record.pdf_link}" target="_blank" class="bg-orange-50 hover:bg-orange-100 text-orange-600 font-bold px-4 py-2 rounded-lg text-xs flex items-center transition-all border border-orange-100">
+                                    <svg class="w-4 h-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+                                    เปิดเอกสาร
+                                </a>
+                            </div>`;
+                        }
+
+                        const docHTML = `
+                        <div class="bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-xs hover:border-orange-300 transition-colors animate-fade-in">
+                            <div class="p-6 relative">
+                                <div class="flex flex-col md:flex-row justify-between items-start border-b border-gray-100 pb-4 mb-4 gap-4">
+                                    <div>
+                                        <span class="text-xs font-bold text-orange-600 bg-orange-50 px-2 py-0.5 rounded uppercase mb-2 inline-block border border-orange-100">หมวด: ${displayCategory}</span>
+                                        <h3 class="text-lg font-bold text-gray-900 mb-1">เรื่อง ${record.title}</h3>
+                                        <div class="flex items-center gap-3 mt-1">
+                                            <p class="text-sm text-gray-600">เลขที่: <span class="font-mono font-bold text-gray-800">${displayDocId}</span></p>
+                                        </div>
+                                    </div>
+                                    <div class="text-left md:text-right text-xs shrink-0 bg-gray-50 p-2 rounded-lg border border-gray-100">
+                                        <p class="text-gray-400">วันที่ลงเอกสาร</p>
+                                        <p class="font-semibold text-gray-800">${record.doc_date}</p>
+                                    </div>
+                                </div>
+                                
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-3 text-sm mb-4">
+                                    <div class="flex items-start border-b border-gray-50 pb-2">
+                                        <span class="text-gray-400 w-24 shrink-0">ส่วนงาน/ฝ่าย:</span>
+                                        <span class="text-gray-800 font-medium">${displayDepartment}</span>
+                                    </div>
+                                    <div class="flex items-start border-b border-gray-50 pb-2">
+                                        <span class="text-gray-400 w-24 shrink-0">เรียน:</span>
+                                        <span class="text-gray-800 font-medium">${record.attention || '-'}</span>
+                                    </div>
+                                    <div class="flex items-start border-b border-gray-50 pb-2">
+                                        <span class="text-gray-400 w-24 shrink-0">ผู้ประสานงาน:</span>
+                                        <span class="text-gray-800">${record.coordinator || '-'}</span>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <span class="text-xs font-bold text-gray-800 block mb-2">เนื้อหาโดยย่อ:</span>
+                                    <div class="bg-gray-50/70 p-4 rounded-xl border border-gray-200 text-gray-600 text-sm">${record.content || '-'}</div>
+                                </div>
+
+                                ${pdfButtonsHTML}
+                            </div>
+                        </div>`;
+                        resultsContainer.insertAdjacentHTML('beforeend', docHTML);
+                    });
+                } else {
+                    resultsContainer.innerHTML = '<div class="text-center py-10 text-red-500 bg-red-50 rounded-xl border border-red-100 text-sm">ไม่พบข้อมูลที่ตรงกับเงื่อนไข</div>';
+                }
+
+            } catch (error) {
+                console.error(error);
+            } finally {
+                document.getElementById('searchBtnText').innerText = 'ค้นหา';
+            }
+        }
+
+        // ==========================================
+        // ฟังก์ชันสำหรับ "เพิ่มเอกสารใหม่" (In-app Upload)
+        // ==========================================
+        function openAddModal() {
+            document.getElementById('addDocForm').reset();
+            document.getElementById('addError').classList.add('hidden');
+            document.getElementById('addDocModal').classList.remove('hidden');
+        }
+
+        function closeAddModal() {
+            document.getElementById('addDocModal').classList.add('hidden');
+        }
+
+        async function submitNewDocument(e) {
+            e.preventDefault();
+            const saveBtn = document.getElementById('saveDocBtn');
+            const errorDiv = document.getElementById('addError');
+            
+            // ดึงค่าจากฟอร์ม
+            const newDoc = {
+                category: document.getElementById('modalCat').value,
+                department: document.getElementById('modalDept').value,
+                doc_id: document.getElementById('modalDocId').value,
+                doc_date: document.getElementById('modalDate').value,
+                title: document.getElementById('modalTitle').value,
+                attention: document.getElementById('modalAttention').value || '-',
+                coordinator: document.getElementById('modalCoordinator').value || '-',
+                content: document.getElementById('modalContent').value || '-',
+                pdf_link: document.getElementById('modalPdf').value || '-',
+                ref_no: Date.now().toString() // สร้างเลขอ้างอิงชั่วคราวจาก timestamp
+            };
+
+            saveBtn.innerHTML = 'กำลังบันทึก...';
+            saveBtn.disabled = true;
+            errorDiv.classList.add('hidden');
+
+            try {
+                // ส่งข้อมูล Insert ลงฐานข้อมูล Supabase
+                const { data, error } = await supabase
+                    .from('documents')
+                    .insert([newDoc]);
+
+                if (error) throw error;
+
+                // บันทึกสำเร็จ
+                closeAddModal();
+                alert('เพิ่มเอกสารเข้าสู่ระบบสำเร็จ!');
+                searchDocument(true); // รีเฟรชหน้าค้นหาอัตโนมัติ
+
+            } catch (err) {
+                console.error(err);
+                errorDiv.innerText = "เกิดข้อผิดพลาดในการบันทึกข้อมูล กรุณาลองใหม่";
+                errorDiv.classList.remove('hidden');
+            } finally {
+                saveBtn.innerHTML = 'บันทึกข้อมูล';
+                saveBtn.disabled = false;
+            }
         }
 
         function logout() {
+            localStorage.removeItem('ffsUser');
             location.reload();
         }
 

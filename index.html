@@ -308,11 +308,20 @@
         // ==========================================
         // นำ URL และ ANON KEY จาก Supabase มาใส่ตรงนี้ครับ 👇
         // ==========================================
-        const SUPABASE_URL = 'https://cjhbuqplwezklititoxt.supabase.co';
-        const SUPABASE_ANON_KEY = 'cjhbuqplwezklititoxt';
+        const SUPABASE_URL = 'https://cjhbuqplwezklititoxt.supabase.co/rest/v1/'; // แก้ไขตรงนี้
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNqaGJ1cXBsd2V6a2xpdGl0b3h0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIxMjU4NDcsImV4cCI6MjA5NzcwMTg0N30.hUVV7JPoFUR0vk2FTYOPoR1cUipKSCBEPWdB11xTVGo'; // แก้ไขตรงนี้
         
-        // เชื่อมต่อฐานข้อมูล
-        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        let supabase;
+        try {
+            // เชื่อมต่อฐานข้อมูล
+            if (!SUPABASE_URL.includes('supabase.co')) {
+                alert("แจ้งเตือน: ยังไม่ได้ใส่ URL ของ Supabase หรือใส่ผิดรูปแบบครับ (ต้องมี https:// และลงท้ายด้วย supabase.co)");
+            }
+            supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        } catch (e) {
+            console.error("Supabase Init Error:", e);
+            alert("โค้ดมีปัญหา: ตรวจสอบการใส่ URL และ Key ว่ามีเครื่องหมายฟันหนูเดี่ยว '...' ครอบอยู่หรือไม่ครับ");
+        }
 
         let currentUser = null;
 
@@ -327,23 +336,41 @@
             "07": "ขอเข้าพบ", "08": "ประชาสัมพันธ์", "09": "ขอเชิญเข้าร่วม"
         };
 
+        // เพิ่มการกด Enter เพื่อล็อกอิน
+        document.getElementById('passwordInput').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') handleLogin();
+        });
+        document.getElementById('userInput').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') handleLogin();
+        });
+
         async function handleLogin() {
             const usernameInput = document.getElementById('userInput').value.trim();
             const passwordInput = document.getElementById('passwordInput').value.trim();
             const loginBtnText = document.getElementById('loginBtnText');
             const loginError = document.getElementById('loginError');
 
-            if (!usernameInput || !passwordInput) return;
+            if (!usernameInput || !passwordInput) {
+                document.getElementById('errorMessage').innerText = "กรุณากรอกข้อมูลให้ครบถ้วน";
+                loginError.classList.remove('hidden');
+                return;
+            }
 
             loginBtnText.innerText = 'กำลังตรวจสอบ...';
             loginError.classList.add('hidden');
 
             try {
+                if (!supabase) throw new Error("Supabase is not initialized.");
+
                 const { data: users, error } = await supabase
                     .from('users')
                     .select('*')
                     .eq('username', usernameInput)
                     .eq('password', passwordInput);
+
+                if (error) {
+                    throw error;
+                }
 
                 if (users && users.length > 0) {
                     const user = users[0];
@@ -355,8 +382,8 @@
                     loginBtnText.innerText = 'เข้าสู่ระบบ';
                 }
             } catch (err) {
-                console.error(err);
-                document.getElementById('errorMessage').innerText = "ขัดข้อง ไม่สามารถเชื่อมต่อฐานข้อมูลได้";
+                console.error("Login Error:", err);
+                document.getElementById('errorMessage').innerText = "ขัดข้อง: " + (err.message || "ไม่สามารถเชื่อมต่อฐานข้อมูลได้");
                 loginError.classList.remove('hidden');
                 loginBtnText.innerText = 'เข้าสู่ระบบ';
             }
@@ -402,6 +429,8 @@
             document.getElementById('searchBtnText').innerText = 'กำลังโหลด...';
 
             try {
+                if (!supabase) throw new Error("Supabase is not initialized.");
+
                 let query = supabase.from('documents').select('*');
                 
                 if (category) query = query.eq('category', category);
@@ -411,6 +440,8 @@
                 }
 
                 const { data: documents, error } = await query.order('id', { ascending: false });
+
+                if (error) throw error;
 
                 resultsContainer.innerHTML = '';
 
@@ -480,7 +511,8 @@
                 }
 
             } catch (error) {
-                console.error(error);
+                console.error("Search Error:", error);
+                resultsContainer.innerHTML = `<div class="text-center py-10 text-red-500 bg-red-50 rounded-xl border border-red-100 text-sm">เกิดข้อผิดพลาดในการดึงข้อมูล: ${error.message}</div>`;
             } finally {
                 document.getElementById('searchBtnText').innerText = 'ค้นหา';
             }
@@ -504,7 +536,6 @@
             const saveBtn = document.getElementById('saveDocBtn');
             const errorDiv = document.getElementById('addError');
             
-            // ดึงค่าจากฟอร์ม
             const newDoc = {
                 category: document.getElementById('modalCat').value,
                 department: document.getElementById('modalDept').value,
@@ -515,7 +546,7 @@
                 coordinator: document.getElementById('modalCoordinator').value || '-',
                 content: document.getElementById('modalContent').value || '-',
                 pdf_link: document.getElementById('modalPdf').value || '-',
-                ref_no: Date.now().toString() // สร้างเลขอ้างอิงชั่วคราวจาก timestamp
+                ref_no: Date.now().toString() 
             };
 
             saveBtn.innerHTML = 'กำลังบันทึก...';
@@ -523,21 +554,21 @@
             errorDiv.classList.add('hidden');
 
             try {
-                // ส่งข้อมูล Insert ลงฐานข้อมูล Supabase
+                if (!supabase) throw new Error("Supabase is not initialized.");
+
                 const { data, error } = await supabase
                     .from('documents')
                     .insert([newDoc]);
 
                 if (error) throw error;
 
-                // บันทึกสำเร็จ
                 closeAddModal();
                 alert('เพิ่มเอกสารเข้าสู่ระบบสำเร็จ!');
-                searchDocument(true); // รีเฟรชหน้าค้นหาอัตโนมัติ
+                searchDocument(true); 
 
             } catch (err) {
-                console.error(err);
-                errorDiv.innerText = "เกิดข้อผิดพลาดในการบันทึกข้อมูล กรุณาลองใหม่";
+                console.error("Submit Error:", err);
+                errorDiv.innerText = "เกิดข้อผิดพลาดในการบันทึกข้อมูล กรุณาลองใหม่: " + err.message;
                 errorDiv.classList.remove('hidden');
             } finally {
                 saveBtn.innerHTML = 'บันทึกข้อมูล';

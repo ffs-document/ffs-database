@@ -64,7 +64,7 @@
             <div class="p-6">
                 <form id="userForm" onsubmit="submitUser(event)" class="space-y-4">
                     <input type="hidden" id="u-id">
-                    <div><label class="block text-xs font-medium text-gray-700 mb-1">รหัสสมาชิก *</label><input type="text" id="u-username" required class="w-full px-3 py-2 border rounded-lg text-sm bg-gray-50 focus:ring-2 focus:ring-orange-500 outline-none"></div>
+                    <div><label class="block text-xs font-medium text-gray-700 mb-1">รหัสสมาชิก (ใช้สำหรับล็อกอิน) *</label><input type="text" id="u-username" required class="w-full px-3 py-2 border rounded-lg text-sm bg-gray-50 focus:ring-2 focus:ring-orange-500 outline-none"></div>
                     <div><label class="block text-xs font-medium text-gray-700 mb-1">รหัสผ่าน *</label><input type="text" id="u-password" required class="w-full px-3 py-2 border rounded-lg text-sm bg-gray-50 focus:ring-2 focus:ring-orange-500 outline-none"></div>
                     <div><label class="block text-xs font-medium text-gray-700 mb-1">ชื่อ-นามสกุล *</label><input type="text" id="u-fullname" required class="w-full px-3 py-2 border rounded-lg text-sm bg-gray-50 focus:ring-2 focus:ring-orange-500 outline-none"></div>
                     <div class="grid grid-cols-2 gap-4">
@@ -125,6 +125,28 @@
                     <button onclick="closePrintModal()" class="px-5 py-2 text-sm text-gray-600 bg-gray-100 rounded-lg">ยกเลิก</button>
                     <button onclick="executePrint()" class="px-5 py-2 text-sm font-bold text-white bg-gray-800 rounded-lg">สั่งพิมพ์</button>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: เพิ่มเทมเพลต (Add Template) -->
+    <div id="addTemplateModal" class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm z-[110] hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg flex flex-col overflow-hidden animate-fade-in">
+            <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
+                <h3 class="text-lg font-bold text-gray-900">เพิ่มเทมเพลตเอกสารใหม่</h3>
+                <button onclick="closeAddTemplateModal()" class="text-gray-400 hover:text-gray-600"><svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg></button>
+            </div>
+            <div class="p-6">
+                <form id="addTemplateForm" onsubmit="submitNewTemplate(event)" class="space-y-4">
+                    <div><label class="block text-xs font-medium text-gray-700 mb-1">ชื่อเทมเพลตเอกสาร *</label><input type="text" id="t-title" required class="w-full px-3 py-2 border rounded-lg text-sm bg-gray-50 focus:ring-2 focus:ring-orange-500 outline-none"></div>
+                    <div><label class="block text-xs font-medium text-gray-700 mb-1">หมวดหมู่เอกสาร *</label><input type="text" id="t-category" required placeholder="เช่น งานกิจกรรม, การเงิน" class="w-full px-3 py-2 border rounded-lg text-sm bg-gray-50 focus:ring-2 focus:ring-orange-500 outline-none"></div>
+                    <div><label class="block text-xs font-medium text-gray-700 mb-1">รายละเอียด</label><textarea id="t-desc" rows="2" class="w-full px-3 py-2 border rounded-lg text-sm bg-gray-50 focus:ring-2 focus:ring-orange-500 outline-none"></textarea></div>
+                    <div><label class="block text-xs font-medium text-gray-700 mb-1">ลิงก์ดาวน์โหลด (URL) *</label><input type="url" id="t-url" required placeholder="https://..." class="w-full px-3 py-2 border rounded-lg text-sm bg-gray-50 focus:ring-2 focus:ring-orange-500 outline-none"></div>
+                    <div class="mt-6 flex justify-end gap-3 pt-4 border-t border-gray-100">
+                        <button type="button" onclick="closeAddTemplateModal()" class="px-5 py-2 text-sm text-gray-600 bg-gray-100 rounded-lg">ยกเลิก</button>
+                        <button type="submit" id="saveTemplateBtn" class="px-5 py-2 text-sm font-bold text-white bg-orange-500 rounded-lg shadow-sm">บันทึกข้อมูล</button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
@@ -245,10 +267,6 @@
                 <!-- การจัดการระบบสำหรับผู้บริหาร/Admin -->
                 <div id="managementMenuSection" class="hidden">
                     <p class="px-6 text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2">การบริหารจัดการระบบ</p>
-                    <a href="#" onclick="switchView('users')" id="nav-users" class="flex items-center px-6 py-2.5 nav-inactive border-r-4 border-transparent hover:bg-gray-50 transition-all">
-                        <svg class="w-5 h-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
-                        <span class="text-sm">จัดการผู้ใช้งาน</span>
-                    </a>
                     <a href="#" onclick="switchView('history')" id="nav-history" class="flex items-center px-6 py-2.5 nav-inactive border-r-4 border-transparent hover:bg-gray-50 transition-all">
                         <svg class="w-5 h-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                         <span class="text-sm">ประวัติการทำงาน (Log)</span>
@@ -307,6 +325,9 @@
                             <select id="docDepartment" class="w-full sm:w-1/4 px-3 py-2.5 border border-gray-300 rounded-xl bg-gray-50 text-sm focus:ring-2 focus:ring-orange-500 outline-none">
                                 <option value="">ทุกฝ่าย (All)</option><option value="อสพ">เอกสารสัมพันธ์ (อสพ.)</option><option value="สมช">ฝ่ายสมาชิกสัมพันธ์ (สมช.)</option><option value="สธส">ฝ่ายสาธารณสุขสัมพันธ์ (สธส.)</option><option value="วนธ">ฝ่ายวัฒนธรรม (วนธ.)</option><option value="กษส">ฝ่ายเกษตรสัมพันธ์ (กษส.)</option><option value="ชสพ">ฝ่ายชุมชนสัมพันธ์ (ชสพ.)</option><option value="กกส">ฝ่ายกิจกรรมสัมพันธ์ (กกส.)</option><option value="ศสพ">ฝ่ายศึกษาสัมพันธ์ (ศสพ.)</option><option value="อกป">ฝ่ายอำนวยการและปฏิสัมพันธ์ (อกป.)</option>
                             </select>
+                            <select id="docCategory" class="w-full sm:w-1/4 px-3 py-2.5 border border-gray-300 rounded-xl bg-gray-50 text-sm focus:ring-2 focus:ring-orange-500 outline-none">
+                                <option value="">ทุกหมวดหมู่ (All)</option><option value="01">01 - ทั่วไป</option><option value="02">02 - รับรองกิจกรรม</option><option value="03">03 - รับรองสมาชิก</option><option value="04">04 - ลาเรียน</option><option value="05">05 - เยี่ยมชม</option><option value="06">06 - ขอข้อมูล</option><option value="07">07 - ขอเข้าพบ</option><option value="08">08 - ประชาสัมพันธ์</option><option value="09">09 - ขอเชิญเข้าร่วม</option>
+                            </select>
                             <input type="text" id="docSearchInput" placeholder="เลขเอกสาร หรือ ชื่อเรื่อง..." class="w-full flex-grow px-4 py-2.5 border border-gray-300 rounded-xl bg-gray-50 text-sm focus:ring-2 focus:ring-orange-500 outline-none">
                             <button onclick="searchDocument()" class="w-full sm:w-auto bg-gray-800 hover:bg-gray-900 text-white font-medium px-6 py-2.5 rounded-xl text-sm transition-all shadow-xs">ค้นหา</button>
                         </div>
@@ -318,6 +339,7 @@
                 <div id="view-templates" class="max-w-5xl mx-auto hidden animate-fade-in pb-10">
                     <div class="flex justify-between items-center mb-6">
                         <div><h2 class="text-2xl font-bold text-gray-900">คลังเทมเพลตเอกสารองค์กร</h2><p class="text-sm text-gray-500">ดาวน์โหลดตัวอย่างแบบฟอร์มและเอกสารมาตรฐาน</p></div>
+                        <button id="addTemplateBtnUI" onclick="openAddTemplateModal()" class="hidden bg-orange-500 hover:bg-orange-600 text-white text-sm font-bold px-4 py-2 rounded-lg items-center shadow-sm transition-colors">+ เพิ่มเทมเพลต</button>
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="templatesContainer"></div>
                 </div>
@@ -540,7 +562,7 @@
         function renderSidebarMenu() {
             const menuContainer = document.getElementById('dynamicDeptMenu');
             Object.keys(deptNames).forEach(code => {
-                menuContainer.innerHTML += `<li><a href="#" onclick="switchDashboardView('${code}')" id="nav-dash-${code}" class="flex items-center pl-14 pr-6 py-2 nav-inactive transition-all border-r-4 border-transparent hover:bg-white hover:shadow-sm"><span class="w-1.5 h-1.5 rounded-full bg-gray-300 mr-3" id="dot-${code}"></span><span class="text-sm truncate w-full" title="${deptNames[code]}">${code}.</span></a></li>`;
+                menuContainer.innerHTML += `<li><a href="#" onclick="switchDashboardView('${code}')" id="nav-dash-${code}" class="flex items-center pl-14 pr-6 py-2 nav-inactive transition-all border-r-4 border-transparent hover:bg-white hover:shadow-sm"><span class="w-1.5 h-1.5 rounded-full bg-gray-300 mr-3" id="dot-${code}"></span><span class="text-sm truncate w-full" title="${deptNames[code]}">${deptNames[code]}</span></a></li>`;
             });
         }
         renderSidebarMenu();
@@ -589,6 +611,7 @@
             // แสดงเมนู Management ถ้าเป็น Admin หรือ President
             if (['Administrator', 'President'].includes(user.role)) {
                 document.getElementById('managementMenuSection').classList.remove('hidden');
+                document.getElementById('addTemplateBtnUI').classList.remove('hidden');
             }
             // แสดงเมนู Setting/Audit เฉพาะ Admin
             if (user.role === 'Administrator') {
@@ -609,8 +632,8 @@
             if (['document', 'dashboard', 'members', 'templates'].includes(viewName)) { 
                 if (systemSettings[viewName] === false && currentUser.role !== 'Administrator') targetView = 'maintenance'; 
             }
-            ['document', 'dashboard', 'audit', 'members', 'settings', 'maintenance', 'templates', 'users', 'history'].forEach(v => { const el = document.getElementById(`view-${v}`); if(el) { el.classList.add('hidden'); el.classList.remove('block', 'flex'); } });
-            ['document', 'members', 'audit', 'settings', 'templates', 'users', 'history'].forEach(nav => { const el = document.getElementById(`nav-${nav}`); if(el) { el.classList.replace('nav-active', 'nav-inactive'); el.classList.replace('bg-orange-50', 'border-transparent'); el.classList.replace('text-red-600', 'nav-inactive'); } });
+            ['document', 'dashboard', 'audit', 'members', 'settings', 'maintenance', 'templates', 'history'].forEach(v => { const el = document.getElementById(`view-${v}`); if(el) { el.classList.add('hidden'); el.classList.remove('block', 'flex'); } });
+            ['document', 'members', 'audit', 'settings', 'templates', 'history'].forEach(nav => { const el = document.getElementById(`nav-${nav}`); if(el) { el.classList.replace('nav-active', 'nav-inactive'); el.classList.replace('bg-orange-50', 'border-transparent'); el.classList.replace('text-red-600', 'nav-inactive'); } });
             
             const activeEl = document.getElementById(`view-${targetView}`); if(activeEl) { activeEl.classList.remove('hidden'); if(targetView === 'maintenance') activeEl.classList.add('flex'); else activeEl.classList.add('block'); }
             if (targetView !== 'maintenance') { const activeNav = document.getElementById(`nav-${viewName}`); if(activeNav) { if(viewName === 'audit') activeNav.classList.replace('nav-inactive', 'text-red-600'); else if(viewName !== 'dashboard') { activeNav.classList.replace('nav-inactive', 'nav-active'); activeNav.classList.replace('border-transparent', 'bg-orange-50'); } } }
@@ -624,7 +647,6 @@
             else if (targetView === 'audit') loadAuditLog();
             else if (targetView === 'settings') loadSettings();
             else if (targetView === 'templates') loadTemplates();
-            else if (targetView === 'users') loadUsers();
             else if (targetView === 'history') loadHistoryLog();
         }
 
@@ -644,34 +666,6 @@
             highlightStatusCard(); loadDashboardData(); loadActivities();
         }
 
-        // --- User Management ---
-        async function loadUsers() {
-            const tbody = document.getElementById('usersTableBody'); tbody.innerHTML = '<tr><td colspan="5" class="text-center py-5">กำลังโหลด...</td></tr>';
-            const {data} = await supabaseClient.from('users').select('*').order('role');
-            tbody.innerHTML = '';
-            data.forEach(u => {
-                let badge = u.role === 'Administrator' ? 'bg-red-100 text-red-700' : (u.role === 'President' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700');
-                tbody.innerHTML += `<tr><td class="px-6 py-4 font-mono text-sm">${u.username}</td><td class="px-6 py-4 font-bold text-gray-800">${u.fullname}</td><td class="px-6 py-4"><span class="px-2 py-1 rounded text-xs font-bold ${badge}">${u.role}</span></td><td class="px-6 py-4 text-sm">${u.department||'-'}</td><td class="px-6 py-4 text-right"><button onclick="editUser('${u.id}')" class="text-blue-600 mr-3 text-sm hover:underline">แก้ไข</button><button onclick="deleteUser('${u.id}', '${u.username}')" class="text-red-600 text-sm hover:underline">ลบ</button></td></tr>`;
-            });
-        }
-        function openUserModal() { document.getElementById('userForm').reset(); document.getElementById('u-id').value = ''; document.getElementById('userModal').classList.remove('hidden'); }
-        function closeUserModal() { document.getElementById('userModal').classList.add('hidden'); }
-        async function editUser(id) {
-            const {data} = await supabaseClient.from('users').select('*').eq('id', id).single();
-            document.getElementById('u-id').value = data.id; document.getElementById('u-username').value = data.username; document.getElementById('u-password').value = data.password; document.getElementById('u-fullname').value = data.fullname; document.getElementById('u-role').value = data.role; document.getElementById('u-dept').value = data.department;
-            document.getElementById('userModal').classList.remove('hidden');
-        }
-        async function submitUser(e) {
-            e.preventDefault(); const id = document.getElementById('u-id').value;
-            const obj = { username: document.getElementById('u-username').value, password: document.getElementById('u-password').value, fullname: document.getElementById('u-fullname').value, role: document.getElementById('u-role').value, department: document.getElementById('u-dept').value };
-            if(id) { await supabaseClient.from('users').update(obj).eq('id', id); } else { await supabaseClient.from('users').insert([obj]); }
-            closeUserModal(); loadUsers();
-        }
-        async function deleteUser(id, username) {
-            if(username === 'admin' || username === currentUser.username) return alert("ไม่สามารถลบบัญชีหลัก หรือบัญชีตัวเองได้");
-            if(confirm('ลบผู้ใช้?')) { await supabaseClient.from('users').delete().eq('id', id); loadUsers(); }
-        }
-
         // --- History Log ---
         async function loadHistoryLog() {
             const tbody = document.getElementById('historyTableBody'); tbody.innerHTML = '<tr><td colspan="4" class="text-center py-5">กำลังโหลด...</td></tr>';
@@ -679,7 +673,10 @@
             const {data} = await supabaseClient.from('activities').select('*').not('action', 'ilike', '%ลบ%').order('created_at', {ascending: false});
             tbody.innerHTML = '';
             if(data.length===0) return tbody.innerHTML = '<tr><td colspan="4" class="text-center py-5">ไม่มีประวัติ</td></tr>';
-            data.forEach(h => { tbody.innerHTML += `<tr class="border-b"><td class="px-4 py-3 font-bold text-gray-800">${h.user_name} <span class="text-xs font-normal text-gray-500">(${h.department})</span></td><td class="px-4 py-3"><span class="bg-blue-50 text-blue-600 px-2 py-1 rounded text-xs">${h.action}</span></td><td class="px-4 py-3 text-sm text-gray-600">${h.details}</td><td class="px-4 py-3 text-xs text-gray-400">${new Date(h.created_at).toLocaleString('th-TH')}</td></tr>`; });
+            data.forEach(h => { 
+                let dptName = deptNames[h.department] || h.department;
+                tbody.innerHTML += `<tr class="border-b"><td class="px-4 py-3 font-bold text-gray-800">${h.user_name} <span class="text-xs font-normal text-gray-500">(${dptName})</span></td><td class="px-4 py-3"><span class="bg-blue-50 text-blue-600 px-2 py-1 rounded text-xs">${h.action}</span></td><td class="px-4 py-3 text-sm text-gray-600">${h.details}</td><td class="px-4 py-3 text-xs text-gray-400">${new Date(h.created_at).toLocaleString('th-TH')}</td></tr>`; 
+            });
         }
 
         // --- Members CSV Upload ---
@@ -788,7 +785,12 @@
             const { data } = await supabaseClient.from('activities').select('*').order('created_at', { ascending: false }).limit(20);
             const container = document.getElementById('activityFeedContainer'); container.innerHTML = '';
             if(!data || data.length === 0) return container.innerHTML = '<div class="text-center text-xs text-gray-400 mt-5">ยังไม่มีประกาศความคืบหน้า</div>';
-            data.forEach(a => { const t = new Date(a.created_at).toLocaleTimeString('th-TH', {hour: '2-digit', minute:'2-digit'}); let c = a.action.includes('เสร็จ')?'text-emerald-600 bg-emerald-100':(a.action.includes('ลบ')?'text-red-600 bg-red-100':'text-blue-600 bg-blue-100'); container.innerHTML += `<div class="flex items-start gap-3 border-l-2 border-gray-100 pl-4 py-1 relative"><div class="absolute -left-1.5 top-2 w-3 h-3 rounded-full bg-gray-200 border-2 border-white"></div><div class="w-8 h-8 rounded-full ${c} flex items-center justify-center shrink-0 shadow-sm"><svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg></div><div class="bg-white p-3 rounded-xl rounded-tl-none w-full border border-gray-100 shadow-sm"><div class="flex justify-between items-baseline mb-1"><span class="text-sm font-bold text-gray-800">${a.user_name} <span class="text-gray-500 font-normal ml-1">(${a.department}.)</span></span><span class="text-[10px] text-gray-400">${t} น.</span></div><p class="text-xs font-medium text-gray-500">${a.action}</p><p class="text-sm text-gray-800 bg-gray-50 px-3 py-2 mt-1 rounded-lg inline-block">${a.details}</p></div></div>`; });
+            data.forEach(a => { 
+                const t = new Date(a.created_at).toLocaleTimeString('th-TH', {hour: '2-digit', minute:'2-digit'}); 
+                let dptName = deptNames[a.department] || a.department;
+                let c = a.action.includes('เสร็จ')?'text-emerald-600 bg-emerald-100':(a.action.includes('ลบ')?'text-red-600 bg-red-100':'text-blue-600 bg-blue-100'); 
+                container.innerHTML += `<div class="flex items-start gap-3 border-l-2 border-gray-100 pl-4 py-1 relative"><div class="absolute -left-1.5 top-2 w-3 h-3 rounded-full bg-gray-200 border-2 border-white"></div><div class="w-8 h-8 rounded-full ${c} flex items-center justify-center shrink-0 shadow-sm"><svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg></div><div class="bg-white p-3 rounded-xl rounded-tl-none w-full border border-gray-100 shadow-sm"><div class="flex justify-between items-baseline mb-1"><span class="text-sm font-bold text-gray-800">${a.user_name} <span class="text-gray-500 font-normal ml-1">(${dptName})</span></span><span class="text-[10px] text-gray-400">${t} น.</span></div><p class="text-xs font-medium text-gray-500">${a.action}</p><p class="text-sm text-gray-800 bg-gray-50 px-3 py-2 mt-1 rounded-lg inline-block">${a.details}</p></div></div>`; 
+            });
         }
 
         // --- ระบบ Dashboard (ย่อ) ---
@@ -853,7 +855,10 @@
 
         // --- คลังเอกสาร & Audit ---
         async function searchDocument(isInit = false) {
-            const sk = document.getElementById('docSearchInput').value.trim().toLowerCase(); const cat = document.getElementById('docCategory').value; const dep = document.getElementById('docDepartment').value; const res = document.getElementById('resultsContainer');
+            const sk = document.getElementById('docSearchInput').value.trim().toLowerCase(); 
+            const cat = document.getElementById('docCategory') ? document.getElementById('docCategory').value : ''; 
+            const dep = document.getElementById('docDepartment').value; 
+            const res = document.getElementById('resultsContainer');
             res.innerHTML = '<div class="text-center py-5 text-gray-400">กำลังโหลด...</div>';
             let q = supabaseClient.from('documents').select('*').is('deleted_at', null); 
             if (cat) q=q.eq('category', cat); 
@@ -868,7 +873,9 @@
                     let pdf = d.pdf_link && d.pdf_link !== "-" ? `<a href="${d.pdf_link}" target="_blank" class="bg-gray-800 text-white px-4 py-2 rounded-lg text-xs font-bold mt-3 inline-block">เปิดเอกสาร (PDF)</a>` : '';
                     res.innerHTML += `<div class="bg-white rounded-2xl border p-6 mb-4 shadow-sm hover:border-orange-300"><div class="flex justify-between border-b pb-3 mb-3"><div><h3 class="font-bold text-gray-900">${d.title}</h3><p class="text-sm text-gray-500">เลขที่: ${d.department}.${d.doc_id}</p></div><div>${dBtn}</div></div><div class="bg-gray-50 p-4 rounded-xl text-sm text-gray-600">${d.content}</div>${pdf}</div>`;
                 });
-            } else res.innerHTML = '<div class="text-center py-10 text-red-400">ไม่พบเอกสาร</div>';
+            } else {
+                res.innerHTML = '<div class="flex flex-col items-center justify-center py-12 text-gray-400"><svg class="w-16 h-16 mb-4 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg><p class="text-sm">ไม่พบเอกสารในระบบ</p></div>';
+            }
         }
         async function submitNewDocument(e) { e.preventDefault(); const d = { category: document.getElementById('modalCat').value, department: document.getElementById('modalDept').value, doc_id: document.getElementById('modalDocId').value, doc_date: document.getElementById('modalDate').value, title: document.getElementById('modalTitle').value, attention: document.getElementById('modalAttention').value||'-', coordinator: document.getElementById('modalCoordinator').value||'-', content: document.getElementById('modalContent').value||'-', pdf_link: document.getElementById('modalPdf').value||'-', ref_no: Date.now().toString() }; await supabaseClient.from('documents').insert([d]); closeAddModal(); searchDocument(true); logActivity('นำเข้าเอกสาร', `เรื่อง: ${d.title}`); }
         async function deleteDoc(id, title) { if(!confirm(`ลบเอกสาร: ${title}?`)) return; await supabaseClient.from('documents').update({ deleted_at: new Date().toISOString(), deleted_by: currentUser.fullname }).eq('id', id); searchDocument(true); logActivity('ลบเอกสาร', `ลบเรื่อง: ${title}`); }
@@ -887,6 +894,19 @@
             document.getElementById('loginGate').style.display = 'flex';
             document.getElementById('userInput').value = ''; document.getElementById('passwordInput').value = '';
         }
+
+        async function submitNewTemplate(e) { 
+            e.preventDefault(); 
+            const btn = document.getElementById('saveTemplateBtn'); btn.innerHTML = 'บันทึก...'; btn.disabled = true; 
+            const t = { title: document.getElementById('t-title').value, category: document.getElementById('t-category').value, description: document.getElementById('t-desc').value, file_url: document.getElementById('t-url').value }; 
+            try { 
+                await supabaseClient.from('templates').insert([t]); 
+                closeAddTemplateModal(); loadTemplates(); logActivity('เพิ่มเทมเพลตเอกสาร', `เรื่อง: ${t.title}`); 
+            } catch (err) { alert(err.message); } finally { btn.innerHTML = 'บันทึกข้อมูล'; btn.disabled = false; } 
+        }
+
+        function openAddTemplateModal() { document.getElementById('addTemplateForm').reset(); document.getElementById('addTemplateModal').classList.remove('hidden'); }
+        function closeAddTemplateModal() { document.getElementById('addTemplateModal').classList.add('hidden'); }
 
         function openAddModal() { 
             document.getElementById('addDocForm').reset(); 

@@ -46,7 +46,7 @@
                     <p class="text-sm text-gray-500 mt-1">ระบบบริหารจัดการข้อมูลองค์กร</p>
                 </div>
                 <div class="space-y-4">
-                    <div><input type="text" id="userInput" placeholder="รหัสสมาชิก (เช่น admin)" class="block w-full px-4 py-2.5 border border-gray-300 rounded-xl bg-gray-50 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"></div>
+                    <div><input type="text" id="userInput" placeholder="รหัสสมาชิก" class="block w-full px-4 py-2.5 border border-gray-300 rounded-xl bg-gray-50 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"></div>
                     <div><input type="password" id="passwordInput" placeholder="รหัสผ่าน" class="block w-full px-4 py-2.5 border border-gray-300 rounded-xl bg-gray-50 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"></div>
                     <button id="loginBtn" onclick="handleLogin()" class="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-2.5 rounded-xl text-sm transition-all shadow-xs"><span id="loginBtnText">เข้าสู่ระบบ</span></button>
                 </div>
@@ -102,13 +102,13 @@
     <div id="userModal" class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm z-[110] hidden flex items-center justify-center p-4">
         <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden animate-fade-in">
             <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
-                <h3 class="text-lg font-bold text-gray-900">จัดการข้อมูลผู้ใช้</h3>
+                <h3 class="text-lg font-bold text-gray-900">เพิ่มผู้ใช้งานใหม่</h3>
                 <button onclick="closeUserModal()" class="text-gray-400 hover:text-gray-600"><svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg></button>
             </div>
             <div class="p-6">
                 <form id="userForm" onsubmit="submitUser(event)" class="space-y-4">
                     <input type="hidden" id="u-id">
-                    <div><label class="block text-xs font-medium text-gray-700 mb-1">รหัสสมาชิก (ใช้สำหรับล็อกอิน) *</label><input type="text" id="u-username" required class="w-full px-3 py-2 border rounded-lg text-sm bg-gray-50 focus:ring-2 focus:ring-orange-500 outline-none"></div>
+                    <div><label class="block text-xs font-medium text-gray-700 mb-1">รหัสสมาชิก *</label><input type="text" id="u-username" required class="w-full px-3 py-2 border rounded-lg text-sm bg-gray-50 focus:ring-2 focus:ring-orange-500 outline-none"></div>
                     <div><label class="block text-xs font-medium text-gray-700 mb-1">รหัสผ่าน *</label><input type="text" id="u-password" required class="w-full px-3 py-2 border rounded-lg text-sm bg-gray-50 focus:ring-2 focus:ring-orange-500 outline-none"></div>
                     <div><label class="block text-xs font-medium text-gray-700 mb-1">ชื่อ-นามสกุล *</label><input type="text" id="u-fullname" required class="w-full px-3 py-2 border rounded-lg text-sm bg-gray-50 focus:ring-2 focus:ring-orange-500 outline-none"></div>
                     <div class="grid grid-cols-2 gap-4">
@@ -135,6 +135,27 @@
                         <button type="submit" id="saveUserBtn" class="px-5 py-2 text-sm font-bold text-white bg-blue-600 rounded-lg shadow-sm">บันทึกข้อมูล</button>
                     </div>
                 </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: ประวัติเฉพาะบุคคล (User History Log) -->
+    <div id="userHistoryModal" class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm z-[110] hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl flex flex-col overflow-hidden animate-fade-in max-h-[90vh]">
+            <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50 shrink-0">
+                <h3 class="text-lg font-bold text-gray-900 flex items-center">
+                    <svg class="w-5 h-5 mr-2 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                    ประวัติการทำรายการ: <span id="uh-fullname" class="ml-2 text-blue-600"></span>
+                </h3>
+                <button onclick="closeUserHistoryModal()" class="text-gray-400 hover:text-gray-600"><svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg></button>
+            </div>
+            <div class="p-6 overflow-y-auto flex-1">
+                <table class="w-full text-left text-sm text-gray-600">
+                    <thead class="bg-gray-50 text-xs text-gray-500 uppercase border-b border-gray-200">
+                        <tr><th class="px-4 py-3 w-40">เวลา</th><th class="px-4 py-3 w-40">การกระทำ</th><th class="px-4 py-3">รายละเอียด</th></tr>
+                    </thead>
+                    <tbody id="userHistoryTableBody" class="divide-y divide-gray-100"></tbody>
+                </table>
             </div>
         </div>
     </div>
@@ -195,6 +216,7 @@
         </div>
     </div>
 
+    <!-- Modal: เพิ่มเอกสาร -->
     <div id="addDocModal" class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm z-[110] hidden flex items-center justify-center p-4">
         <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden animate-fade-in">
             <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
@@ -206,31 +228,40 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <label class="block text-xs font-medium text-gray-700 mb-1">หมวดหมู่ *</label>
-                            <select id="modalCat" required class="w-full px-3 py-2 border rounded-lg text-sm">
-                                <option value="01">01 - ทั่วไป</option><option value="02">02 - รับรองกิจกรรม</option><option value="03">03 - รับรองสมาชิก</option><option value="04">04 - ลาเรียน</option>
+                            <select id="modalCat" required class="w-full px-3 py-2 border rounded-lg text-sm bg-gray-50 outline-none focus:ring-2 focus:ring-orange-500">
+                                <option value="">เลือก</option>
+                                <option value="01">01 - ทั่วไป</option>
+                                <option value="02">02 - รับรองการทำกิจกรรม</option>
+                                <option value="03">03 - รับรองสมาชิก</option>
+                                <option value="04">04 - ลาเรียน</option>
+                                <option value="05">05 - เยี่ยมชม</option>
+                                <option value="06">06 - ขอข้อมูล</option>
+                                <option value="07">07 - ขอเข้าพบ</option>
+                                <option value="08">08 - ประชาสัมพันธ์</option>
+                                <option value="09">09 - ขอเชิญเข้าร่วม</option>
                             </select>
                         </div>
                         <div>
                             <label class="block text-xs font-medium text-gray-700 mb-1">ส่วนงาน/ฝ่าย *</label>
-                            <select id="modalDept" required class="w-full px-3 py-2 border rounded-lg text-sm">
+                            <select id="modalDept" required class="w-full px-3 py-2 border rounded-lg text-sm bg-gray-50 outline-none focus:ring-2 focus:ring-orange-500">
                                 <option value="อสพ">เอกสารสัมพันธ์ (อสพ.)</option><option value="สมช">ฝ่ายสมาชิกสัมพันธ์ (สมช.)</option><option value="สธส">ฝ่ายสาธารณสุขสัมพันธ์ (สธส.)</option>
                                 <option value="วนธ">ฝ่ายวัฒนธรรม (วนธ.)</option><option value="กษส">ฝ่ายเกษตรสัมพันธ์ (กษส.)</option><option value="ชสพ">ฝ่ายชุมชนสัมพันธ์ (ชสพ.)</option>
                                 <option value="กกส">ฝ่ายกิจกรรมสัมพันธ์ (กกส.)</option><option value="ศสพ">ฝ่ายศึกษาสัมพันธ์ (ศสพ.)</option><option value="อกป">ฝ่ายอำนวยการและปฏิสัมพันธ์ (อกป.)</option>
                             </select>
                         </div>
-                        <div><label class="block text-xs font-medium text-gray-700 mb-1">เลขที่เอกสาร *</label><input type="text" id="modalDocId" required class="w-full px-3 py-2 border rounded-lg text-sm"></div>
-                        <div><label class="block text-xs font-medium text-gray-700 mb-1">วันที่ลงเอกสาร *</label><input type="date" id="modalDate" required class="w-full px-3 py-2 border rounded-lg text-sm"></div>
-                        <div class="md:col-span-2"><label class="block text-xs font-medium text-gray-700 mb-1">ชื่อเรื่อง *</label><input type="text" id="modalTitle" required class="w-full px-3 py-2 border rounded-lg text-sm"></div>
+                        <div><label class="block text-xs font-medium text-gray-700 mb-1">เลขที่เอกสาร *</label><input type="text" id="modalDocId" required class="w-full px-3 py-2 border rounded-lg text-sm bg-gray-50 outline-none focus:ring-2 focus:ring-orange-500"></div>
+                        <div><label class="block text-xs font-medium text-gray-700 mb-1">วันที่ลงเอกสาร *</label><input type="date" id="modalDate" required class="w-full px-3 py-2 border rounded-lg text-sm bg-gray-50 outline-none focus:ring-2 focus:ring-orange-500"></div>
+                        <div class="md:col-span-2"><label class="block text-xs font-medium text-gray-700 mb-1">ชื่อเรื่อง *</label><input type="text" id="modalTitle" required class="w-full px-3 py-2 border rounded-lg text-sm bg-gray-50 outline-none focus:ring-2 focus:ring-orange-500"></div>
                         
-                        <div><label class="block text-xs font-medium text-gray-700 mb-1">เรียน (ถึงใคร)</label><input type="text" id="modalAttention" placeholder="เช่น ผู้จัดการฝ่าย..." class="w-full px-3 py-2 border rounded-lg text-sm"></div>
-                        <div><label class="block text-xs font-medium text-gray-700 mb-1">หน่วยงาน/ผู้ประสานงาน</label><input type="text" id="modalCoordinator" placeholder="ชื่อหน่วยงาน หรือบุคคล" class="w-full px-3 py-2 border rounded-lg text-sm"></div>
+                        <div><label class="block text-xs font-medium text-gray-700 mb-1">เรียน (ถึงใคร)</label><input type="text" id="modalAttention" placeholder="เช่น ผู้จัดการฝ่าย..." class="w-full px-3 py-2 border rounded-lg text-sm bg-gray-50 outline-none focus:ring-2 focus:ring-orange-500"></div>
+                        <div><label class="block text-xs font-medium text-gray-700 mb-1">หน่วยงาน/ผู้ประสานงาน</label><input type="text" id="modalCoordinator" placeholder="ชื่อหน่วยงาน หรือบุคคล" class="w-full px-3 py-2 border rounded-lg text-sm bg-gray-50 outline-none focus:ring-2 focus:ring-orange-500"></div>
 
-                        <div class="md:col-span-2"><label class="block text-xs font-medium text-gray-700 mb-1">เนื้อหาโดยย่อ</label><textarea id="modalContent" rows="2" class="w-full px-3 py-2 border rounded-lg text-sm"></textarea></div>
-                        <div class="md:col-span-2"><label class="block text-xs font-medium text-gray-700 mb-1">ลิงก์ PDF</label><input type="url" id="modalPdf" class="w-full px-3 py-2 border rounded-lg text-sm"></div>
+                        <div class="md:col-span-2"><label class="block text-xs font-medium text-gray-700 mb-1">เนื้อหาโดยย่อ</label><textarea id="modalContent" rows="2" class="w-full px-3 py-2 border rounded-lg text-sm bg-gray-50 outline-none focus:ring-2 focus:ring-orange-500"></textarea></div>
+                        <div class="md:col-span-2"><label class="block text-xs font-medium text-gray-700 mb-1">ลิงก์ PDF</label><input type="url" id="modalPdf" class="w-full px-3 py-2 border rounded-lg text-sm bg-gray-50 outline-none focus:ring-2 focus:ring-orange-500"></div>
                     </div>
                     <div class="mt-6 flex justify-end gap-3 pt-4 border-t border-gray-100">
-                        <button type="button" onclick="closeAddModal()" class="px-5 py-2 text-sm bg-gray-100 rounded-lg">ยกเลิก</button>
-                        <button type="submit" id="saveDocBtn" class="px-5 py-2 text-sm font-bold text-white bg-orange-500 rounded-lg">บันทึกข้อมูล</button>
+                        <button type="button" onclick="closeAddModal()" class="px-5 py-2 text-sm bg-gray-100 hover:bg-gray-200 rounded-lg">ยกเลิก</button>
+                        <button type="submit" id="saveDocBtn" class="px-5 py-2 text-sm font-bold text-white bg-orange-500 hover:bg-orange-600 rounded-lg">บันทึกข้อมูล</button>
                     </div>
                 </form>
             </div>
@@ -246,21 +277,21 @@
             <div class="p-6">
                 <form id="addTaskForm" onsubmit="submitNewTask(event)" class="space-y-4">
                     <input type="hidden" id="taskId">
-                    <div><label class="block text-xs font-medium text-gray-700 mb-1">ชื่องาน / กิจกรรม *</label><input type="text" id="taskTitle" required class="w-full px-3 py-2 border rounded-lg text-sm"></div>
+                    <div><label class="block text-xs font-medium text-gray-700 mb-1">ชื่องาน / กิจกรรม *</label><input type="text" id="taskTitle" required class="w-full px-3 py-2 border rounded-lg text-sm bg-gray-50 outline-none focus:ring-2 focus:ring-orange-500"></div>
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <label class="block text-xs font-medium text-gray-700 mb-1">ฝ่าย *</label>
-                            <select id="taskDept" required class="w-full px-3 py-2 border rounded-lg text-sm">
+                            <select id="taskDept" required class="w-full px-3 py-2 border rounded-lg text-sm bg-gray-50 outline-none focus:ring-2 focus:ring-orange-500">
                                 <option value="อสพ">เอกสารสัมพันธ์ (อสพ.)</option><option value="สมช">ฝ่ายสมาชิกสัมพันธ์ (สมช.)</option><option value="สธส">ฝ่ายสาธารณสุขสัมพันธ์ (สธส.)</option>
                                 <option value="วนธ">ฝ่ายวัฒนธรรม (วนธ.)</option><option value="กษส">ฝ่ายเกษตรสัมพันธ์ (กษส.)</option><option value="ชสพ">ฝ่ายชุมชนสัมพันธ์ (ชสพ.)</option>
                                 <option value="กกส">ฝ่ายกิจกรรมสัมพันธ์ (กกส.)</option><option value="ศสพ">ฝ่ายศึกษาสัมพันธ์ (ศสพ.)</option><option value="อกป">ฝ่ายอำนวยการและปฏิสัมพันธ์ (อกป.)</option>
                             </select>
                         </div>
-                        <div><label class="block text-xs font-medium text-gray-700 mb-1">สถานะ *</label><select id="taskStatus" required class="w-full px-3 py-2 border rounded-lg text-sm"><option value="pending">รอดำเนินการ</option><option value="in_progress">กำลังดำเนินการ</option><option value="completed">เสร็จสิ้นแล้ว</option></select></div>
+                        <div><label class="block text-xs font-medium text-gray-700 mb-1">สถานะ *</label><select id="taskStatus" required class="w-full px-3 py-2 border rounded-lg text-sm bg-gray-50 outline-none focus:ring-2 focus:ring-orange-500"><option value="pending">รอดำเนินการ</option><option value="in_progress">กำลังดำเนินการ</option><option value="completed">เสร็จสิ้นแล้ว</option></select></div>
                     </div>
                     <div class="grid grid-cols-2 gap-4">
-                        <div><label class="block text-xs font-medium text-gray-700 mb-1">ผู้รับผิดชอบ</label><input type="text" id="taskAssignee" class="w-full px-3 py-2 border rounded-lg text-sm"></div>
-                        <div><label class="block text-xs font-medium text-gray-700 mb-1">กำหนดส่ง</label><input type="date" id="taskDueDate" class="w-full px-3 py-2 border rounded-lg text-sm"></div>
+                        <div><label class="block text-xs font-medium text-gray-700 mb-1">ผู้รับผิดชอบ</label><input type="text" id="taskAssignee" class="w-full px-3 py-2 border rounded-lg text-sm bg-gray-50 outline-none focus:ring-2 focus:ring-orange-500"></div>
+                        <div><label class="block text-xs font-medium text-gray-700 mb-1">กำหนดส่ง</label><input type="date" id="taskDueDate" class="w-full px-3 py-2 border rounded-lg text-sm bg-gray-50 outline-none focus:ring-2 focus:ring-orange-500"></div>
                     </div>
                     
                     <div class="md:col-span-2">
@@ -325,10 +356,6 @@
                         <svg class="w-5 h-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
                         <span class="text-sm">จัดการผู้ใช้งาน</span>
                     </a>
-                    <a href="#" onclick="switchView('history')" id="nav-history" class="flex items-center px-6 py-2.5 nav-inactive border-r-4 border-transparent hover:bg-gray-50 transition-all">
-                        <svg class="w-5 h-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                        <span class="text-sm">ประวัติการทำงาน (Log)</span>
-                    </a>
                     <div id="adminOnlyMenu" class="hidden">
                         <a href="#" onclick="switchView('settings')" id="nav-settings" class="flex items-center px-6 py-2.5 nav-inactive border-r-4 border-transparent hover:bg-gray-50 hover:text-orange-500 transition-all">
                             <svg class="w-5 h-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /></svg>
@@ -382,6 +409,9 @@
                         <div class="flex flex-col sm:flex-row gap-3">
                             <select id="docDepartment" class="w-full sm:w-1/4 px-3 py-2.5 border border-gray-300 rounded-xl bg-gray-50 text-sm focus:ring-2 focus:ring-orange-500 outline-none">
                                 <option value="">ทุกฝ่าย (All)</option><option value="อสพ">เอกสารสัมพันธ์ (อสพ.)</option><option value="สมช">ฝ่ายสมาชิกสัมพันธ์ (สมช.)</option><option value="สธส">ฝ่ายสาธารณสุขสัมพันธ์ (สธส.)</option><option value="วนธ">ฝ่ายวัฒนธรรม (วนธ.)</option><option value="กษส">ฝ่ายเกษตรสัมพันธ์ (กษส.)</option><option value="ชสพ">ฝ่ายชุมชนสัมพันธ์ (ชสพ.)</option><option value="กกส">ฝ่ายกิจกรรมสัมพันธ์ (กกส.)</option><option value="ศสพ">ฝ่ายศึกษาสัมพันธ์ (ศสพ.)</option><option value="อกป">ฝ่ายอำนวยการและปฏิสัมพันธ์ (อกป.)</option>
+                            </select>
+                            <select id="docCategory" class="w-full sm:w-1/4 px-3 py-2.5 border border-gray-300 rounded-xl bg-gray-50 text-sm focus:ring-2 focus:ring-orange-500 outline-none">
+                                <option value="">ทุกหมวดหมู่ (All)</option><option value="01">01 - ทั่วไป</option><option value="02">02 - รับรองกิจกรรม</option><option value="03">03 - รับรองสมาชิก</option><option value="04">04 - ลาเรียน</option><option value="05">05 - เยี่ยมชม</option><option value="06">06 - ขอข้อมูล</option><option value="07">07 - ขอเข้าพบ</option><option value="08">08 - ประชาสัมพันธ์</option><option value="09">09 - ขอเชิญเข้าร่วม</option>
                             </select>
                             <input type="text" id="docSearchInput" placeholder="เลขเอกสาร หรือ ชื่อเรื่อง..." class="w-full flex-grow px-4 py-2.5 border border-gray-300 rounded-xl bg-gray-50 text-sm focus:ring-2 focus:ring-orange-500 outline-none">
                             <button onclick="searchDocument()" class="w-full sm:w-auto bg-gray-800 hover:bg-gray-900 text-white font-medium px-6 py-2.5 rounded-xl text-sm transition-all shadow-xs">ค้นหา</button>
@@ -444,7 +474,7 @@
                     <!-- ตารางงาน -->
                     <div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden mb-10">
                         <div class="px-6 py-4 border-b border-gray-100 bg-gray-50 flex justify-between items-center">
-                            <h3 class="text-sm font-bold text-gray-800" id="tableTitle">รายการงาน / ภารกิจทั้งหมด</h3>
+                            <h3 class="text-sm font-bold text-gray-800" id="tableTitle">รายการงานทั้งหมด</h3>
                             <button onclick="clearFilters()" id="clearFilterBtn" class="hidden text-xs text-orange-600 font-bold hover:underline">แสดงทั้งหมด (ล้างตัวกรอง)</button>
                         </div>
                         <div class="overflow-x-auto">
@@ -493,7 +523,7 @@
 
                     <div class="bg-white rounded-2xl border border-gray-200 shadow-sm mb-6 overflow-hidden">
                         <div class="px-6 py-4 border-b border-gray-100 bg-gray-50 flex justify-between items-center">
-                            <h3 class="text-sm font-bold text-gray-800">การกระจายตัวตามจังหวัด (ภูมิศาสตร์)</h3>
+                            <h3 class="text-sm font-bold text-gray-800">การกระจายตัวตามจังหวัด</h3>
                             <div class="bg-gray-200/50 p-1 rounded-lg flex text-xs font-bold">
                                 <button onclick="toggleMapMode('bar')" id="btn-mode-bar" class="px-3 py-1.5 rounded-md bg-white text-orange-600 shadow-sm transition-all">กราฟแท่ง</button>
                                 <button onclick="toggleMapMode('map')" id="btn-mode-map" class="px-3 py-1.5 rounded-md text-gray-500 hover:text-gray-800 transition-all">แผนที่ประเทศไทย</button>
@@ -536,27 +566,9 @@
                         <div class="overflow-x-auto">
                             <table class="w-full text-left text-sm text-gray-600">
                                 <thead class="bg-gray-50 text-xs text-gray-500 uppercase border-b border-gray-200">
-                                    <tr><th class="px-6 py-3">รหัสสมาชิก</th><th class="px-6 py-3">ชื่อ-นามสกุล</th><th class="px-6 py-3">สิทธิ์ (Role)</th><th class="px-6 py-3">ฝ่าย</th><th class="px-6 py-3 text-right">จัดการ</th></tr>
+                                    <tr><th class="px-6 py-3">รหัสสมาชิก</th><th class="px-6 py-3">ชื่อ-นามสกุล</th><th class="px-6 py-3">สิทธิ์ (Role)</th><th class="px-6 py-3">ฝ่าย</th></tr>
                                 </thead>
                                 <tbody id="usersTableBody" class="divide-y divide-gray-100"></tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 5. หน้า ประวัติการทำงาน (History Log) -->
-                <div id="view-history" class="max-w-5xl mx-auto hidden animate-fade-in pb-10">
-                    <div class="bg-white rounded-2xl border border-blue-200 shadow-sm overflow-hidden">
-                        <div class="px-6 py-4 bg-blue-50 border-b border-blue-100 flex items-center">
-                            <svg class="w-6 h-6 text-blue-600 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                            <h2 class="text-lg font-bold text-blue-800">ประวัติการปฏิบัติงาน (Update History)</h2>
-                        </div>
-                        <div class="p-6">
-                            <table class="w-full text-left text-sm text-gray-600">
-                                <thead class="bg-gray-50 text-xs text-gray-500 uppercase border-b border-gray-200">
-                                    <tr><th class="px-4 py-3">ผู้ดำเนินการ</th><th class="px-4 py-3">การกระทำ</th><th class="px-4 py-3">รายละเอียด</th><th class="px-4 py-3">เวลา</th></tr>
-                                </thead>
-                                <tbody id="historyTableBody" class="divide-y divide-gray-100"></tbody>
                             </table>
                         </div>
                     </div>
@@ -608,7 +620,8 @@
         let allCurrentTasks = []; let activeStatusFilter = 'all'; let activeDateFilter = null; let currentDashboardView = 'all'; 
 
         const deptNames = { "อสพ": "เอกสารสัมพันธ์ (อสพ.)", "สมช": "ฝ่ายสมาชิกสัมพันธ์ (สมช.)", "สธส": "ฝ่ายสาธารณสุขสัมพันธ์ (สธส.)", "วนธ": "ฝ่ายวัฒนธรรม (วนธ.)", "กษส": "ฝ่ายเกษตรสัมพันธ์ (กษส.)", "ชสพ": "ฝ่ายชุมชนสัมพันธ์ (ชสพ.)", "กกส": "ฝ่ายกิจกรรมสัมพันธ์ (กกส.)", "ศสพ": "ฝ่ายศึกษาสัมพันธ์ (ศสพ.)", "อกป": "ฝ่ายอำนวยการและปฏิสัมพันธ์ (อกป.)" };
-        
+        const catNames = { "01": "ทั่วไป", "02": "รับรองการทำกิจกรรม", "03": "รับรองสมาชิก", "04": "ลาเรียน", "05": "เยี่ยมชม", "06": "ขอข้อมูล", "07": "ขอเข้าพบ", "08": "ประชาสัมพันธ์", "09": "ขอเชิญเข้าร่วม" };
+
         google.charts.load('current', { 'packages': ['geochart'] });
 
         // --- Custom Notifications & Modals ---
@@ -633,7 +646,6 @@
             confirmActionCallback = callback;
             document.getElementById('confirmModal').classList.remove('hidden');
             document.getElementById('confirmModal').classList.add('flex');
-            // short delay for fade in
             setTimeout(() => { document.getElementById('confirmModal').classList.remove('opacity-0'); }, 10);
         }
         function closeConfirm() {
@@ -648,7 +660,6 @@
             if (confirmActionCallback) confirmActionCallback();
             closeConfirm();
         });
-
 
         function renderSidebarMenu() {
             const menuContainer = document.getElementById('dynamicDeptMenu');
@@ -719,8 +730,8 @@
             if (['document', 'dashboard', 'members', 'templates'].includes(viewName)) { 
                 if (systemSettings[viewName] === false && currentUser.role !== 'Administrator') targetView = 'maintenance'; 
             }
-            ['document', 'dashboard', 'audit', 'members', 'settings', 'maintenance', 'templates', 'users', 'history'].forEach(v => { const el = document.getElementById(`view-${v}`); if(el) { el.classList.add('hidden'); el.classList.remove('block', 'flex'); } });
-            ['document', 'members', 'audit', 'settings', 'templates', 'users', 'history'].forEach(nav => { const el = document.getElementById(`nav-${nav}`); if(el) { el.classList.replace('nav-active', 'nav-inactive'); el.classList.replace('bg-orange-50', 'border-transparent'); el.classList.replace('text-red-600', 'nav-inactive'); } });
+            ['document', 'dashboard', 'audit', 'members', 'settings', 'maintenance', 'templates', 'users'].forEach(v => { const el = document.getElementById(`view-${v}`); if(el) { el.classList.add('hidden'); el.classList.remove('block', 'flex'); } });
+            ['document', 'members', 'audit', 'settings', 'templates', 'users'].forEach(nav => { const el = document.getElementById(`nav-${nav}`); if(el) { el.classList.replace('nav-active', 'nav-inactive'); el.classList.replace('bg-orange-50', 'border-transparent'); el.classList.replace('text-red-600', 'nav-inactive'); } });
             
             const activeEl = document.getElementById(`view-${targetView}`); if(activeEl) { activeEl.classList.remove('hidden'); if(targetView === 'maintenance') activeEl.classList.add('flex'); else activeEl.classList.add('block'); }
             if (targetView !== 'maintenance') { const activeNav = document.getElementById(`nav-${viewName}`); if(activeNav) { if(viewName === 'audit') activeNav.classList.replace('nav-inactive', 'text-red-600'); else if(viewName !== 'dashboard') { activeNav.classList.replace('nav-inactive', 'nav-active'); activeNav.classList.replace('border-transparent', 'bg-orange-50'); } } }
@@ -735,7 +746,6 @@
             else if (targetView === 'settings') loadSettings();
             else if (targetView === 'templates') loadTemplates();
             else if (targetView === 'users') loadUsers();
-            else if (targetView === 'history') loadHistoryLog();
         }
 
         function switchDashboardView(deptCode) {
@@ -754,9 +764,9 @@
             highlightStatusCard(); loadDashboardData(); loadActivities();
         }
 
-        // --- User Management ---
+        // --- User Management & History ---
         async function loadUsers() {
-            const tbody = document.getElementById('usersTableBody'); tbody.innerHTML = '<tr><td colspan="5" class="text-center py-5">กำลังโหลด...</td></tr>';
+            const tbody = document.getElementById('usersTableBody'); tbody.innerHTML = '<tr><td colspan="4" class="text-center py-5">กำลังโหลด...</td></tr>';
             try {
                 const {data, error} = await supabaseClient.from('users').select('*').order('role');
                 if (error) throw error;
@@ -764,57 +774,58 @@
                 data.forEach(u => {
                     let badge = u.role === 'Administrator' ? 'bg-red-100 text-red-700' : (u.role === 'President' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700');
                     let deptDisp = u.department === 'ทั้งหมด' ? 'ทั้งหมด (Admin/Pres)' : (deptNames[u.department] || u.department);
-                    tbody.innerHTML += `<tr><td class="px-6 py-4 font-mono text-sm">${u.username}</td><td class="px-6 py-4 font-bold text-gray-800">${u.fullname}</td><td class="px-6 py-4"><span class="px-2 py-1 rounded text-xs font-bold ${badge}">${u.role}</span></td><td class="px-6 py-4 text-sm">${deptDisp}</td><td class="px-6 py-4 text-right"><button onclick="editUser('${u.id}')" class="text-blue-600 mr-3 text-sm hover:underline">แก้ไข</button><button onclick="deleteUser('${u.id}', '${u.username}')" class="text-red-600 text-sm hover:underline">ลบ</button></td></tr>`;
+                    tbody.innerHTML += `<tr>
+                        <td class="px-6 py-4 font-mono text-sm">${u.username}</td>
+                        <td class="px-6 py-4"><button onclick="viewUserHistory('${u.fullname}')" class="font-bold text-blue-600 hover:text-blue-800 hover:underline transition-colors">${u.fullname}</button></td>
+                        <td class="px-6 py-4"><span class="px-2 py-1 rounded text-xs font-bold ${badge}">${u.role}</span></td>
+                        <td class="px-6 py-4 text-sm">${deptDisp}</td>
+                    </tr>`;
                 });
-            } catch (err) { tbody.innerHTML = '<tr><td colspan="5" class="text-center py-5 text-red-500">ไม่สามารถโหลดข้อมูลผู้ใช้ได้</td></tr>'; }
+            } catch (err) { tbody.innerHTML = '<tr><td colspan="4" class="text-center py-5 text-red-500">ไม่สามารถโหลดข้อมูลผู้ใช้ได้</td></tr>'; }
         }
         function openUserModal() { document.getElementById('userForm').reset(); document.getElementById('u-id').value = ''; document.getElementById('userModal').classList.remove('hidden'); }
         function closeUserModal() { document.getElementById('userModal').classList.add('hidden'); }
-        async function editUser(id) {
-            try {
-                const {data, error} = await supabaseClient.from('users').select('*').eq('id', id).single();
-                if(error) throw error;
-                document.getElementById('u-id').value = data.id; document.getElementById('u-username').value = data.username; document.getElementById('u-password').value = data.password; document.getElementById('u-fullname').value = data.fullname; document.getElementById('u-role').value = data.role; document.getElementById('u-dept').value = data.department;
-                document.getElementById('userModal').classList.remove('hidden');
-            } catch (err) { showToast('ไม่สามารถดึงข้อมูลได้', 'error'); }
-        }
         async function submitUser(e) {
-            e.preventDefault(); const id = document.getElementById('u-id').value;
+            e.preventDefault(); 
             const obj = { username: document.getElementById('u-username').value, password: document.getElementById('u-password').value, fullname: document.getElementById('u-fullname').value, role: document.getElementById('u-role').value, department: document.getElementById('u-dept').value };
             try {
-                if(id) { 
-                    const { error } = await supabaseClient.from('users').update(obj).eq('id', id); 
-                    if(error) throw error; showToast('อัปเดตข้อมูลผู้ใช้สำเร็จ');
-                } else { 
-                    const { error } = await supabaseClient.from('users').insert([obj]); 
-                    if(error) throw error; showToast('เพิ่มข้อมูลผู้ใช้สำเร็จ');
-                }
+                const { error } = await supabaseClient.from('users').insert([obj]); 
+                if(error) throw error; showToast('เพิ่มข้อมูลผู้ใช้สำเร็จ');
                 closeUserModal(); loadUsers();
             } catch (err) { showToast('เกิดข้อผิดพลาด: ' + err.message, 'error'); }
         }
-        async function deleteUser(id, username) {
-            if(username === 'admin' || username === currentUser.username) return showToast("ไม่สามารถลบบัญชีหลัก หรือบัญชีตัวเองได้", "error");
-            showConfirm('ลบผู้ใช้', `ยืนยันการลบผู้ใช้: ${username} ใช่หรือไม่?`, async () => {
-                try {
-                    const { error } = await supabaseClient.from('users').delete().eq('id', id); 
-                    if (error) throw error;
-                    showToast('ลบผู้ใช้สำเร็จ'); loadUsers(); 
-                } catch(err) { showToast('ลบไม่สำเร็จ: ' + err.message, 'error'); }
-            });
-        }
 
-        // --- History Log ---
-        async function loadHistoryLog() {
-            const tbody = document.getElementById('historyTableBody'); tbody.innerHTML = '<tr><td colspan="4" class="text-center py-5">กำลังโหลด...</td></tr>';
+        async function viewUserHistory(fullname) {
+            document.getElementById('uh-fullname').innerText = fullname;
+            const tbody = document.getElementById('userHistoryTableBody');
+            tbody.innerHTML = '<tr><td colspan="3" class="text-center py-5">กำลังโหลด...</td></tr>';
+            document.getElementById('userHistoryModal').classList.remove('hidden');
+            document.getElementById('userHistoryModal').classList.add('flex');
+            
             try {
-                const {data, error} = await supabaseClient.from('activities').select('*').not('action', 'ilike', '%ลบ%').order('created_at', {ascending: false});
-                if(error) throw error; tbody.innerHTML = '';
-                if(data.length===0) return tbody.innerHTML = '<tr><td colspan="4" class="text-center py-5">ไม่มีประวัติ</td></tr>';
-                data.forEach(h => { 
-                    let dptName = deptNames[h.department] || h.department;
-                    tbody.innerHTML += `<tr class="border-b"><td class="px-4 py-3 font-bold text-gray-800">${h.user_name} <span class="text-xs font-normal text-gray-500">(${dptName})</span></td><td class="px-4 py-3"><span class="bg-blue-50 text-blue-600 px-2 py-1 rounded text-xs">${h.action}</span></td><td class="px-4 py-3 text-sm text-gray-600">${h.details}</td><td class="px-4 py-3 text-xs text-gray-400">${new Date(h.created_at).toLocaleString('th-TH')}</td></tr>`; 
+                const { data, error } = await supabaseClient.from('activities').select('*').eq('user_name', fullname).order('created_at', { ascending: false });
+                if (error) throw error;
+                tbody.innerHTML = '';
+                if (data.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="3" class="text-center py-5 text-gray-400">ไม่มีประวัติการทำรายการ</td></tr>';
+                    return;
+                }
+                data.forEach(h => {
+                    let c = h.action.includes('ลบ') ? 'text-red-600 bg-red-50' : 'text-blue-600 bg-blue-50';
+                    tbody.innerHTML += `
+                    <tr class="border-b hover:bg-gray-50">
+                        <td class="px-4 py-3 text-xs text-gray-500">${new Date(h.created_at).toLocaleString('th-TH')}</td>
+                        <td class="px-4 py-3"><span class="${c} px-2 py-1 rounded text-xs font-bold">${h.action}</span></td>
+                        <td class="px-4 py-3 text-sm">${h.details}</td>
+                    </tr>`;
                 });
-            } catch (err) { tbody.innerHTML = '<tr><td colspan="4" class="text-center py-5 text-red-500">เกิดข้อผิดพลาดในการโหลดประวัติ</td></tr>'; }
+            } catch (err) {
+                tbody.innerHTML = '<tr><td colspan="3" class="text-center py-5 text-red-500">เกิดข้อผิดพลาดในการโหลด</td></tr>';
+            }
+        }
+        function closeUserHistoryModal() {
+            document.getElementById('userHistoryModal').classList.add('hidden');
+            document.getElementById('userHistoryModal').classList.remove('flex');
         }
 
         // --- Members CSV Upload ---
@@ -1011,20 +1022,40 @@
                     data.forEach(d => {
                         const canEditDelete = ['Administrator', 'President'].includes(currentUser.role) || (currentUser.role === 'Working Team' && currentUser.department === d.department);
                         let dBtn = canEditDelete ? `<button onclick="deleteDoc(${d.id}, '${d.title}')" class="text-red-500 bg-red-50 px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-red-500 hover:text-white transition-colors">ลบเอกสาร</button>` : '';
-                        let pdf = d.pdf_link && d.pdf_link !== "-" ? `<a href="${d.pdf_link}" target="_blank" class="bg-gray-800 text-white px-4 py-2 rounded-lg text-xs font-bold mt-3 inline-block">เปิดเอกสาร (PDF)</a>` : '';
+                        let pdf = d.pdf_link && d.pdf_link !== "-" ? `<a href="${d.pdf_link}" target="_blank" class="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg text-xs font-bold mt-4 inline-flex items-center shadow-sm transition-colors"><svg class="w-4 h-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg> ดาวน์โหลด PDF</a>` : '';
                         
-                        let attentionTxt = d.attention ? `<p><span class="font-bold text-gray-800">เรียน:</span> ${d.attention}</p>` : '';
-                        let coordTxt = d.coordinator ? `<p><span class="font-bold text-gray-800">หน่วยงาน/ผู้ประสานงาน:</span> ${d.coordinator}</p>` : '';
+                        let dateDocDisplay = d.doc_date ? new Date(d.doc_date).toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric' }) : '-';
 
                         res.innerHTML += `
-                        <div class="bg-white rounded-2xl border p-6 mb-4 shadow-sm hover:border-orange-300 transition-colors">
-                            <div class="flex flex-col md:flex-row justify-between border-b border-gray-100 pb-3 mb-3 gap-4">
-                                <div><h3 class="text-lg font-bold text-gray-900">${d.title}</h3><p class="text-sm text-gray-500 mt-1">เลขที่: ${d.department}.${d.doc_id} | ลงวันที่: ${new Date(d.doc_date).toLocaleDateString('th-TH')}</p></div>
+                        <div class="bg-white rounded-2xl border border-gray-200 p-6 mb-4 shadow-sm hover:border-orange-300 transition-colors relative">
+                            <div class="flex justify-between items-start mb-2">
+                                <span class="text-orange-500 font-bold text-xs bg-orange-50 px-2.5 py-1 rounded-md">หมวด: ${d.category} - ${catNames[d.category] || 'ทั่วไป'}</span>
+                                <div class="text-right bg-gray-50 px-3 py-1.5 rounded-lg">
+                                    <p class="text-[10px] text-gray-400 font-medium">วันที่ลงเอกสาร</p>
+                                    <p class="text-xs font-bold text-gray-700">${dateDocDisplay}</p>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-4 pr-10">
+                                <h3 class="text-lg font-bold text-gray-900 leading-tight mb-1">เรื่อง ${d.title}</h3>
+                                <p class="text-sm text-gray-500">เลขที่: <span class="font-bold text-gray-700">${d.department}. ${d.doc_id}</span> <span class="ml-2 bg-gray-100 text-gray-400 px-2 py-0.5 rounded-full text-[10px]">ลำดับอ้างอิง: ${d.id}</span></p>
+                            </div>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-600 mb-4 border-t border-b border-gray-50 py-4">
+                                <div><span class="text-gray-400 inline-block w-24">ฝ่าย:</span> <span class="text-gray-800 font-medium">${deptNames[d.department] || d.department}</span></div>
+                                <div><span class="text-gray-400 inline-block w-24">เรียน:</span> <span class="text-gray-800 font-medium">${d.attention || '-'}</span></div>
+                                <div><span class="text-gray-400 inline-block w-24">ผู้ประสานงาน:</span> <span class="text-gray-800 font-medium">${d.coordinator || '-'}</span></div>
+                            </div>
+                            
+                            <div>
+                                <span class="text-gray-600 font-bold text-sm mb-2 block">เนื้อหา:</span>
+                                <div class="bg-gray-50 p-4 rounded-xl text-sm text-gray-600 border border-gray-100 min-h-[60px] whitespace-pre-wrap">${d.content}</div>
+                            </div>
+                            
+                            <div class="flex items-center justify-between mt-4">
+                                <div>${pdf}</div>
                                 <div>${dBtn}</div>
                             </div>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm text-gray-600 mb-3">${attentionTxt}${coordTxt}</div>
-                            <div class="bg-gray-50 p-4 rounded-xl text-sm text-gray-600 border border-gray-100"><span class="font-bold text-gray-800 block mb-1">เนื้อหาโดยย่อ:</span>${d.content}</div>
-                            ${pdf}
                         </div>`;
                     });
                 } else {
@@ -1106,7 +1137,6 @@
         function closeAddTaskModal() { document.getElementById('addTaskModal').classList.add('hidden'); }
         
         function toggleSidebar() { const sb = document.getElementById('sidebar'); sb.classList.toggle('hidden'); sb.classList.toggle('absolute'); sb.classList.toggle('inset-y-0'); sb.classList.toggle('left-0'); }
-        function closeUserModal() { document.getElementById('userModal').classList.add('hidden'); }
     </script>
 </body>
 </html>

@@ -41,7 +41,7 @@
                     <p class="text-sm text-gray-500 mt-1">ระบบบริหารจัดการข้อมูลองค์กร</p>
                 </div>
                 <div class="space-y-4">
-                    <div><input type="text" id="userInput" placeholder="รหัสสมาชิก (เช่น admin)" class="block w-full px-4 py-2.5 border border-gray-300 rounded-xl bg-gray-50 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"></div>
+                    <div><input type="text" id="userInput" placeholder="รหัสสมาชิก (ใช้ล็อกอิน)" class="block w-full px-4 py-2.5 border border-gray-300 rounded-xl bg-gray-50 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"></div>
                     <div><input type="password" id="passwordInput" placeholder="รหัสผ่าน" class="block w-full px-4 py-2.5 border border-gray-300 rounded-xl bg-gray-50 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"></div>
                     <div id="loginError" class="hidden text-[11px] text-red-600 bg-red-50 p-2 rounded-lg text-center border border-red-100"><span id="errorMessage"></span></div>
                     <button id="loginBtn" onclick="handleLogin()" class="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-2.5 rounded-xl text-sm transition-all shadow-xs"><span id="loginBtnText">เข้าสู่ระบบ</span></button>
@@ -58,12 +58,11 @@
     <div id="userModal" class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm z-[110] hidden flex items-center justify-center p-4">
         <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden animate-fade-in">
             <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
-                <h3 class="text-lg font-bold text-gray-900">จัดการข้อมูลผู้ใช้</h3>
+                <h3 class="text-lg font-bold text-gray-900">เพิ่มผู้ใช้ใหม่ในระบบ</h3>
                 <button onclick="closeUserModal()" class="text-gray-400 hover:text-gray-600"><svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg></button>
             </div>
             <div class="p-6">
                 <form id="userForm" onsubmit="submitUser(event)" class="space-y-4">
-                    <input type="hidden" id="u-id">
                     <div><label class="block text-xs font-medium text-gray-700 mb-1">รหัสสมาชิก (ใช้สำหรับล็อกอิน) *</label><input type="text" id="u-username" required class="w-full px-3 py-2 border rounded-lg text-sm bg-gray-50 focus:ring-2 focus:ring-orange-500 outline-none"></div>
                     <div><label class="block text-xs font-medium text-gray-700 mb-1">รหัสผ่าน *</label><input type="text" id="u-password" required class="w-full px-3 py-2 border rounded-lg text-sm bg-gray-50 focus:ring-2 focus:ring-orange-500 outline-none"></div>
                     <div><label class="block text-xs font-medium text-gray-700 mb-1">ชื่อ-นามสกุล *</label><input type="text" id="u-fullname" required class="w-full px-3 py-2 border rounded-lg text-sm bg-gray-50 focus:ring-2 focus:ring-orange-500 outline-none"></div>
@@ -179,7 +178,6 @@
                         <div><label class="block text-xs font-medium text-gray-700 mb-1">วันที่ลงเอกสาร *</label><input type="date" id="modalDate" required class="w-full px-3 py-2 border rounded-lg text-sm"></div>
                         <div class="md:col-span-2"><label class="block text-xs font-medium text-gray-700 mb-1">ชื่อเรื่อง *</label><input type="text" id="modalTitle" required class="w-full px-3 py-2 border rounded-lg text-sm"></div>
                         
-                        <!-- ช่องเพิ่มเติมที่ขอไว้: เรียน & ผู้ประสานงาน -->
                         <div><label class="block text-xs font-medium text-gray-700 mb-1">เรียน (ถึงใคร)</label><input type="text" id="modalAttention" placeholder="เช่น ผู้จัดการฝ่าย..." class="w-full px-3 py-2 border rounded-lg text-sm"></div>
                         <div><label class="block text-xs font-medium text-gray-700 mb-1">หน่วยงาน/ผู้ประสานงาน</label><input type="text" id="modalCoordinator" placeholder="ชื่อหน่วยงาน หรือบุคคล" class="w-full px-3 py-2 border rounded-lg text-sm"></div>
 
@@ -278,10 +276,7 @@
                         <svg class="w-5 h-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
                         <span class="text-sm">จัดการผู้ใช้งาน</span>
                     </a>
-                    <a href="#" onclick="switchView('history')" id="nav-history" class="flex items-center px-6 py-2.5 nav-inactive border-r-4 border-transparent hover:bg-gray-50 transition-all">
-                        <svg class="w-5 h-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                        <span class="text-sm">ประวัติการทำงาน (Log)</span>
-                    </a>
+                    
                     <div id="adminOnlyMenu" class="hidden">
                         <a href="#" onclick="switchView('settings')" id="nav-settings" class="flex items-center px-6 py-2.5 nav-inactive border-r-4 border-transparent hover:bg-gray-50 hover:text-orange-500 transition-all">
                             <svg class="w-5 h-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /></svg>
@@ -422,7 +417,7 @@
                             <p class="text-sm text-gray-500">ข้อมูลสถิติภาพรวมระดับการศึกษา และภูมิลำเนาของสมาชิก</p>
                         </div>
                         <div class="flex gap-2">
-                            <!-- ปุ่มอัปโหลด CSV -->
+                            <!-- ปุ่มอัปโหลด CSV (โชว์เฉพาะ Admin, President, หรือ ฝ่ายสมช.) -->
                             <div id="csvUploadSection" class="hidden">
                                 <input type="file" id="csvFileInput" accept=".csv" class="hidden" onchange="handleCSVUpload(event)">
                                 <button onclick="document.getElementById('csvFileInput').click()" class="bg-green-600 hover:bg-green-700 text-white text-sm font-bold px-4 py-2.5 rounded-lg shadow-sm flex items-center transition-colors">
@@ -482,32 +477,32 @@
                     </div>
                 </div>
 
-                <!-- 4. หน้า จัดการผู้ใช้งาน (User Management) -->
-                <div id="view-users" class="max-w-5xl mx-auto hidden animate-fade-in pb-10">
+                <!-- 4. หน้า จัดการผู้ใช้งานและประวัติ (รวมกัน) -->
+                <div id="view-users" class="max-w-6xl mx-auto hidden animate-fade-in pb-10">
                     <div class="flex justify-between items-center mb-6">
-                        <div><h2 class="text-2xl font-bold text-gray-900">จัดการข้อมูลผู้ใช้งาน</h2><p class="text-sm text-gray-500">เพิ่ม ลบ และปรับปรุงสิทธิ์การเข้าใช้งานระบบ</p></div>
+                        <div><h2 class="text-2xl font-bold text-gray-900">จัดการผู้ใช้งานและประวัติการทำงาน</h2><p class="text-sm text-gray-500">ดูรายชื่อผู้ใช้ เพิ่มผู้ใช้ใหม่ และตรวจสอบประวัติการทำงาน</p></div>
                         <button onclick="openUserModal()" class="bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold px-4 py-2.5 rounded-lg shadow-sm">+ เพิ่มผู้ใช้งาน</button>
                     </div>
-                    <div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+                    
+                    <div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden mb-8">
+                        <div class="px-6 py-4 bg-gray-50 border-b border-gray-200"><h3 class="text-sm font-bold text-gray-800">รายชื่อผู้ใช้งานในระบบ</h3></div>
                         <div class="overflow-x-auto">
                             <table class="w-full text-left text-sm text-gray-600">
-                                <thead class="bg-gray-50 text-xs text-gray-500 uppercase border-b border-gray-200">
-                                    <tr><th class="px-6 py-3">รหัสสมาชิก</th><th class="px-6 py-3">ชื่อ-นามสกุล</th><th class="px-6 py-3">สิทธิ์ (Role)</th><th class="px-6 py-3">ฝ่าย</th><th class="px-6 py-3 text-right">จัดการ</th></tr>
+                                <thead class="bg-white text-xs text-gray-400 uppercase border-b border-gray-100">
+                                    <tr><th class="px-6 py-3">รหัสสมาชิก (ล็อกอิน)</th><th class="px-6 py-3">ชื่อ-นามสกุล</th><th class="px-6 py-3">สิทธิ์ (Role)</th><th class="px-6 py-3">ฝ่าย</th></tr>
                                 </thead>
-                                <tbody id="usersTableBody" class="divide-y divide-gray-100"></tbody>
+                                <tbody id="usersTableBody" class="divide-y divide-gray-50"></tbody>
                             </table>
                         </div>
                     </div>
-                </div>
 
-                <!-- 5. หน้า ประวัติการทำงาน (History Log) -->
-                <div id="view-history" class="max-w-5xl mx-auto hidden animate-fade-in pb-10">
+                    <!-- ตารางประวัติ (ย้ายมาจากหน้า history เดิม) -->
                     <div class="bg-white rounded-2xl border border-blue-200 shadow-sm overflow-hidden">
                         <div class="px-6 py-4 bg-blue-50 border-b border-blue-100 flex items-center">
                             <svg class="w-6 h-6 text-blue-600 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                            <h2 class="text-lg font-bold text-blue-800">ประวัติการปฏิบัติงาน (Update History)</h2>
+                            <h2 class="text-lg font-bold text-blue-800">ประวัติการปฏิบัติงานโดยรวม (Update History)</h2>
                         </div>
-                        <div class="p-6">
+                        <div class="p-6 overflow-x-auto">
                             <table class="w-full text-left text-sm text-gray-600">
                                 <thead class="bg-gray-50 text-xs text-gray-500 uppercase border-b border-gray-200">
                                     <tr><th class="px-4 py-3">ผู้ดำเนินการ</th><th class="px-4 py-3">การกระทำ</th><th class="px-4 py-3">รายละเอียด</th><th class="px-4 py-3">เวลา</th></tr>
@@ -518,18 +513,18 @@
                     </div>
                 </div>
 
-                <!-- 6. หน้า ตั้งค่าโมดูลระบบ (Admin Settings) -->
+                <!-- 5. หน้า ตั้งค่าโมดูลระบบ (Admin Settings) -->
                 <div id="view-settings" class="max-w-4xl mx-auto hidden animate-fade-in pb-10">
                     <div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden mb-6">
                         <div class="px-6 py-5 bg-gray-50 border-b border-gray-200 flex items-center">
                             <div class="w-10 h-10 bg-gray-200 rounded-full flex justify-center items-center mr-3 text-gray-600"><svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /></svg></div>
-                            <div><h2 class="text-lg font-bold text-gray-900">ตั้งค่าเปิด-ปิด โมดูลระบบ (Maintenance Mode)</h2><p class="text-xs text-gray-500">หากปิดการใช้งาน ผู้ใช้ทั่วไปจะเห็นหน้าจอ "ปิดปรับปรุง"</p></div>
+                            <div><h2 class="text-lg font-bold text-gray-900">ตั้งค่าเปิด-ปิด โมดูลระบบ (Maintenance Mode)</h2><p class="text-xs text-gray-500">หากปิดการใช้งาน ผู้ใช้ทั่วไปจะเห็นหน้าจอ "ปิดปรับปรุง" แต่ Admin ยังคงเข้าใช้งานได้ปกติ</p></div>
                         </div>
                         <div class="p-2" id="settingsContainer"></div>
                     </div>
                 </div>
 
-                <!-- 7. หน้าประวัติการลบ (Audit Log - เฉพาะ Admin) -->
+                <!-- 6. หน้าประวัติการลบ (Audit Log - เฉพาะ Admin) -->
                 <div id="view-audit" class="max-w-5xl mx-auto hidden animate-fade-in pb-10">
                     <div class="bg-white rounded-2xl border border-red-200 shadow-sm overflow-hidden">
                         <div class="px-6 py-4 bg-red-50 border-b border-red-100 flex items-center">
@@ -537,12 +532,14 @@
                             <h2 class="text-lg font-bold text-red-800">ประวัติการลบข้อมูล (Audit Log)</h2>
                         </div>
                         <div class="p-6">
-                            <table class="w-full text-left text-sm text-gray-600">
-                                <thead class="bg-gray-50 text-xs text-gray-500 uppercase border-b border-gray-200">
-                                    <tr><th class="px-4 py-3">ประเภท</th><th class="px-4 py-3">ชื่อเรื่อง / ข้อมูล</th><th class="px-4 py-3">ลบโดย</th><th class="px-4 py-3">เวลาที่ลบ</th></tr>
-                                </thead>
-                                <tbody id="auditTableBody" class="divide-y divide-gray-100"></tbody>
-                            </table>
+                            <div class="overflow-x-auto border border-gray-100 rounded-xl">
+                                <table class="w-full text-left text-sm text-gray-600">
+                                    <thead class="bg-gray-50 text-xs text-gray-500 uppercase border-b border-gray-200">
+                                        <tr><th class="px-4 py-3">ประเภท</th><th class="px-4 py-3">ชื่อเรื่อง / ข้อมูล</th><th class="px-4 py-3">ลบโดย</th><th class="px-4 py-3">เวลาที่ลบ</th></tr>
+                                    </thead>
+                                    <tbody id="auditTableBody" class="divide-y divide-gray-100"></tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -553,9 +550,6 @@
 
     <!-- Scripts -->
     <script>
-        // ==========================================
-        // การตั้งค่า Supabase
-        // ==========================================
         const SUPABASE_URL = 'https://cjhbuqplwezklititoxt.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNqaGJ1cXBsd2V6a2xpdGl0b3h0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIxMjU4NDcsImV4cCI6MjA5NzcwMTg0N30.hUVV7JPoFUR0vk2FTYOPoR1cUipKSCBEPWdB11xTVGo';
         const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -567,7 +561,8 @@
         let allCurrentTasks = []; let activeStatusFilter = 'all'; let activeDateFilter = null; let currentDashboardView = 'all'; 
 
         const deptNames = { "อสพ": "เอกสารสัมพันธ์ (อสพ.)", "สมช": "ฝ่ายสมาชิกสัมพันธ์ (สมช.)", "สธส": "ฝ่ายสาธารณสุขสัมพันธ์ (สธส.)", "วนธ": "ฝ่ายวัฒนธรรม (วนธ.)", "กษส": "ฝ่ายเกษตรสัมพันธ์ (กษส.)", "ชสพ": "ฝ่ายชุมชนสัมพันธ์ (ชสพ.)", "กกส": "ฝ่ายกิจกรรมสัมพันธ์ (กกส.)", "ศสพ": "ฝ่ายศึกษาสัมพันธ์ (ศสพ.)", "อกป": "ฝ่ายอำนวยการและปฏิสัมพันธ์ (อกป.)" };
-        
+        const catNames = { "01": "ทั่วไป", "02": "รับรองกิจกรรม", "03": "รับรองสมาชิก", "04": "ลาเรียน", "05": "เยี่ยมชม", "06": "ขอข้อมูล", "07": "ขอเข้าพบ", "08": "ประชาสัมพันธ์", "09": "ขอเชิญเข้าร่วม" };
+
         google.charts.load('current', { 'packages': ['geochart'] });
 
         function renderSidebarMenu() {
@@ -584,7 +579,6 @@
             else { menu.classList.add('hidden'); arrow.classList.remove('rotate-180'); }
         }
 
-        // --- Login ---
         document.getElementById('passwordInput').addEventListener('keypress', function (e) { if (e.key === 'Enter') handleLogin(); });
         document.getElementById('userInput').addEventListener('keypress', function (e) { if (e.key === 'Enter') handleLogin(); });
 
@@ -624,17 +618,14 @@
 
             document.getElementById('userFullName').innerText = user.fullname; document.getElementById('userRole').innerText = roleDisplay; document.getElementById('userInitial').innerText = user.fullname.charAt(0);
             
-            // แสดงเมนู Management ถ้าเป็น Admin หรือ President
             if (['Administrator', 'President'].includes(user.role)) {
                 document.getElementById('managementMenuSection').classList.remove('hidden');
                 document.getElementById('addTemplateBtnUI').classList.remove('hidden');
             }
-            // แสดงเมนู Setting/Audit เฉพาะ Admin
             if (user.role === 'Administrator') {
                 document.getElementById('adminOnlyMenu').classList.remove('hidden');
             }
 
-            // ปุ่ม CSV ในหน้าสมาชิก โชว์เฉพาะ Admin, President หรือ คณะทำงาน สมช.
             if (['Administrator', 'President'].includes(user.role) || (user.role === 'Working Team' && user.department === 'สมช')) {
                 document.getElementById('csvUploadSection').classList.remove('hidden');
             }
@@ -648,8 +639,8 @@
             if (['document', 'dashboard', 'members', 'templates'].includes(viewName)) { 
                 if (systemSettings[viewName] === false && currentUser.role !== 'Administrator') targetView = 'maintenance'; 
             }
-            ['document', 'dashboard', 'audit', 'members', 'settings', 'maintenance', 'templates', 'users', 'history'].forEach(v => { const el = document.getElementById(`view-${v}`); if(el) { el.classList.add('hidden'); el.classList.remove('block', 'flex'); } });
-            ['document', 'members', 'audit', 'settings', 'templates', 'users', 'history'].forEach(nav => { const el = document.getElementById(`nav-${nav}`); if(el) { el.classList.replace('nav-active', 'nav-inactive'); el.classList.replace('bg-orange-50', 'border-transparent'); el.classList.replace('text-red-600', 'nav-inactive'); } });
+            ['document', 'dashboard', 'audit', 'members', 'settings', 'maintenance', 'templates', 'users'].forEach(v => { const el = document.getElementById(`view-${v}`); if(el) { el.classList.add('hidden'); el.classList.remove('block', 'flex'); } });
+            ['document', 'members', 'audit', 'settings', 'templates', 'users'].forEach(nav => { const el = document.getElementById(`nav-${nav}`); if(el) { el.classList.replace('nav-active', 'nav-inactive'); el.classList.replace('bg-orange-50', 'border-transparent'); el.classList.replace('text-red-600', 'nav-inactive'); } });
             
             const activeEl = document.getElementById(`view-${targetView}`); if(activeEl) { activeEl.classList.remove('hidden'); if(targetView === 'maintenance') activeEl.classList.add('flex'); else activeEl.classList.add('block'); }
             if (targetView !== 'maintenance') { const activeNav = document.getElementById(`nav-${viewName}`); if(activeNav) { if(viewName === 'audit') activeNav.classList.replace('nav-inactive', 'text-red-600'); else if(viewName !== 'dashboard') { activeNav.classList.replace('nav-inactive', 'nav-active'); activeNav.classList.replace('border-transparent', 'bg-orange-50'); } } }
@@ -663,8 +654,7 @@
             else if (targetView === 'audit') loadAuditLog();
             else if (targetView === 'settings') loadSettings();
             else if (targetView === 'templates') loadTemplates();
-            else if (targetView === 'users') loadUsers();
-            else if (targetView === 'history') loadHistoryLog();
+            else if (targetView === 'users') { loadUsers(); loadHistoryLog(); } // Load both when viewing Users page
         }
 
         function switchDashboardView(deptCode) {
@@ -685,68 +675,44 @@
 
         // --- User Management ---
         async function loadUsers() {
-            const tbody = document.getElementById('usersTableBody'); tbody.innerHTML = '<tr><td colspan="5" class="text-center py-5">กำลังโหลด...</td></tr>';
+            const tbody = document.getElementById('usersTableBody'); tbody.innerHTML = '<tr><td colspan="4" class="text-center py-5">กำลังโหลด...</td></tr>';
             try {
                 const {data, error} = await supabaseClient.from('users').select('*').order('role');
                 if (error) throw error;
                 tbody.innerHTML = '';
                 data.forEach(u => {
                     let badge = u.role === 'Administrator' ? 'bg-red-100 text-red-700' : (u.role === 'President' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700');
-                    tbody.innerHTML += `<tr><td class="px-6 py-4 font-mono text-sm">${u.username}</td><td class="px-6 py-4 font-bold text-gray-800">${u.fullname}</td><td class="px-6 py-4"><span class="px-2 py-1 rounded text-xs font-bold ${badge}">${u.role}</span></td><td class="px-6 py-4 text-sm">${u.department||'-'}</td><td class="px-6 py-4 text-right"><button onclick="editUser('${u.id}')" class="text-blue-600 mr-3 text-sm hover:underline">แก้ไข</button><button onclick="deleteUser('${u.id}', '${u.username}')" class="text-red-600 text-sm hover:underline">ลบ</button></td></tr>`;
+                    // Removed Edit and Delete buttons from HTML rendering
+                    tbody.innerHTML += `<tr class="hover:bg-gray-50"><td class="px-6 py-4 font-mono text-sm">${u.username}</td><td class="px-6 py-4 font-bold text-gray-800">${u.fullname}</td><td class="px-6 py-4"><span class="px-2 py-1 rounded text-xs font-bold ${badge}">${u.role}</span></td><td class="px-6 py-4 text-sm">${u.department||'-'}</td></tr>`;
                 });
             } catch (err) {
                 console.error(err);
-                tbody.innerHTML = '<tr><td colspan="5" class="text-center py-5 text-red-500">ไม่สามารถโหลดข้อมูลผู้ใช้ได้</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="4" class="text-center py-5 text-red-500">ไม่สามารถโหลดข้อมูลผู้ใช้ได้</td></tr>';
             }
         }
         function openUserModal() { document.getElementById('userForm').reset(); document.getElementById('u-id').value = ''; document.getElementById('userModal').classList.remove('hidden'); }
         function closeUserModal() { document.getElementById('userModal').classList.add('hidden'); }
-        async function editUser(id) {
-            try {
-                const {data, error} = await supabaseClient.from('users').select('*').eq('id', id).single();
-                if(error) throw error;
-                document.getElementById('u-id').value = data.id; document.getElementById('u-username').value = data.username; document.getElementById('u-password').value = data.password; document.getElementById('u-fullname').value = data.fullname; document.getElementById('u-role').value = data.role; document.getElementById('u-dept').value = data.department;
-                document.getElementById('userModal').classList.remove('hidden');
-            } catch (err) { alert('ไม่สามารถดึงข้อมูลได้'); }
-        }
         async function submitUser(e) {
-            e.preventDefault(); const id = document.getElementById('u-id').value;
+            e.preventDefault(); 
             const obj = { username: document.getElementById('u-username').value, password: document.getElementById('u-password').value, fullname: document.getElementById('u-fullname').value, role: document.getElementById('u-role').value, department: document.getElementById('u-dept').value };
             try {
-                if(id) { 
-                    const { error } = await supabaseClient.from('users').update(obj).eq('id', id); 
-                    if(error) throw error; alert('อัปเดตข้อมูลผู้ใช้สำเร็จ');
-                } else { 
-                    const { error } = await supabaseClient.from('users').insert([obj]); 
-                    if(error) throw error; alert('เพิ่มข้อมูลผู้ใช้สำเร็จ');
-                }
+                const { error } = await supabaseClient.from('users').insert([obj]); 
+                if(error) throw error; alert('เพิ่มข้อมูลผู้ใช้สำเร็จ');
                 closeUserModal(); loadUsers();
             } catch (err) { alert('เกิดข้อผิดพลาด: ' + err.message); }
         }
-        async function deleteUser(id, username) {
-            if(username === 'admin' || username === currentUser.username) return alert("ไม่สามารถลบบัญชีหลัก หรือบัญชีตัวเองได้");
-            if(confirm(`ยืนยันการลบผู้ใช้: ${username} ใช่หรือไม่?`)) { 
-                try {
-                    const { error } = await supabaseClient.from('users').delete().eq('id', id); 
-                    if (error) throw error;
-                    alert('ลบผู้ใช้สำเร็จ');
-                    loadUsers(); 
-                } catch(err) { alert('ลบไม่สำเร็จ: ' + err.message); }
-            }
-        }
 
-        // --- History Log ---
+        // --- History Log (Merged into Users page) ---
         async function loadHistoryLog() {
             const tbody = document.getElementById('historyTableBody'); tbody.innerHTML = '<tr><td colspan="4" class="text-center py-5">กำลังโหลด...</td></tr>';
             try {
-                // ดึงกิจกรรมที่ ไม่ใช่การลบ
-                const {data, error} = await supabaseClient.from('activities').select('*').not('action', 'ilike', '%ลบ%').order('created_at', {ascending: false});
+                const {data, error} = await supabaseClient.from('activities').select('*').order('created_at', {ascending: false}).limit(50);
                 if(error) throw error;
                 tbody.innerHTML = '';
                 if(data.length===0) return tbody.innerHTML = '<tr><td colspan="4" class="text-center py-5">ไม่มีประวัติ</td></tr>';
                 data.forEach(h => { 
                     let dptName = deptNames[h.department] || h.department;
-                    tbody.innerHTML += `<tr class="border-b"><td class="px-4 py-3 font-bold text-gray-800">${h.user_name} <span class="text-xs font-normal text-gray-500">(${dptName})</span></td><td class="px-4 py-3"><span class="bg-blue-50 text-blue-600 px-2 py-1 rounded text-xs">${h.action}</span></td><td class="px-4 py-3 text-sm text-gray-600">${h.details}</td><td class="px-4 py-3 text-xs text-gray-400">${new Date(h.created_at).toLocaleString('th-TH')}</td></tr>`; 
+                    tbody.innerHTML += `<tr class="border-b hover:bg-gray-50"><td class="px-4 py-3 font-bold text-gray-800">${h.user_name} <span class="text-xs font-normal text-gray-500">(${dptName})</span></td><td class="px-4 py-3"><span class="bg-blue-50 text-blue-600 px-2 py-1 rounded text-xs">${h.action}</span></td><td class="px-4 py-3 text-sm text-gray-600">${h.details}</td><td class="px-4 py-3 text-xs text-gray-400">${new Date(h.created_at).toLocaleString('th-TH')}</td></tr>`; 
                 });
             } catch (err) { tbody.innerHTML = '<tr><td colspan="4" class="text-center py-5 text-red-500">เกิดข้อผิดพลาดในการโหลดประวัติ</td></tr>'; }
         }
@@ -758,11 +724,9 @@
             reader.onload = async function(e) {
                 const text = e.target.result;
                 const rows = text.split('\n');
-                // Format: member_id, prefix, first_name, last_name, nickname, edu_level, province
                 const dataToInsert = [];
                 for(let i=1; i<rows.length; i++) {
                     if(!rows[i].trim()) continue;
-                    // แยกด้วย comma แบบเบสิค
                     const vals = rows[i].split(',');
                     dataToInsert.push({ member_id: vals[0]?.trim(), prefix: vals[1]?.trim(), first_name: vals[2]?.trim(), last_name: vals[3]?.trim(), nickname: vals[4]?.trim(), edu_level: vals[5]?.trim(), province: vals[6]?.trim() });
                 }
@@ -772,7 +736,7 @@
                     alert("นำเข้าข้อมูลสมาชิกสำเร็จ " + dataToInsert.length + " รายการ");
                     loadMembersData();
                 } catch(err) { alert("เกิดข้อผิดพลาดในการบันทึกข้อมูล: โปรดตรวจสอบฟอร์แมตไฟล์ CSV หรือตารางฐานข้อมูล"); }
-                document.getElementById('csvFileInput').value = ''; // รีเซ็ต input
+                document.getElementById('csvFileInput').value = '';
             };
             reader.readAsText(file);
         }
@@ -867,13 +831,15 @@
                 if (tId) { 
                     const { error } = await supabaseClient.from('tasks').update(tData).eq('id', tId); 
                     if (error) throw error;
+                    alert('บันทึกงานสำเร็จ');
                     logActivity(tData.status === 'completed' ? 'ทำภารกิจเสร็จสิ้น' : 'อัปเดตความคืบหน้า', `เรื่อง: ${tData.title}`); 
                 } else { 
                     const { error } = await supabaseClient.from('tasks').insert([tData]); 
                     if (error) throw error;
+                    alert('บันทึกงานสำเร็จ');
                     logActivity('เพิ่มงานใหม่', `เรื่อง: ${tData.title}`); 
                 } 
-                closeAddTaskModal(); alert('บันทึกงานสำเร็จ'); loadDashboardData(); 
+                closeAddTaskModal(); loadDashboardData(); 
             } catch (err) { alert('ข้อผิดพลาด: ' + err.message); } 
         }
         async function editTask(id) { 
@@ -911,22 +877,53 @@
                 
                 if (data && data.length > 0) {
                     data.forEach(d => {
+                        let catName = catNames[d.category] || d.category;
+                        let deptName = deptNames[d.department] || d.department;
+                        let docDateStr = '-';
+                        if(d.doc_date) {
+                            const dateObj = new Date(d.doc_date);
+                            docDateStr = dateObj.toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric' });
+                        }
+
                         const canEditDelete = ['Administrator', 'President'].includes(currentUser.role) || (currentUser.role === 'Working Team' && currentUser.department === d.department);
-                        let dBtn = canEditDelete ? `<button onclick="deleteDoc(${d.id}, '${d.title}')" class="text-red-500 bg-red-50 px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-red-500 hover:text-white transition-colors">ลบเอกสาร</button>` : '';
-                        let pdf = d.pdf_link && d.pdf_link !== "-" ? `<a href="${d.pdf_link}" target="_blank" class="bg-gray-800 text-white px-4 py-2 rounded-lg text-xs font-bold mt-3 inline-block">เปิดเอกสาร (PDF)</a>` : '';
+                        let delBtn = canEditDelete ? `<button onclick="deleteDoc(${d.id}, '${d.title}')" class="text-red-500 hover:text-red-700 text-xs font-bold px-3 py-1 bg-red-50 rounded-lg transition-colors">ลบเอกสาร</button>` : '';
                         
-                        let attentionTxt = d.attention ? `<p><span class="font-bold text-gray-800">เรียน:</span> ${d.attention}</p>` : '';
-                        let coordTxt = d.coordinator ? `<p><span class="font-bold text-gray-800">หน่วยงาน/ผู้ประสานงาน:</span> ${d.coordinator}</p>` : '';
+                        let pdfBtns = d.pdf_link && d.pdf_link !== "-" 
+                            ? `<a href="${d.pdf_link}" target="_blank" class="inline-flex items-center justify-center px-4 py-2 bg-orange-50 text-orange-600 hover:bg-orange-100 rounded-lg text-sm font-bold transition-colors mr-2"><svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg> ดูตัวอย่างเอกสาร</a><a href="${d.pdf_link}" target="_blank" class="inline-flex items-center justify-center px-4 py-2 bg-orange-500 text-white hover:bg-orange-600 rounded-lg text-sm font-bold transition-colors"><svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg> ดาวน์โหลด PDF</a>` 
+                            : '';
 
                         res.innerHTML += `
-                        <div class="bg-white rounded-2xl border p-6 mb-4 shadow-sm hover:border-orange-300 transition-colors">
-                            <div class="flex flex-col md:flex-row justify-between border-b border-gray-100 pb-3 mb-3 gap-4">
-                                <div><h3 class="text-lg font-bold text-gray-900">${d.title}</h3><p class="text-sm text-gray-500 mt-1">เลขที่: ${d.department}.${d.doc_id} | ลงวันที่: ${new Date(d.doc_date).toLocaleDateString('th-TH')}</p></div>
-                                <div>${dBtn}</div>
+                        <div class="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm hover:shadow-md transition-shadow mb-6">
+                            <div class="flex justify-between items-start mb-2">
+                                <div>
+                                    <span class="text-xs font-bold text-orange-600 bg-orange-50 px-2 py-1 rounded-md">หมวด: ${d.category} - ${catName}</span>
+                                    <h3 class="text-xl font-bold text-gray-900 mt-3 mb-1">${d.title}</h3>
+                                    <div class="flex items-center text-sm text-gray-500 gap-3">
+                                        <span>เลขที่: <span class="font-bold text-gray-800">${d.department}. ${d.doc_id}</span></span>
+                                        <span class="bg-gray-100 px-2 py-0.5 rounded text-xs">ลำดับอ้างอิง: ${d.id}</span>
+                                    </div>
+                                </div>
+                                <div class="text-right bg-gray-50 px-4 py-2 rounded-lg border border-gray-100">
+                                    <p class="text-xs text-gray-400 mb-0.5">วันที่ลงเอกสาร</p>
+                                    <p class="text-sm font-bold text-gray-800">${docDateStr}</p>
+                                </div>
                             </div>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm text-gray-600 mb-3">${attentionTxt}${coordTxt}</div>
-                            <div class="bg-gray-50 p-4 rounded-xl text-sm text-gray-600 border border-gray-100"><span class="font-bold text-gray-800 block mb-1">เนื้อหาโดยย่อ:</span>${d.content}</div>
-                            ${pdf}
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 my-6 text-sm text-gray-700">
+                                <div class="grid grid-cols-3 gap-2"><span class="text-gray-400">ฝ่าย:</span><span class="col-span-2 font-medium">${deptName}</span></div>
+                                <div class="grid grid-cols-3 gap-2"><span class="text-gray-400">เรียน:</span><span class="col-span-2 font-medium">${d.attention || '-'}</span></div>
+                                <div class="grid grid-cols-3 gap-2"><span class="text-gray-400">ผู้ประสานงาน:</span><span class="col-span-2 font-medium">${d.coordinator || '-'}</span></div>
+                            </div>
+
+                            <div class="mb-6">
+                                <p class="text-sm font-bold text-gray-800 mb-2">เนื้อหา:</p>
+                                <div class="bg-gray-50/50 border border-gray-200 rounded-xl p-4 text-sm text-gray-600 min-h-[60px] whitespace-pre-wrap">${d.content || '-'}</div>
+                            </div>
+
+                            <div class="flex justify-between items-center pt-2">
+                                <div class="flex gap-2">${pdfBtns}</div>
+                                <div>${delBtn}</div>
+                            </div>
                         </div>`;
                     });
                 } else {

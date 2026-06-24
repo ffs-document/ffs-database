@@ -17,14 +17,19 @@
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         .nav-active { @apply text-orange-600 font-bold bg-orange-50/50; }
         .nav-inactive { @apply text-gray-500 hover:text-orange-500 font-medium; }
-        .calendar-day { min-height: 100px; transition: all 0.2s ease; cursor: pointer; }
+        .calendar-day { min-height: 110px; transition: all 0.2s ease; cursor: pointer; }
         .calendar-day:hover { transform: scale(1.02); z-index: 10; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); border-color: #fbd38d; }
         .card-active { ring-2 ring-orange-500 bg-orange-50/30 transform scale-[1.02] shadow-md; border-color: #f97316 !important; }
         .toggle-checkbox:checked { right: 0; border-color: #f97316; }
         .toggle-checkbox:checked + .toggle-label { background-color: #f97316; }
     </style>
 </head>
-<body class="bg-gray-50 h-screen overflow-hidden text-gray-900 selection:bg-orange-200 selection:text-orange-900">
+<body class="bg-gray-50 h-screen overflow-hidden text-gray-900 selection:bg-orange-200 selection:text-orange-900 relative">
+
+    <!-- ========================================== -->
+    <!-- Custom Toast Notifications -->
+    <!-- ========================================== -->
+    <div id="toast-container" class="fixed top-6 right-6 z-[200] flex flex-col gap-3 pointer-events-none"></div>
 
     <!-- ========================================== -->
     <!-- หน้าต่างเข้าสู่ระบบ (Login Gate) -->
@@ -41,9 +46,8 @@
                     <p class="text-sm text-gray-500 mt-1">ระบบบริหารจัดการข้อมูลองค์กร</p>
                 </div>
                 <div class="space-y-4">
-                    <div><input type="text" id="userInput" placeholder="รหัสสมาชิก (ใช้ล็อกอิน)" class="block w-full px-4 py-2.5 border border-gray-300 rounded-xl bg-gray-50 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"></div>
+                    <div><input type="text" id="userInput" placeholder="รหัสสมาชิก (เช่น admin)" class="block w-full px-4 py-2.5 border border-gray-300 rounded-xl bg-gray-50 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"></div>
                     <div><input type="password" id="passwordInput" placeholder="รหัสผ่าน" class="block w-full px-4 py-2.5 border border-gray-300 rounded-xl bg-gray-50 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"></div>
-                    <div id="loginError" class="hidden text-[11px] text-red-600 bg-red-50 p-2 rounded-lg text-center border border-red-100"><span id="errorMessage"></span></div>
                     <button id="loginBtn" onclick="handleLogin()" class="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-2.5 rounded-xl text-sm transition-all shadow-xs"><span id="loginBtnText">เข้าสู่ระบบ</span></button>
                 </div>
             </div>
@@ -54,15 +58,56 @@
     <!-- Modals ต่างๆ -->
     <!-- ========================================== -->
     
-    <!-- Modal: จัดการผู้ใช้งาน (User Management) -->
+    <!-- Custom Confirm Modal -->
+    <div id="confirmModal" class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm z-[200] hidden flex items-center justify-center p-4 transition-opacity">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden animate-fade-in border border-gray-100">
+            <div class="p-6 text-center">
+                <div id="confirmIconContainer" class="w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                </div>
+                <h3 class="text-lg font-bold text-gray-900 mb-2" id="confirmTitle">ยืนยันการทำรายการ?</h3>
+                <p class="text-sm text-gray-500 mb-6" id="confirmMessage">คุณต้องการลบข้อมูลนี้ใช่หรือไม่?</p>
+                <div class="flex gap-3">
+                    <button onclick="closeConfirm()" class="flex-1 px-4 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl font-medium transition-colors">ยกเลิก</button>
+                    <button id="confirmBtn" class="flex-1 px-4 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-xl font-bold transition-colors shadow-sm">ยืนยัน</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: View Task Details (ดูรายละเอียดงาน) -->
+    <div id="viewTaskModal" class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm z-[110] hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-xl flex flex-col overflow-hidden animate-fade-in">
+            <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
+                <h3 class="text-lg font-bold text-gray-900 flex items-center"><svg class="w-5 h-5 mr-2 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>รายละเอียดงาน / ภารกิจ</h3>
+                <button onclick="closeViewTaskModal()" class="text-gray-400 hover:text-gray-600"><svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg></button>
+            </div>
+            <div class="p-6 space-y-5">
+                <div><p class="text-xs text-gray-400 font-bold mb-1 uppercase tracking-wider">ชื่องาน / กิจกรรม</p><p id="vt-title" class="text-base font-bold text-gray-900 bg-orange-50/50 border border-orange-100 p-3 rounded-lg"></p></div>
+                <div class="grid grid-cols-2 gap-5">
+                    <div><p class="text-xs text-gray-400 font-bold mb-1 uppercase tracking-wider">ฝ่ายที่รับผิดชอบ</p><p id="vt-dept" class="text-sm font-bold text-gray-800"></p></div>
+                    <div><p class="text-xs text-gray-400 font-bold mb-1 uppercase tracking-wider">สถานะ</p><div id="vt-status"></div></div>
+                    <div><p class="text-xs text-gray-400 font-bold mb-1 uppercase tracking-wider">ผู้รับผิดชอบหลัก</p><p id="vt-assignee" class="text-sm font-medium text-gray-800"></p></div>
+                    <div><p class="text-xs text-gray-400 font-bold mb-1 uppercase tracking-wider">กำหนดส่ง (Due Date)</p><p id="vt-due" class="text-sm font-medium text-gray-800"></p></div>
+                </div>
+                <div><p class="text-xs text-gray-400 font-bold mb-1 uppercase tracking-wider">รายละเอียด / บันทึกเพิ่มเติม</p><div id="vt-desc" class="text-sm font-medium text-gray-700 bg-gray-50 border border-gray-100 p-4 rounded-xl min-h-[100px] whitespace-pre-wrap"></div></div>
+            </div>
+            <div class="px-6 py-4 border-t border-gray-100 bg-gray-50 flex justify-end">
+                <button onclick="closeViewTaskModal()" class="px-6 py-2.5 text-sm font-bold text-gray-700 bg-white border border-gray-200 hover:bg-gray-100 rounded-xl transition-colors shadow-sm">ปิดหน้าต่าง</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal: จัดการผู้ใช้งาน -->
     <div id="userModal" class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm z-[110] hidden flex items-center justify-center p-4">
         <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden animate-fade-in">
             <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
-                <h3 class="text-lg font-bold text-gray-900">เพิ่มผู้ใช้ใหม่ในระบบ</h3>
+                <h3 class="text-lg font-bold text-gray-900">จัดการข้อมูลผู้ใช้</h3>
                 <button onclick="closeUserModal()" class="text-gray-400 hover:text-gray-600"><svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg></button>
             </div>
             <div class="p-6">
                 <form id="userForm" onsubmit="submitUser(event)" class="space-y-4">
+                    <input type="hidden" id="u-id">
                     <div><label class="block text-xs font-medium text-gray-700 mb-1">รหัสสมาชิก (ใช้สำหรับล็อกอิน) *</label><input type="text" id="u-username" required class="w-full px-3 py-2 border rounded-lg text-sm bg-gray-50 focus:ring-2 focus:ring-orange-500 outline-none"></div>
                     <div><label class="block text-xs font-medium text-gray-700 mb-1">รหัสผ่าน *</label><input type="text" id="u-password" required class="w-full px-3 py-2 border rounded-lg text-sm bg-gray-50 focus:ring-2 focus:ring-orange-500 outline-none"></div>
                     <div><label class="block text-xs font-medium text-gray-700 mb-1">ชื่อ-นามสกุล *</label><input type="text" id="u-fullname" required class="w-full px-3 py-2 border rounded-lg text-sm bg-gray-50 focus:ring-2 focus:ring-orange-500 outline-none"></div>
@@ -79,9 +124,9 @@
                             <label class="block text-xs font-medium text-gray-700 mb-1">ฝ่าย *</label>
                             <select id="u-dept" required class="w-full px-3 py-2 border rounded-lg text-sm bg-gray-50 outline-none">
                                 <option value="ทั้งหมด">ทั้งหมด (Admin/Pres)</option>
-                                <option value="อสพ">อสพ.</option><option value="สมช">สมช.</option><option value="สธส">สธส.</option>
-                                <option value="วนธ">วนธ.</option><option value="กษส">กษส.</option><option value="ชสพ">ชสพ.</option>
-                                <option value="กกส">กกส.</option><option value="ศสพ">ศสพ.</option><option value="อกป">อกป.</option>
+                                <option value="อสพ">เอกสารสัมพันธ์ (อสพ.)</option><option value="สมช">ฝ่ายสมาชิกสัมพันธ์ (สมช.)</option><option value="สธส">ฝ่ายสาธารณสุขสัมพันธ์ (สธส.)</option>
+                                <option value="วนธ">ฝ่ายวัฒนธรรม (วนธ.)</option><option value="กษส">ฝ่ายเกษตรสัมพันธ์ (กษส.)</option><option value="ชสพ">ฝ่ายชุมชนสัมพันธ์ (ชสพ.)</option>
+                                <option value="กกส">ฝ่ายกิจกรรมสัมพันธ์ (กกส.)</option><option value="ศสพ">ฝ่ายศึกษาสัมพันธ์ (ศสพ.)</option><option value="อกป">ฝ่ายอำนวยการและปฏิสัมพันธ์ (อกป.)</option>
                             </select>
                         </div>
                     </div>
@@ -150,7 +195,6 @@
         </div>
     </div>
 
-    <!-- Modal: เพิ่มเอกสารอ้างอิง -->
     <div id="addDocModal" class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm z-[110] hidden flex items-center justify-center p-4">
         <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden animate-fade-in">
             <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
@@ -193,7 +237,6 @@
         </div>
     </div>
 
-    <!-- Modal: จัดการงาน -->
     <div id="addTaskModal" class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm z-[110] hidden flex items-center justify-center p-4">
         <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg flex flex-col overflow-hidden animate-fade-in">
             <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
@@ -219,9 +262,15 @@
                         <div><label class="block text-xs font-medium text-gray-700 mb-1">ผู้รับผิดชอบ</label><input type="text" id="taskAssignee" class="w-full px-3 py-2 border rounded-lg text-sm"></div>
                         <div><label class="block text-xs font-medium text-gray-700 mb-1">กำหนดส่ง</label><input type="date" id="taskDueDate" class="w-full px-3 py-2 border rounded-lg text-sm"></div>
                     </div>
+                    
+                    <div class="md:col-span-2">
+                        <label class="block text-xs font-medium text-gray-700 mb-1">รายละเอียดงาน</label>
+                        <textarea id="taskDesc" rows="3" class="w-full px-3 py-2 border rounded-lg text-sm bg-gray-50 focus:ring-2 focus:ring-orange-500 outline-none" placeholder="ระบุรายละเอียดของงาน..."></textarea>
+                    </div>
+
                     <div class="mt-6 flex justify-end gap-3 pt-4 border-t border-gray-100">
-                        <button type="button" onclick="closeAddTaskModal()" class="px-5 py-2 text-sm bg-gray-100 rounded-lg">ยกเลิก</button>
-                        <button type="submit" id="saveTaskBtn" class="px-5 py-2 text-sm font-bold text-white bg-orange-500 rounded-lg">บันทึกงาน</button>
+                        <button type="button" onclick="closeAddTaskModal()" class="px-5 py-2 text-sm bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors">ยกเลิก</button>
+                        <button type="submit" id="saveTaskBtn" class="px-5 py-2 text-sm font-bold text-white bg-orange-500 hover:bg-orange-600 rounded-lg transition-colors">บันทึกงาน</button>
                     </div>
                 </form>
             </div>
@@ -276,7 +325,10 @@
                         <svg class="w-5 h-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
                         <span class="text-sm">จัดการผู้ใช้งาน</span>
                     </a>
-                    
+                    <a href="#" onclick="switchView('history')" id="nav-history" class="flex items-center px-6 py-2.5 nav-inactive border-r-4 border-transparent hover:bg-gray-50 transition-all">
+                        <svg class="w-5 h-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                        <span class="text-sm">ประวัติการทำงาน (Log)</span>
+                    </a>
                     <div id="adminOnlyMenu" class="hidden">
                         <a href="#" onclick="switchView('settings')" id="nav-settings" class="flex items-center px-6 py-2.5 nav-inactive border-r-4 border-transparent hover:bg-gray-50 hover:text-orange-500 transition-all">
                             <svg class="w-5 h-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /></svg>
@@ -330,9 +382,6 @@
                         <div class="flex flex-col sm:flex-row gap-3">
                             <select id="docDepartment" class="w-full sm:w-1/4 px-3 py-2.5 border border-gray-300 rounded-xl bg-gray-50 text-sm focus:ring-2 focus:ring-orange-500 outline-none">
                                 <option value="">ทุกฝ่าย (All)</option><option value="อสพ">เอกสารสัมพันธ์ (อสพ.)</option><option value="สมช">ฝ่ายสมาชิกสัมพันธ์ (สมช.)</option><option value="สธส">ฝ่ายสาธารณสุขสัมพันธ์ (สธส.)</option><option value="วนธ">ฝ่ายวัฒนธรรม (วนธ.)</option><option value="กษส">ฝ่ายเกษตรสัมพันธ์ (กษส.)</option><option value="ชสพ">ฝ่ายชุมชนสัมพันธ์ (ชสพ.)</option><option value="กกส">ฝ่ายกิจกรรมสัมพันธ์ (กกส.)</option><option value="ศสพ">ฝ่ายศึกษาสัมพันธ์ (ศสพ.)</option><option value="อกป">ฝ่ายอำนวยการและปฏิสัมพันธ์ (อกป.)</option>
-                            </select>
-                            <select id="docCategory" class="w-full sm:w-1/4 px-3 py-2.5 border border-gray-300 rounded-xl bg-gray-50 text-sm focus:ring-2 focus:ring-orange-500 outline-none">
-                                <option value="">ทุกหมวดหมู่ (All)</option><option value="01">01 - ทั่วไป</option><option value="02">02 - รับรองกิจกรรม</option><option value="03">03 - รับรองสมาชิก</option><option value="04">04 - ลาเรียน</option><option value="05">05 - เยี่ยมชม</option><option value="06">06 - ขอข้อมูล</option><option value="07">07 - ขอเข้าพบ</option><option value="08">08 - ประชาสัมพันธ์</option><option value="09">09 - ขอเชิญเข้าร่วม</option>
                             </select>
                             <input type="text" id="docSearchInput" placeholder="เลขเอกสาร หรือ ชื่อเรื่อง..." class="w-full flex-grow px-4 py-2.5 border border-gray-300 rounded-xl bg-gray-50 text-sm focus:ring-2 focus:ring-orange-500 outline-none">
                             <button onclick="searchDocument()" class="w-full sm:w-auto bg-gray-800 hover:bg-gray-900 text-white font-medium px-6 py-2.5 rounded-xl text-sm transition-all shadow-xs">ค้นหา</button>
@@ -417,7 +466,7 @@
                             <p class="text-sm text-gray-500">ข้อมูลสถิติภาพรวมระดับการศึกษา และภูมิลำเนาของสมาชิก</p>
                         </div>
                         <div class="flex gap-2">
-                            <!-- ปุ่มอัปโหลด CSV (โชว์เฉพาะ Admin, President, หรือ ฝ่ายสมช.) -->
+                            <!-- ปุ่มอัปโหลด CSV -->
                             <div id="csvUploadSection" class="hidden">
                                 <input type="file" id="csvFileInput" accept=".csv" class="hidden" onchange="handleCSVUpload(event)">
                                 <button onclick="document.getElementById('csvFileInput').click()" class="bg-green-600 hover:bg-green-700 text-white text-sm font-bold px-4 py-2.5 rounded-lg shadow-sm flex items-center transition-colors">
@@ -477,32 +526,32 @@
                     </div>
                 </div>
 
-                <!-- 4. หน้า จัดการผู้ใช้งานและประวัติ (รวมกัน) -->
-                <div id="view-users" class="max-w-6xl mx-auto hidden animate-fade-in pb-10">
+                <!-- 4. หน้า จัดการผู้ใช้งาน (User Management) -->
+                <div id="view-users" class="max-w-5xl mx-auto hidden animate-fade-in pb-10">
                     <div class="flex justify-between items-center mb-6">
-                        <div><h2 class="text-2xl font-bold text-gray-900">จัดการผู้ใช้งานและประวัติการทำงาน</h2><p class="text-sm text-gray-500">ดูรายชื่อผู้ใช้ เพิ่มผู้ใช้ใหม่ และตรวจสอบประวัติการทำงาน</p></div>
+                        <div><h2 class="text-2xl font-bold text-gray-900">จัดการข้อมูลผู้ใช้งาน</h2><p class="text-sm text-gray-500">เพิ่ม ลบ และปรับปรุงสิทธิ์การเข้าใช้งานระบบ</p></div>
                         <button onclick="openUserModal()" class="bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold px-4 py-2.5 rounded-lg shadow-sm">+ เพิ่มผู้ใช้งาน</button>
                     </div>
-                    
-                    <div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden mb-8">
-                        <div class="px-6 py-4 bg-gray-50 border-b border-gray-200"><h3 class="text-sm font-bold text-gray-800">รายชื่อผู้ใช้งานในระบบ</h3></div>
+                    <div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
                         <div class="overflow-x-auto">
                             <table class="w-full text-left text-sm text-gray-600">
-                                <thead class="bg-white text-xs text-gray-400 uppercase border-b border-gray-100">
-                                    <tr><th class="px-6 py-3">รหัสสมาชิก (ล็อกอิน)</th><th class="px-6 py-3">ชื่อ-นามสกุล</th><th class="px-6 py-3">สิทธิ์ (Role)</th><th class="px-6 py-3">ฝ่าย</th></tr>
+                                <thead class="bg-gray-50 text-xs text-gray-500 uppercase border-b border-gray-200">
+                                    <tr><th class="px-6 py-3">รหัสสมาชิก</th><th class="px-6 py-3">ชื่อ-นามสกุล</th><th class="px-6 py-3">สิทธิ์ (Role)</th><th class="px-6 py-3">ฝ่าย</th><th class="px-6 py-3 text-right">จัดการ</th></tr>
                                 </thead>
-                                <tbody id="usersTableBody" class="divide-y divide-gray-50"></tbody>
+                                <tbody id="usersTableBody" class="divide-y divide-gray-100"></tbody>
                             </table>
                         </div>
                     </div>
+                </div>
 
-                    <!-- ตารางประวัติ (ย้ายมาจากหน้า history เดิม) -->
+                <!-- 5. หน้า ประวัติการทำงาน (History Log) -->
+                <div id="view-history" class="max-w-5xl mx-auto hidden animate-fade-in pb-10">
                     <div class="bg-white rounded-2xl border border-blue-200 shadow-sm overflow-hidden">
                         <div class="px-6 py-4 bg-blue-50 border-b border-blue-100 flex items-center">
                             <svg class="w-6 h-6 text-blue-600 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                            <h2 class="text-lg font-bold text-blue-800">ประวัติการปฏิบัติงานโดยรวม (Update History)</h2>
+                            <h2 class="text-lg font-bold text-blue-800">ประวัติการปฏิบัติงาน (Update History)</h2>
                         </div>
-                        <div class="p-6 overflow-x-auto">
+                        <div class="p-6">
                             <table class="w-full text-left text-sm text-gray-600">
                                 <thead class="bg-gray-50 text-xs text-gray-500 uppercase border-b border-gray-200">
                                     <tr><th class="px-4 py-3">ผู้ดำเนินการ</th><th class="px-4 py-3">การกระทำ</th><th class="px-4 py-3">รายละเอียด</th><th class="px-4 py-3">เวลา</th></tr>
@@ -513,18 +562,18 @@
                     </div>
                 </div>
 
-                <!-- 5. หน้า ตั้งค่าโมดูลระบบ (Admin Settings) -->
+                <!-- 6. หน้า ตั้งค่าโมดูลระบบ (Admin Settings) -->
                 <div id="view-settings" class="max-w-4xl mx-auto hidden animate-fade-in pb-10">
                     <div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden mb-6">
                         <div class="px-6 py-5 bg-gray-50 border-b border-gray-200 flex items-center">
                             <div class="w-10 h-10 bg-gray-200 rounded-full flex justify-center items-center mr-3 text-gray-600"><svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /></svg></div>
-                            <div><h2 class="text-lg font-bold text-gray-900">ตั้งค่าเปิด-ปิด โมดูลระบบ (Maintenance Mode)</h2><p class="text-xs text-gray-500">หากปิดการใช้งาน ผู้ใช้ทั่วไปจะเห็นหน้าจอ "ปิดปรับปรุง" แต่ Admin ยังคงเข้าใช้งานได้ปกติ</p></div>
+                            <div><h2 class="text-lg font-bold text-gray-900">ตั้งค่าเปิด-ปิด โมดูลระบบ (Maintenance Mode)</h2><p class="text-xs text-gray-500">หากปิดการใช้งาน ผู้ใช้ทั่วไปจะเห็นหน้าจอ "ปิดปรับปรุง"</p></div>
                         </div>
                         <div class="p-2" id="settingsContainer"></div>
                     </div>
                 </div>
 
-                <!-- 6. หน้าประวัติการลบ (Audit Log - เฉพาะ Admin) -->
+                <!-- 7. หน้าประวัติการลบ (Audit Log - เฉพาะ Admin) -->
                 <div id="view-audit" class="max-w-5xl mx-auto hidden animate-fade-in pb-10">
                     <div class="bg-white rounded-2xl border border-red-200 shadow-sm overflow-hidden">
                         <div class="px-6 py-4 bg-red-50 border-b border-red-100 flex items-center">
@@ -532,14 +581,12 @@
                             <h2 class="text-lg font-bold text-red-800">ประวัติการลบข้อมูล (Audit Log)</h2>
                         </div>
                         <div class="p-6">
-                            <div class="overflow-x-auto border border-gray-100 rounded-xl">
-                                <table class="w-full text-left text-sm text-gray-600">
-                                    <thead class="bg-gray-50 text-xs text-gray-500 uppercase border-b border-gray-200">
-                                        <tr><th class="px-4 py-3">ประเภท</th><th class="px-4 py-3">ชื่อเรื่อง / ข้อมูล</th><th class="px-4 py-3">ลบโดย</th><th class="px-4 py-3">เวลาที่ลบ</th></tr>
-                                    </thead>
-                                    <tbody id="auditTableBody" class="divide-y divide-gray-100"></tbody>
-                                </table>
-                            </div>
+                            <table class="w-full text-left text-sm text-gray-600">
+                                <thead class="bg-gray-50 text-xs text-gray-500 uppercase border-b border-gray-200">
+                                    <tr><th class="px-4 py-3">ประเภท</th><th class="px-4 py-3">ชื่อเรื่อง / ข้อมูล</th><th class="px-4 py-3">ลบโดย</th><th class="px-4 py-3">เวลาที่ลบ</th></tr>
+                                </thead>
+                                <tbody id="auditTableBody" class="divide-y divide-gray-100"></tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
@@ -561,9 +608,47 @@
         let allCurrentTasks = []; let activeStatusFilter = 'all'; let activeDateFilter = null; let currentDashboardView = 'all'; 
 
         const deptNames = { "อสพ": "เอกสารสัมพันธ์ (อสพ.)", "สมช": "ฝ่ายสมาชิกสัมพันธ์ (สมช.)", "สธส": "ฝ่ายสาธารณสุขสัมพันธ์ (สธส.)", "วนธ": "ฝ่ายวัฒนธรรม (วนธ.)", "กษส": "ฝ่ายเกษตรสัมพันธ์ (กษส.)", "ชสพ": "ฝ่ายชุมชนสัมพันธ์ (ชสพ.)", "กกส": "ฝ่ายกิจกรรมสัมพันธ์ (กกส.)", "ศสพ": "ฝ่ายศึกษาสัมพันธ์ (ศสพ.)", "อกป": "ฝ่ายอำนวยการและปฏิสัมพันธ์ (อกป.)" };
-        const catNames = { "01": "ทั่วไป", "02": "รับรองกิจกรรม", "03": "รับรองสมาชิก", "04": "ลาเรียน", "05": "เยี่ยมชม", "06": "ขอข้อมูล", "07": "ขอเข้าพบ", "08": "ประชาสัมพันธ์", "09": "ขอเชิญเข้าร่วม" };
-
+        
         google.charts.load('current', { 'packages': ['geochart'] });
+
+        // --- Custom Notifications & Modals ---
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            const colorClass = type === 'success' ? 'bg-emerald-500' : (type === 'error' ? 'bg-red-500' : 'bg-blue-500');
+            const icon = type === 'success' ? '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />' : '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />';
+            
+            toast.className = `flex items-center gap-3 px-4 py-3 rounded-xl text-white shadow-lg transform transition-all duration-300 translate-x-full opacity-0 ${colorClass}`;
+            toast.innerHTML = `<svg class="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">${icon}</svg><p class="text-sm font-medium">${message}</p>`;
+            
+            container.appendChild(toast);
+            requestAnimationFrame(() => { toast.classList.remove('translate-x-full', 'opacity-0'); });
+            setTimeout(() => { toast.classList.add('opacity-0', 'translate-x-full'); setTimeout(() => toast.remove(), 300); }, 3000);
+        }
+
+        let confirmActionCallback = null;
+        function showConfirm(title, message, callback) {
+            document.getElementById('confirmTitle').innerText = title;
+            document.getElementById('confirmMessage').innerText = message;
+            confirmActionCallback = callback;
+            document.getElementById('confirmModal').classList.remove('hidden');
+            document.getElementById('confirmModal').classList.add('flex');
+            // short delay for fade in
+            setTimeout(() => { document.getElementById('confirmModal').classList.remove('opacity-0'); }, 10);
+        }
+        function closeConfirm() {
+            document.getElementById('confirmModal').classList.add('opacity-0');
+            setTimeout(() => {
+                document.getElementById('confirmModal').classList.add('hidden');
+                document.getElementById('confirmModal').classList.remove('flex');
+                confirmActionCallback = null;
+            }, 200);
+        }
+        document.getElementById('confirmBtn').addEventListener('click', () => {
+            if (confirmActionCallback) confirmActionCallback();
+            closeConfirm();
+        });
+
 
         function renderSidebarMenu() {
             const menuContainer = document.getElementById('dynamicDeptMenu');
@@ -579,24 +664,20 @@
             else { menu.classList.add('hidden'); arrow.classList.remove('rotate-180'); }
         }
 
+        // --- Login ---
         document.getElementById('passwordInput').addEventListener('keypress', function (e) { if (e.key === 'Enter') handleLogin(); });
         document.getElementById('userInput').addEventListener('keypress', function (e) { if (e.key === 'Enter') handleLogin(); });
 
         async function handleLogin() {
             const u = document.getElementById('userInput').value.trim(); const p = document.getElementById('passwordInput').value.trim();
             if (!u || !p) return; document.getElementById('loginBtnText').innerText = 'ตรวจสอบ...';
-            try {
-                const { data, error } = await supabaseClient.from('users').select('*').eq('username', u).eq('password', p);
-                if (error) throw error;
-                if(data && data.length > 0) { 
-                    const userData = { ...data[0], loginTime: new Date().getTime() };
-                    localStorage.setItem('ffsUser', JSON.stringify(userData)); 
-                    showMainSystem(userData); 
-                }
-                else { document.getElementById('errorMessage').innerText = "รหัสผิดพลาด"; document.getElementById('loginError').classList.remove('hidden'); document.getElementById('loginBtnText').innerText = 'เข้าสู่ระบบ'; }
-            } catch (err) {
-                document.getElementById('errorMessage').innerText = "เกิดข้อผิดพลาดในการเชื่อมต่อ"; document.getElementById('loginError').classList.remove('hidden'); document.getElementById('loginBtnText').innerText = 'เข้าสู่ระบบ';
+            const { data, error } = await supabaseClient.from('users').select('*').eq('username', u).eq('password', p);
+            if(data && data.length > 0) { 
+                const userData = { ...data[0], loginTime: new Date().getTime() };
+                localStorage.setItem('ffsUser', JSON.stringify(userData)); 
+                showMainSystem(userData); 
             }
+            else { showToast("รหัสผิดพลาด", "error"); document.getElementById('loginBtnText').innerText = 'เข้าสู่ระบบ'; }
         }
 
         window.addEventListener('DOMContentLoaded', () => { 
@@ -625,7 +706,6 @@
             if (user.role === 'Administrator') {
                 document.getElementById('adminOnlyMenu').classList.remove('hidden');
             }
-
             if (['Administrator', 'President'].includes(user.role) || (user.role === 'Working Team' && user.department === 'สมช')) {
                 document.getElementById('csvUploadSection').classList.remove('hidden');
             }
@@ -639,8 +719,8 @@
             if (['document', 'dashboard', 'members', 'templates'].includes(viewName)) { 
                 if (systemSettings[viewName] === false && currentUser.role !== 'Administrator') targetView = 'maintenance'; 
             }
-            ['document', 'dashboard', 'audit', 'members', 'settings', 'maintenance', 'templates', 'users'].forEach(v => { const el = document.getElementById(`view-${v}`); if(el) { el.classList.add('hidden'); el.classList.remove('block', 'flex'); } });
-            ['document', 'members', 'audit', 'settings', 'templates', 'users'].forEach(nav => { const el = document.getElementById(`nav-${nav}`); if(el) { el.classList.replace('nav-active', 'nav-inactive'); el.classList.replace('bg-orange-50', 'border-transparent'); el.classList.replace('text-red-600', 'nav-inactive'); } });
+            ['document', 'dashboard', 'audit', 'members', 'settings', 'maintenance', 'templates', 'users', 'history'].forEach(v => { const el = document.getElementById(`view-${v}`); if(el) { el.classList.add('hidden'); el.classList.remove('block', 'flex'); } });
+            ['document', 'members', 'audit', 'settings', 'templates', 'users', 'history'].forEach(nav => { const el = document.getElementById(`nav-${nav}`); if(el) { el.classList.replace('nav-active', 'nav-inactive'); el.classList.replace('bg-orange-50', 'border-transparent'); el.classList.replace('text-red-600', 'nav-inactive'); } });
             
             const activeEl = document.getElementById(`view-${targetView}`); if(activeEl) { activeEl.classList.remove('hidden'); if(targetView === 'maintenance') activeEl.classList.add('flex'); else activeEl.classList.add('block'); }
             if (targetView !== 'maintenance') { const activeNav = document.getElementById(`nav-${viewName}`); if(activeNav) { if(viewName === 'audit') activeNav.classList.replace('nav-inactive', 'text-red-600'); else if(viewName !== 'dashboard') { activeNav.classList.replace('nav-inactive', 'nav-active'); activeNav.classList.replace('border-transparent', 'bg-orange-50'); } } }
@@ -654,7 +734,8 @@
             else if (targetView === 'audit') loadAuditLog();
             else if (targetView === 'settings') loadSettings();
             else if (targetView === 'templates') loadTemplates();
-            else if (targetView === 'users') { loadUsers(); loadHistoryLog(); } // Load both when viewing Users page
+            else if (targetView === 'users') loadUsers();
+            else if (targetView === 'history') loadHistoryLog();
         }
 
         function switchDashboardView(deptCode) {
@@ -675,44 +756,63 @@
 
         // --- User Management ---
         async function loadUsers() {
-            const tbody = document.getElementById('usersTableBody'); tbody.innerHTML = '<tr><td colspan="4" class="text-center py-5">กำลังโหลด...</td></tr>';
+            const tbody = document.getElementById('usersTableBody'); tbody.innerHTML = '<tr><td colspan="5" class="text-center py-5">กำลังโหลด...</td></tr>';
             try {
                 const {data, error} = await supabaseClient.from('users').select('*').order('role');
                 if (error) throw error;
                 tbody.innerHTML = '';
                 data.forEach(u => {
                     let badge = u.role === 'Administrator' ? 'bg-red-100 text-red-700' : (u.role === 'President' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700');
-                    // Removed Edit and Delete buttons from HTML rendering
-                    tbody.innerHTML += `<tr class="hover:bg-gray-50"><td class="px-6 py-4 font-mono text-sm">${u.username}</td><td class="px-6 py-4 font-bold text-gray-800">${u.fullname}</td><td class="px-6 py-4"><span class="px-2 py-1 rounded text-xs font-bold ${badge}">${u.role}</span></td><td class="px-6 py-4 text-sm">${u.department||'-'}</td></tr>`;
+                    let deptDisp = u.department === 'ทั้งหมด' ? 'ทั้งหมด (Admin/Pres)' : (deptNames[u.department] || u.department);
+                    tbody.innerHTML += `<tr><td class="px-6 py-4 font-mono text-sm">${u.username}</td><td class="px-6 py-4 font-bold text-gray-800">${u.fullname}</td><td class="px-6 py-4"><span class="px-2 py-1 rounded text-xs font-bold ${badge}">${u.role}</span></td><td class="px-6 py-4 text-sm">${deptDisp}</td><td class="px-6 py-4 text-right"><button onclick="editUser('${u.id}')" class="text-blue-600 mr-3 text-sm hover:underline">แก้ไข</button><button onclick="deleteUser('${u.id}', '${u.username}')" class="text-red-600 text-sm hover:underline">ลบ</button></td></tr>`;
                 });
-            } catch (err) {
-                console.error(err);
-                tbody.innerHTML = '<tr><td colspan="4" class="text-center py-5 text-red-500">ไม่สามารถโหลดข้อมูลผู้ใช้ได้</td></tr>';
-            }
+            } catch (err) { tbody.innerHTML = '<tr><td colspan="5" class="text-center py-5 text-red-500">ไม่สามารถโหลดข้อมูลผู้ใช้ได้</td></tr>'; }
         }
         function openUserModal() { document.getElementById('userForm').reset(); document.getElementById('u-id').value = ''; document.getElementById('userModal').classList.remove('hidden'); }
         function closeUserModal() { document.getElementById('userModal').classList.add('hidden'); }
+        async function editUser(id) {
+            try {
+                const {data, error} = await supabaseClient.from('users').select('*').eq('id', id).single();
+                if(error) throw error;
+                document.getElementById('u-id').value = data.id; document.getElementById('u-username').value = data.username; document.getElementById('u-password').value = data.password; document.getElementById('u-fullname').value = data.fullname; document.getElementById('u-role').value = data.role; document.getElementById('u-dept').value = data.department;
+                document.getElementById('userModal').classList.remove('hidden');
+            } catch (err) { showToast('ไม่สามารถดึงข้อมูลได้', 'error'); }
+        }
         async function submitUser(e) {
-            e.preventDefault(); 
+            e.preventDefault(); const id = document.getElementById('u-id').value;
             const obj = { username: document.getElementById('u-username').value, password: document.getElementById('u-password').value, fullname: document.getElementById('u-fullname').value, role: document.getElementById('u-role').value, department: document.getElementById('u-dept').value };
             try {
-                const { error } = await supabaseClient.from('users').insert([obj]); 
-                if(error) throw error; alert('เพิ่มข้อมูลผู้ใช้สำเร็จ');
+                if(id) { 
+                    const { error } = await supabaseClient.from('users').update(obj).eq('id', id); 
+                    if(error) throw error; showToast('อัปเดตข้อมูลผู้ใช้สำเร็จ');
+                } else { 
+                    const { error } = await supabaseClient.from('users').insert([obj]); 
+                    if(error) throw error; showToast('เพิ่มข้อมูลผู้ใช้สำเร็จ');
+                }
                 closeUserModal(); loadUsers();
-            } catch (err) { alert('เกิดข้อผิดพลาด: ' + err.message); }
+            } catch (err) { showToast('เกิดข้อผิดพลาด: ' + err.message, 'error'); }
+        }
+        async function deleteUser(id, username) {
+            if(username === 'admin' || username === currentUser.username) return showToast("ไม่สามารถลบบัญชีหลัก หรือบัญชีตัวเองได้", "error");
+            showConfirm('ลบผู้ใช้', `ยืนยันการลบผู้ใช้: ${username} ใช่หรือไม่?`, async () => {
+                try {
+                    const { error } = await supabaseClient.from('users').delete().eq('id', id); 
+                    if (error) throw error;
+                    showToast('ลบผู้ใช้สำเร็จ'); loadUsers(); 
+                } catch(err) { showToast('ลบไม่สำเร็จ: ' + err.message, 'error'); }
+            });
         }
 
-        // --- History Log (Merged into Users page) ---
+        // --- History Log ---
         async function loadHistoryLog() {
             const tbody = document.getElementById('historyTableBody'); tbody.innerHTML = '<tr><td colspan="4" class="text-center py-5">กำลังโหลด...</td></tr>';
             try {
-                const {data, error} = await supabaseClient.from('activities').select('*').order('created_at', {ascending: false}).limit(50);
-                if(error) throw error;
-                tbody.innerHTML = '';
+                const {data, error} = await supabaseClient.from('activities').select('*').not('action', 'ilike', '%ลบ%').order('created_at', {ascending: false});
+                if(error) throw error; tbody.innerHTML = '';
                 if(data.length===0) return tbody.innerHTML = '<tr><td colspan="4" class="text-center py-5">ไม่มีประวัติ</td></tr>';
                 data.forEach(h => { 
                     let dptName = deptNames[h.department] || h.department;
-                    tbody.innerHTML += `<tr class="border-b hover:bg-gray-50"><td class="px-4 py-3 font-bold text-gray-800">${h.user_name} <span class="text-xs font-normal text-gray-500">(${dptName})</span></td><td class="px-4 py-3"><span class="bg-blue-50 text-blue-600 px-2 py-1 rounded text-xs">${h.action}</span></td><td class="px-4 py-3 text-sm text-gray-600">${h.details}</td><td class="px-4 py-3 text-xs text-gray-400">${new Date(h.created_at).toLocaleString('th-TH')}</td></tr>`; 
+                    tbody.innerHTML += `<tr class="border-b"><td class="px-4 py-3 font-bold text-gray-800">${h.user_name} <span class="text-xs font-normal text-gray-500">(${dptName})</span></td><td class="px-4 py-3"><span class="bg-blue-50 text-blue-600 px-2 py-1 rounded text-xs">${h.action}</span></td><td class="px-4 py-3 text-sm text-gray-600">${h.details}</td><td class="px-4 py-3 text-xs text-gray-400">${new Date(h.created_at).toLocaleString('th-TH')}</td></tr>`; 
                 });
             } catch (err) { tbody.innerHTML = '<tr><td colspan="4" class="text-center py-5 text-red-500">เกิดข้อผิดพลาดในการโหลดประวัติ</td></tr>'; }
         }
@@ -722,9 +822,7 @@
             const file = event.target.files[0]; if(!file) return;
             const reader = new FileReader();
             reader.onload = async function(e) {
-                const text = e.target.result;
-                const rows = text.split('\n');
-                const dataToInsert = [];
+                const text = e.target.result; const rows = text.split('\n'); const dataToInsert = [];
                 for(let i=1; i<rows.length; i++) {
                     if(!rows[i].trim()) continue;
                     const vals = rows[i].split(',');
@@ -733,9 +831,8 @@
                 try {
                     const { error } = await supabaseClient.from('members').insert(dataToInsert);
                     if (error) throw error;
-                    alert("นำเข้าข้อมูลสมาชิกสำเร็จ " + dataToInsert.length + " รายการ");
-                    loadMembersData();
-                } catch(err) { alert("เกิดข้อผิดพลาดในการบันทึกข้อมูล: โปรดตรวจสอบฟอร์แมตไฟล์ CSV หรือตารางฐานข้อมูล"); }
+                    showToast("นำเข้าข้อมูลสมาชิกสำเร็จ " + dataToInsert.length + " รายการ"); loadMembersData();
+                } catch(err) { showToast("เกิดข้อผิดพลาด: โปรดตรวจสอบฟอร์แมตไฟล์ CSV", "error"); }
                 document.getElementById('csvFileInput').value = '';
             };
             reader.readAsText(file);
@@ -743,10 +840,7 @@
 
         // --- ระบบประกาศ/แชท ---
         async function logActivity(act, dtl) { 
-            try {
-                await supabaseClient.from('activities').insert([{ department: currentUser.department || 'Admin', user_name: currentUser.fullname, action: act, details: dtl }]); 
-                if(document.getElementById('view-dashboard').classList.contains('block')) loadActivities(); 
-            } catch (e) { console.error("Log error", e); }
+            try { await supabaseClient.from('activities').insert([{ department: currentUser.department || 'Admin', user_name: currentUser.fullname, action: act, details: dtl }]); if(document.getElementById('view-dashboard').classList.contains('block')) loadActivities(); } catch (e) { console.error("Log error", e); }
         }
         
         async function loadActivities() {
@@ -788,13 +882,16 @@
             if (ft.length === 0) return tbody.innerHTML = '<tr><td colspan="5" class="px-6 py-10 text-center text-gray-400">ไม่พบข้อมูล</td></tr>';
             ft.forEach(t => { 
                 const ov = checkTaskOverdueStatus(t);
-                let b = t.status==='completed'?'<span class="text-emerald-700 bg-emerald-50 px-2 py-1 rounded text-xs">เสร็จสิ้น</span>':(t.status==='in_progress'?'<span class="text-amber-700 bg-amber-50 px-2 py-1 rounded text-xs">กำลังทำ</span>':'<span class="text-gray-600 bg-gray-100 px-2 py-1 rounded text-xs">รอเริ่ม</span>');
-                let dDisplay = t.due_date ? new Date(t.due_date).toLocaleDateString('th-TH') : '-'; if (ov.isOverdue) { b = `<span class="text-red-700 bg-red-50 px-2 py-1 rounded text-xs animate-pulse">เลยกำหนด ${ov.days} วัน</span>`; dDisplay = `<span class="text-red-500 font-bold">${dDisplay}</span>`; }
+                let b = t.status==='completed'?'<span class="text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-md text-xs font-bold border border-emerald-200">เสร็จสิ้น</span>':(t.status==='in_progress'?'<span class="text-amber-700 bg-amber-50 px-2.5 py-1 rounded-md text-xs font-bold border border-amber-200">กำลังทำ</span>':'<span class="text-gray-600 bg-gray-100 px-2.5 py-1 rounded-md text-xs font-bold border border-gray-200">รอเริ่ม</span>');
+                let dDisplay = t.due_date ? new Date(t.due_date).toLocaleDateString('th-TH') : '-'; if (ov.isOverdue) { b = `<span class="text-red-700 bg-red-50 px-2.5 py-1 rounded-md text-xs font-bold border border-red-200 animate-pulse">เลยกำหนด ${ov.days} วัน</span>`; dDisplay = `<span class="text-red-500 font-bold">${dDisplay}</span>`; }
                 
                 const canEditDelete = ['Administrator', 'President'].includes(currentUser.role) || (currentUser.role === 'Working Team' && currentUser.department === t.department);
-                let act = canEditDelete ? `<button onclick="editTask(${t.id})" class="text-blue-600 bg-blue-50 px-3 py-1.5 rounded-lg text-xs mr-2 hover:bg-blue-100">อัปเดต</button><button onclick="deleteTask(${t.id}, '${t.title}')" class="text-red-600 bg-red-50 px-3 py-1.5 rounded-lg text-xs hover:bg-red-100">ลบ</button>` : '-';
-                
-                tbody.innerHTML += `<tr class="border-b border-gray-50 hover:bg-orange-50/40"><td class="px-6 py-5 font-bold">${t.title}<br><span class="text-xs text-gray-400 font-normal">รับผิดชอบ: ${t.assignee||'-'}</span></td><td class="px-6 py-5">${t.department}.</td><td class="px-6 py-5">${dDisplay}</td><td class="px-6 py-5 text-center">${b}</td><td class="px-6 py-5 text-right">${act}</td></tr>`;
+                let act = `<button onclick="viewTask(${t.id})" class="text-gray-600 bg-gray-100 px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-gray-200 transition-colors mr-2">รายละเอียด</button>`;
+                if (canEditDelete) {
+                    act += `<button onclick="editTask(${t.id})" class="text-blue-600 bg-blue-50 px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-blue-100 transition-colors mr-2">อัปเดต</button><button onclick="deleteTask(${t.id}, '${t.title}')" class="text-red-600 bg-red-50 px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-red-100 transition-colors">ลบ</button>`;
+                }
+                const deptFullName = deptNames[t.department] || t.department;
+                tbody.innerHTML += `<tr class="hover:bg-orange-50/40 transition-colors border-b border-gray-50"><td class="px-6 py-5 font-bold text-gray-900">${t.title}<br><span class="text-xs text-gray-400 font-normal">รับผิดชอบ: ${t.assignee||'-'}</span></td><td class="px-6 py-5"><span class="bg-gray-100 text-gray-600 px-2.5 py-1 rounded-md text-xs font-bold border border-gray-200">${deptFullName}</span></td><td class="px-6 py-5 text-sm">${dDisplay}</td><td class="px-6 py-5 text-center">${b}</td><td class="px-6 py-5 text-right whitespace-nowrap">${act}</td></tr>`;
             });
         }
         function renderDeptChart(tasks, viewMode) {
@@ -802,7 +899,7 @@
             let lbs = [], cd = [], pg = [], pd = [];
             if (viewMode === 'all') { const dpt = Object.keys(deptNames); lbs = dpt.map(d=>d+'.'); dpt.forEach(d => { const dt = tasks.filter(t=>t.department===d); cd.push(dt.filter(t=>t.status==='completed').length); pg.push(dt.filter(t=>t.status==='in_progress').length); pd.push(dt.filter(t=>t.status==='pending').length); }); } 
             else { lbs = [viewMode+'.']; cd=[tasks.filter(t=>t.status==='completed').length]; pg=[tasks.filter(t=>t.status==='in_progress').length]; pd=[tasks.filter(t=>t.status==='pending').length]; }
-            deptChartInstance = new Chart(document.getElementById('deptChart').getContext('2d'), { type: 'bar', data: { labels: lbs, datasets: [{ label: 'เสร็จสิ้น', data: cd, backgroundColor: '#10b981' }, { label: 'กำลังทำ', data: pg, backgroundColor: '#f59e0b' }, { label: 'รอเริ่ม', data: pd, backgroundColor: '#e5e7eb' }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'top', labels:{font:{family:'Sarabun'}} } }, scales: { x: { stacked: true, ticks:{font:{family:'Sarabun'}} }, y: { stacked: true, beginAtZero: true, ticks: { stepSize: 1, font:{family:'Sarabun'} } } } } });
+            deptChartInstance = new Chart(document.getElementById('deptChart').getContext('2d'), { type: 'bar', data: { labels: lbs, datasets: [{ label: 'เสร็จสิ้น', data: cd, backgroundColor: '#10b981', borderRadius: 4 }, { label: 'กำลังทำ', data: pg, backgroundColor: '#f59e0b', borderRadius: 4 }, { label: 'รอเริ่ม', data: pd, backgroundColor: '#e5e7eb', borderRadius: 4 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'top', labels:{font:{family:'Sarabun'}} } }, scales: { x: { stacked: true, ticks:{font:{family:'Sarabun'}} }, y: { stacked: true, beginAtZero: true, ticks: { stepSize: 1, font:{family:'Sarabun'} } } } } });
         }
         const thMonths = ["มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน", "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"];
         function changeMonth(step) { calMonth += step; if(calMonth > 11) { calMonth=0; calYear++; } if(calMonth < 0) { calMonth=11; calYear--; } renderCalendar(); }
@@ -811,52 +908,87 @@
             const fDay = new Date(calYear, calMonth, 1).getDay(); const dInM = new Date(calYear, calMonth + 1, 0).getDate(); const tDay = new Date();
             for(let i=0; i<fDay; i++) grid.innerHTML += `<div class="bg-transparent calendar-day"></div>`;
             for(let i=1; i<=dInM; i++) {
-                const dStr = `${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(i).padStart(2,'0')}`; const tt = allCurrentTasks.filter(t => t.due_date === dStr);
+                const dStr = `${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(i).padStart(2,'0')}`; const tasksToday = allCurrentTasks.filter(t => t.due_date === dStr);
                 let isT = (i === tDay.getDate() && calMonth === tDay.getMonth() && calYear === tDay.getFullYear()); let isS = (activeDateFilter === dStr);
                 let bgCls = isS ? 'bg-orange-50 border-orange-500 ring-2 ring-orange-200' : (isT ? 'bg-blue-50 border-blue-300' : 'bg-white border-gray-200 hover:border-orange-400');
-                let htm = '';
-                if(tt.length > 0) {
-                    let cd=0, cp=0, cw=0, co=0; tt.forEach(t => { const ov=checkTaskOverdueStatus(t); if(ov.isOverdue) co++; else if(t.status==='completed') cd++; else if(t.status==='in_progress') cp++; else cw++; });
-                    let ind=''; if(co>0) ind+=`<div class="bg-red-500 text-white text-[9px] px-1 rounded-sm w-full truncate mb-1">เตือน ${co}</div>`; else if(cw>0) ind+=`<div class="bg-red-400 text-white text-[9px] px-1 rounded-sm w-full truncate mb-1">${cw} รอ</div>`; if(cp>0) ind+=`<div class="bg-amber-500 text-white text-[9px] px-1 rounded-sm w-full truncate mb-1">${cp} ทำ</div>`; if(cd>0) ind+=`<div class="bg-emerald-500 text-white text-[9px] px-1 rounded-sm w-full truncate mb-1">${cd} เสร็จ</div>`; htm = `<div class="mt-2 flex flex-col w-full px-1">${ind}</div>`;
+                
+                let contentHtml = '';
+                if(tasksToday.length > 0) {
+                    let bars = '';
+                    tasksToday.slice(0, 3).forEach(t => {
+                        const ov = checkTaskOverdueStatus(t);
+                        let colorCls = 'bg-gray-100 text-gray-600 border-gray-200';
+                        if (ov.isOverdue) { colorCls = 'bg-red-100 text-red-700 border-red-200'; }
+                        else if (t.status === 'completed') { colorCls = 'bg-emerald-100 text-emerald-700 border-emerald-200'; }
+                        else if (t.status === 'in_progress') { colorCls = 'bg-amber-100 text-amber-700 border-amber-200'; }
+                        bars += `<div class="text-[10px] px-1.5 py-0.5 rounded border truncate w-full mb-1 font-medium ${colorCls}" title="${t.title}">${t.title}</div>`;
+                    });
+                    if (tasksToday.length > 3) {
+                        bars += `<div class="text-[10px] text-gray-500 font-medium w-full text-center hover:underline">+ อีก ${tasksToday.length - 3} งาน</div>`;
+                    }
+                    contentHtml = `<div class="mt-1 flex flex-col w-full px-1">${bars}</div>`;
                 }
-                grid.innerHTML += `<div onclick="selectDateFilter('${dStr}')" class="rounded-xl p-2 border flex flex-col items-center calendar-day shadow-sm ${bgCls}"><span class="text-sm font-bold ${isT ? 'text-blue-700' : 'text-gray-700'}">${i}</span>${htm}</div>`;
+                grid.innerHTML += `<div onclick="selectDateFilter('${dStr}')" class="rounded-xl p-2 border flex flex-col items-center calendar-day shadow-sm ${bgCls} overflow-hidden"><span class="text-sm font-bold ${isT ? 'text-blue-700' : 'text-gray-700'}">${i}</span>${contentHtml}</div>`;
             }
         }
         function selectDateFilter(dStr) { if(activeDateFilter === dStr) activeDateFilter = null; else { activeDateFilter = dStr; activeStatusFilter = 'all'; highlightStatusCard(); } renderCalendar(); renderTaskTable(); if(activeDateFilter) document.getElementById('tableTitle').scrollIntoView({behavior:'smooth', block:'center'}); }
         
         async function submitNewTask(e) { 
             e.preventDefault(); const tId = document.getElementById('taskId').value; 
-            const tData = { title: document.getElementById('taskTitle').value, department: document.getElementById('taskDept').value, status: document.getElementById('taskStatus').value, assignee: document.getElementById('taskAssignee').value, due_date: document.getElementById('taskDueDate').value || null };
+            const tData = { title: document.getElementById('taskTitle').value, department: document.getElementById('taskDept').value, status: document.getElementById('taskStatus').value, assignee: document.getElementById('taskAssignee').value, due_date: document.getElementById('taskDueDate').value || null, description: document.getElementById('taskDesc').value || null };
             try { 
                 if (tId) { 
                     const { error } = await supabaseClient.from('tasks').update(tData).eq('id', tId); 
                     if (error) throw error;
-                    alert('บันทึกงานสำเร็จ');
                     logActivity(tData.status === 'completed' ? 'ทำภารกิจเสร็จสิ้น' : 'อัปเดตความคืบหน้า', `เรื่อง: ${tData.title}`); 
                 } else { 
                     const { error } = await supabaseClient.from('tasks').insert([tData]); 
                     if (error) throw error;
-                    alert('บันทึกงานสำเร็จ');
                     logActivity('เพิ่มงานใหม่', `เรื่อง: ${tData.title}`); 
                 } 
-                closeAddTaskModal(); loadDashboardData(); 
-            } catch (err) { alert('ข้อผิดพลาด: ' + err.message); } 
+                closeAddTaskModal(); showToast('บันทึกงานสำเร็จ'); loadDashboardData(); 
+            } catch (err) { showToast('ข้อผิดพลาด: ' + err.message, 'error'); } 
         }
         async function editTask(id) { 
             try {
                 const { data, error } = await supabaseClient.from('tasks').select('*').eq('id', id).single(); 
                 if (error) throw error;
-                document.getElementById('taskId').value=data.id; document.getElementById('taskTitle').value=data.title; document.getElementById('taskDept').value=data.department; document.getElementById('taskStatus').value=data.status; document.getElementById('taskAssignee').value=data.assignee||''; document.getElementById('taskDueDate').value=data.due_date||''; document.getElementById('taskDept').disabled=true; document.getElementById('addTaskModal').classList.remove('hidden'); 
-            } catch (err) { alert('ไม่สามารถดึงข้อมูลงานได้'); }
+                document.getElementById('taskId').value=data.id; document.getElementById('taskTitle').value=data.title; document.getElementById('taskDept').value=data.department; document.getElementById('taskStatus').value=data.status; document.getElementById('taskAssignee').value=data.assignee||''; document.getElementById('taskDueDate').value=data.due_date||''; document.getElementById('taskDesc').value=data.description||''; document.getElementById('taskDept').disabled=true; document.getElementById('addTaskModal').classList.remove('hidden'); 
+            } catch (err) { showToast('ไม่สามารถดึงข้อมูลงานได้', 'error'); }
         }
         async function deleteTask(id, title) { 
-            if(!confirm(`ลบงาน: ${title}?`)) return; 
-            try {
-                const { error } = await supabaseClient.from('tasks').update({ deleted_at: new Date().toISOString(), deleted_by: currentUser.fullname }).eq('id', id); 
-                if (error) throw error;
-                loadDashboardData(); logActivity('ลบงาน', `ลบเรื่อง: ${title}`); alert('ลบงานสำเร็จ');
-            } catch(e) { alert("ลบไม่สำเร็จ: " + e.message); } 
+            showConfirm('ยืนยันการลบงาน', `คุณต้องการลบงาน: "${title}" ใช่หรือไม่?`, async () => {
+                try {
+                    const { error } = await supabaseClient.from('tasks').update({ deleted_at: new Date().toISOString(), deleted_by: currentUser.fullname }).eq('id', id); 
+                    if (error) throw error;
+                    loadDashboardData(); logActivity('ลบงาน', `ลบเรื่อง: ${title}`); showToast('ลบงานสำเร็จ', 'success');
+                } catch(e) { showToast("ลบไม่สำเร็จ: " + e.message, 'error'); } 
+            });
         }
+        async function viewTask(id) {
+            try {
+                const { data, error } = await supabaseClient.from('tasks').select('*').eq('id', id).single();
+                if(error) throw error;
+                document.getElementById('vt-title').innerText = data.title;
+                document.getElementById('vt-dept').innerText = deptNames[data.department] || data.department;
+                document.getElementById('vt-assignee').innerText = data.assignee || '-';
+                
+                let b = data.status==='completed'?'<span class="text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-md text-xs font-bold border border-emerald-200">เสร็จสิ้น</span>':(data.status==='in_progress'?'<span class="text-amber-700 bg-amber-50 px-2.5 py-1 rounded-md text-xs font-bold border border-amber-200">กำลังทำ</span>':'<span class="text-gray-600 bg-gray-100 px-2.5 py-1 rounded-md text-xs font-bold border border-gray-200">รอเริ่ม</span>');
+                const ov = checkTaskOverdueStatus(data);
+                let dueDisplay = data.due_date ? new Date(data.due_date).toLocaleDateString('th-TH') : '-'; 
+                if (ov.isOverdue) { 
+                    b = `<span class="text-red-700 bg-red-50 px-2.5 py-1 rounded-md text-xs font-bold border border-red-200 animate-pulse">เลยกำหนด ${ov.days} วัน</span>`; 
+                    dueDisplay = `<span class="text-red-500 font-bold">${dueDisplay}</span>`; 
+                }
+                document.getElementById('vt-status').innerHTML = b;
+                document.getElementById('vt-due').innerHTML = dueDisplay;
+                document.getElementById('vt-desc').innerText = data.description || 'ไม่มีการระบุรายละเอียดงาน';
+                
+                document.getElementById('viewTaskModal').classList.remove('hidden');
+                document.getElementById('viewTaskModal').classList.add('flex');
+            } catch (err) { showToast('ไม่สามารถดึงข้อมูลรายละเอียดงานได้', 'error'); }
+        }
+        function closeViewTaskModal() { document.getElementById('viewTaskModal').classList.add('hidden'); document.getElementById('viewTaskModal').classList.remove('flex'); }
 
         // --- คลังเอกสาร & Audit ---
         async function searchDocument(isInit = false) {
@@ -877,53 +1009,22 @@
                 
                 if (data && data.length > 0) {
                     data.forEach(d => {
-                        let catName = catNames[d.category] || d.category;
-                        let deptName = deptNames[d.department] || d.department;
-                        let docDateStr = '-';
-                        if(d.doc_date) {
-                            const dateObj = new Date(d.doc_date);
-                            docDateStr = dateObj.toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric' });
-                        }
-
                         const canEditDelete = ['Administrator', 'President'].includes(currentUser.role) || (currentUser.role === 'Working Team' && currentUser.department === d.department);
-                        let delBtn = canEditDelete ? `<button onclick="deleteDoc(${d.id}, '${d.title}')" class="text-red-500 hover:text-red-700 text-xs font-bold px-3 py-1 bg-red-50 rounded-lg transition-colors">ลบเอกสาร</button>` : '';
+                        let dBtn = canEditDelete ? `<button onclick="deleteDoc(${d.id}, '${d.title}')" class="text-red-500 bg-red-50 px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-red-500 hover:text-white transition-colors">ลบเอกสาร</button>` : '';
+                        let pdf = d.pdf_link && d.pdf_link !== "-" ? `<a href="${d.pdf_link}" target="_blank" class="bg-gray-800 text-white px-4 py-2 rounded-lg text-xs font-bold mt-3 inline-block">เปิดเอกสาร (PDF)</a>` : '';
                         
-                        let pdfBtns = d.pdf_link && d.pdf_link !== "-" 
-                            ? `<a href="${d.pdf_link}" target="_blank" class="inline-flex items-center justify-center px-4 py-2 bg-orange-50 text-orange-600 hover:bg-orange-100 rounded-lg text-sm font-bold transition-colors mr-2"><svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg> ดูตัวอย่างเอกสาร</a><a href="${d.pdf_link}" target="_blank" class="inline-flex items-center justify-center px-4 py-2 bg-orange-500 text-white hover:bg-orange-600 rounded-lg text-sm font-bold transition-colors"><svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg> ดาวน์โหลด PDF</a>` 
-                            : '';
+                        let attentionTxt = d.attention ? `<p><span class="font-bold text-gray-800">เรียน:</span> ${d.attention}</p>` : '';
+                        let coordTxt = d.coordinator ? `<p><span class="font-bold text-gray-800">หน่วยงาน/ผู้ประสานงาน:</span> ${d.coordinator}</p>` : '';
 
                         res.innerHTML += `
-                        <div class="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm hover:shadow-md transition-shadow mb-6">
-                            <div class="flex justify-between items-start mb-2">
-                                <div>
-                                    <span class="text-xs font-bold text-orange-600 bg-orange-50 px-2 py-1 rounded-md">หมวด: ${d.category} - ${catName}</span>
-                                    <h3 class="text-xl font-bold text-gray-900 mt-3 mb-1">${d.title}</h3>
-                                    <div class="flex items-center text-sm text-gray-500 gap-3">
-                                        <span>เลขที่: <span class="font-bold text-gray-800">${d.department}. ${d.doc_id}</span></span>
-                                        <span class="bg-gray-100 px-2 py-0.5 rounded text-xs">ลำดับอ้างอิง: ${d.id}</span>
-                                    </div>
-                                </div>
-                                <div class="text-right bg-gray-50 px-4 py-2 rounded-lg border border-gray-100">
-                                    <p class="text-xs text-gray-400 mb-0.5">วันที่ลงเอกสาร</p>
-                                    <p class="text-sm font-bold text-gray-800">${docDateStr}</p>
-                                </div>
+                        <div class="bg-white rounded-2xl border p-6 mb-4 shadow-sm hover:border-orange-300 transition-colors">
+                            <div class="flex flex-col md:flex-row justify-between border-b border-gray-100 pb-3 mb-3 gap-4">
+                                <div><h3 class="text-lg font-bold text-gray-900">${d.title}</h3><p class="text-sm text-gray-500 mt-1">เลขที่: ${d.department}.${d.doc_id} | ลงวันที่: ${new Date(d.doc_date).toLocaleDateString('th-TH')}</p></div>
+                                <div>${dBtn}</div>
                             </div>
-                            
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 my-6 text-sm text-gray-700">
-                                <div class="grid grid-cols-3 gap-2"><span class="text-gray-400">ฝ่าย:</span><span class="col-span-2 font-medium">${deptName}</span></div>
-                                <div class="grid grid-cols-3 gap-2"><span class="text-gray-400">เรียน:</span><span class="col-span-2 font-medium">${d.attention || '-'}</span></div>
-                                <div class="grid grid-cols-3 gap-2"><span class="text-gray-400">ผู้ประสานงาน:</span><span class="col-span-2 font-medium">${d.coordinator || '-'}</span></div>
-                            </div>
-
-                            <div class="mb-6">
-                                <p class="text-sm font-bold text-gray-800 mb-2">เนื้อหา:</p>
-                                <div class="bg-gray-50/50 border border-gray-200 rounded-xl p-4 text-sm text-gray-600 min-h-[60px] whitespace-pre-wrap">${d.content || '-'}</div>
-                            </div>
-
-                            <div class="flex justify-between items-center pt-2">
-                                <div class="flex gap-2">${pdfBtns}</div>
-                                <div>${delBtn}</div>
-                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm text-gray-600 mb-3">${attentionTxt}${coordTxt}</div>
+                            <div class="bg-gray-50 p-4 rounded-xl text-sm text-gray-600 border border-gray-100"><span class="font-bold text-gray-800 block mb-1">เนื้อหาโดยย่อ:</span>${d.content}</div>
+                            ${pdf}
                         </div>`;
                     });
                 } else {
@@ -941,17 +1042,18 @@
             try { 
                 const { error } = await supabaseClient.from('documents').insert([d]); 
                 if (error) throw error;
-                closeAddModal(); alert('เพิ่มเอกสารสำเร็จ'); searchDocument(true); logActivity('นำเข้าเอกสาร', `เรื่อง: ${d.title}`); 
-            } catch(err) { alert('บันทึกไม่สำเร็จ: ' + err.message); }
+                closeAddModal(); showToast('เพิ่มเอกสารสำเร็จ'); searchDocument(true); logActivity('นำเข้าเอกสาร', `เรื่อง: ${d.title}`); 
+            } catch(err) { showToast('บันทึกไม่สำเร็จ: ' + err.message, 'error'); }
         }
         
         async function deleteDoc(id, title) { 
-            if(!confirm(`ลบเอกสาร: ${title}?`)) return; 
-            try { 
-                const { error } = await supabaseClient.from('documents').update({ deleted_at: new Date().toISOString(), deleted_by: currentUser.fullname }).eq('id', id); 
-                if (error) throw error;
-                searchDocument(true); logActivity('ลบเอกสาร', `ลบเรื่อง: ${title}`); alert('ลบเอกสารสำเร็จ');
-            } catch(e) { alert("ลบไม่สำเร็จ: " + e.message); } 
+            showConfirm('ยืนยันการลบเอกสาร', `คุณต้องการลบเอกสาร: "${title}" ใช่หรือไม่?`, async () => {
+                try { 
+                    const { error } = await supabaseClient.from('documents').update({ deleted_at: new Date().toISOString(), deleted_by: currentUser.fullname }).eq('id', id); 
+                    if (error) throw error;
+                    searchDocument(true); logActivity('ลบเอกสาร', `ลบเรื่อง: ${title}`); showToast('ลบเอกสารสำเร็จ');
+                } catch(e) { showToast("ลบไม่สำเร็จ: " + e.message, 'error'); } 
+            });
         }
         
         async function loadAuditLog() {
@@ -979,8 +1081,8 @@
             try { 
                 const { error } = await supabaseClient.from('templates').insert([t]); 
                 if (error) throw error;
-                closeAddTemplateModal(); alert('เพิ่มเทมเพลตเอกสารสำเร็จ'); loadTemplates(); logActivity('เพิ่มเทมเพลตเอกสาร', `เรื่อง: ${t.title}`); 
-            } catch (err) { alert("เกิดข้อผิดพลาด: " + err.message); } finally { btn.innerHTML = 'บันทึกข้อมูล'; btn.disabled = false; } 
+                closeAddTemplateModal(); showToast('เพิ่มเทมเพลตเอกสารสำเร็จ'); loadTemplates(); logActivity('เพิ่มเทมเพลตเอกสาร', `เรื่อง: ${t.title}`); 
+            } catch (err) { showToast("เกิดข้อผิดพลาด: " + err.message, 'error'); } finally { btn.innerHTML = 'บันทึกข้อมูล'; btn.disabled = false; } 
         }
 
         function openAddTemplateModal() { document.getElementById('addTemplateForm').reset(); document.getElementById('addTemplateModal').classList.remove('hidden'); }
@@ -995,7 +1097,7 @@
         function closeAddModal() { document.getElementById('addDocModal').classList.add('hidden'); }
         
         function openAddTaskModal() { 
-            document.getElementById('addTaskForm').reset(); document.getElementById('taskId').value=''; 
+            document.getElementById('addTaskForm').reset(); document.getElementById('taskId').value=''; document.getElementById('taskDesc').value='';
             if (['Working Team'].includes(currentUser.role)) { document.getElementById('taskDept').value = currentUser.department; document.getElementById('taskDept').disabled = true; } 
             else if (currentDashboardView !== 'all') { document.getElementById('taskDept').value = currentDashboardView; document.getElementById('taskDept').disabled = false; } 
             else { document.getElementById('taskDept').disabled = false; }

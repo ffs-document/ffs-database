@@ -46,8 +46,9 @@
                     <p class="text-sm text-gray-500 mt-1">ระบบบริหารจัดการข้อมูลองค์กร</p>
                 </div>
                 <div class="space-y-4">
-                    <div><input type="text" id="userInput" placeholder="รหัสสมาชิก" class="block w-full px-4 py-2.5 border border-gray-300 rounded-xl bg-gray-50 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"></div>
+                    <div><input type="text" id="userInput" placeholder="รหัสสมาชิก (เช่น admin)" class="block w-full px-4 py-2.5 border border-gray-300 rounded-xl bg-gray-50 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"></div>
                     <div><input type="password" id="passwordInput" placeholder="รหัสผ่าน" class="block w-full px-4 py-2.5 border border-gray-300 rounded-xl bg-gray-50 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"></div>
+                    <div id="loginError" class="hidden text-[11px] text-red-600 bg-red-50 p-2 rounded-lg text-center border border-red-100"><span id="errorMessage"></span></div>
                     <button id="loginBtn" onclick="handleLogin()" class="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-2.5 rounded-xl text-sm transition-all shadow-xs"><span id="loginBtnText">เข้าสู่ระบบ</span></button>
                 </div>
             </div>
@@ -108,7 +109,7 @@
             <div class="p-6">
                 <form id="userForm" onsubmit="submitUser(event)" class="space-y-4">
                     <input type="hidden" id="u-id">
-                    <div><label class="block text-xs font-medium text-gray-700 mb-1">รหัสสมาชิก *</label><input type="text" id="u-username" required class="w-full px-3 py-2 border rounded-lg text-sm bg-gray-50 focus:ring-2 focus:ring-orange-500 outline-none"></div>
+                    <div><label class="block text-xs font-medium text-gray-700 mb-1">รหัสสมาชิก (ใช้สำหรับล็อกอิน) *</label><input type="text" id="u-username" required class="w-full px-3 py-2 border rounded-lg text-sm bg-gray-50 focus:ring-2 focus:ring-orange-500 outline-none"></div>
                     <div><label class="block text-xs font-medium text-gray-700 mb-1">รหัสผ่าน *</label><input type="text" id="u-password" required class="w-full px-3 py-2 border rounded-lg text-sm bg-gray-50 focus:ring-2 focus:ring-orange-500 outline-none"></div>
                     <div><label class="block text-xs font-medium text-gray-700 mb-1">ชื่อ-นามสกุล *</label><input type="text" id="u-fullname" required class="w-full px-3 py-2 border rounded-lg text-sm bg-gray-50 focus:ring-2 focus:ring-orange-500 outline-none"></div>
                     <div class="grid grid-cols-2 gap-4">
@@ -449,7 +450,13 @@
                             <div class="flex-1 overflow-y-auto p-4 space-y-4 relative" id="activityFeedContainer"><div class="text-center text-sm text-gray-400 mt-10">กำลังดึงประกาศล่าสุด...</div></div>
                         </div>
                         <div class="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm flex flex-col col-span-1 lg:col-span-2">
-                            <h3 class="text-sm font-bold text-gray-800 mb-4 text-center" id="chartTitle">ประสิทธิภาพการปฏิบัติงาน (รายฝ่าย)</h3>
+                            <div class="flex justify-between items-center mb-4">
+                                <h3 class="text-sm font-bold text-gray-800" id="chartTitle">ประสิทธิภาพการปฏิบัติงาน (รายฝ่าย)</h3>
+                                <div class="bg-gray-200/50 p-1 rounded-lg flex text-xs font-bold">
+                                    <button onclick="toggleDeptChart('bar')" id="btn-dept-bar" class="px-3 py-1.5 rounded-md bg-white text-orange-600 shadow-sm transition-all">กราฟแท่ง</button>
+                                    <button onclick="toggleDeptChart('pie')" id="btn-dept-pie" class="px-3 py-1.5 rounded-md text-gray-500 hover:text-gray-800 transition-all">กราฟวงกลม</button>
+                                </div>
+                            </div>
                             <div class="relative h-64 w-full"><canvas id="deptChart"></canvas></div>
                         </div>
                     </div>
@@ -474,7 +481,7 @@
                     <!-- ตารางงาน -->
                     <div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden mb-10">
                         <div class="px-6 py-4 border-b border-gray-100 bg-gray-50 flex justify-between items-center">
-                            <h3 class="text-sm font-bold text-gray-800" id="tableTitle">รายการงานทั้งหมด</h3>
+                            <h3 class="text-sm font-bold text-gray-800" id="tableTitle">รายการงาน / ภารกิจทั้งหมด</h3>
                             <button onclick="clearFilters()" id="clearFilterBtn" class="hidden text-xs text-orange-600 font-bold hover:underline">แสดงทั้งหมด (ล้างตัวกรอง)</button>
                         </div>
                         <div class="overflow-x-auto">
@@ -523,7 +530,7 @@
 
                     <div class="bg-white rounded-2xl border border-gray-200 shadow-sm mb-6 overflow-hidden">
                         <div class="px-6 py-4 border-b border-gray-100 bg-gray-50 flex justify-between items-center">
-                            <h3 class="text-sm font-bold text-gray-800">การกระจายตัวตามจังหวัด</h3>
+                            <h3 class="text-sm font-bold text-gray-800">การกระจายตัวตามจังหวัด (ภูมิศาสตร์)</h3>
                             <div class="bg-gray-200/50 p-1 rounded-lg flex text-xs font-bold">
                                 <button onclick="toggleMapMode('bar')" id="btn-mode-bar" class="px-3 py-1.5 rounded-md bg-white text-orange-600 shadow-sm transition-all">กราฟแท่ง</button>
                                 <button onclick="toggleMapMode('map')" id="btn-mode-map" class="px-3 py-1.5 rounded-md text-gray-500 hover:text-gray-800 transition-all">แผนที่ประเทศไทย</button>
@@ -566,7 +573,7 @@
                         <div class="overflow-x-auto">
                             <table class="w-full text-left text-sm text-gray-600">
                                 <thead class="bg-gray-50 text-xs text-gray-500 uppercase border-b border-gray-200">
-                                    <tr><th class="px-6 py-3">รหัสสมาชิก</th><th class="px-6 py-3">ชื่อ-นามสกุล</th><th class="px-6 py-3">สิทธิ์ (Role)</th><th class="px-6 py-3">ฝ่าย</th></tr>
+                                    <tr><th class="px-6 py-3">รหัสสมาชิก</th><th class="px-6 py-3">ชื่อ-นามสกุล</th><th class="px-6 py-3">สิทธิ์ (Role)</th><th class="px-6 py-3">ฝ่าย</th><th class="px-6 py-3 text-right">จัดการ</th></tr>
                                 </thead>
                                 <tbody id="usersTableBody" class="divide-y divide-gray-100"></tbody>
                             </table>
@@ -574,7 +581,7 @@
                     </div>
                 </div>
 
-                <!-- 6. หน้า ตั้งค่าโมดูลระบบ (Admin Settings) -->
+                <!-- 5. หน้า ประวัติการทำงาน (History Log) -->
                 <div id="view-settings" class="max-w-4xl mx-auto hidden animate-fade-in pb-10">
                     <div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden mb-6">
                         <div class="px-6 py-5 bg-gray-50 border-b border-gray-200 flex items-center">
@@ -618,6 +625,7 @@
         let allMembersData = []; let currentMemberPage = 1; const membersPerPage = 50;
         let calMonth = new Date().getMonth(); let calYear = new Date().getFullYear();
         let allCurrentTasks = []; let activeStatusFilter = 'all'; let activeDateFilter = null; let currentDashboardView = 'all'; 
+        let currentDeptChartType = 'bar';
 
         const deptNames = { "อสพ": "เอกสารสัมพันธ์ (อสพ.)", "สมช": "ฝ่ายสมาชิกสัมพันธ์ (สมช.)", "สธส": "ฝ่ายสาธารณสุขสัมพันธ์ (สธส.)", "วนธ": "ฝ่ายวัฒนธรรม (วนธ.)", "กษส": "ฝ่ายเกษตรสัมพันธ์ (กษส.)", "ชสพ": "ฝ่ายชุมชนสัมพันธ์ (ชสพ.)", "กกส": "ฝ่ายกิจกรรมสัมพันธ์ (กกส.)", "ศสพ": "ฝ่ายศึกษาสัมพันธ์ (ศสพ.)", "อกป": "ฝ่ายอำนวยการและปฏิสัมพันธ์ (อกป.)" };
         const catNames = { "01": "ทั่วไป", "02": "รับรองการทำกิจกรรม", "03": "รับรองสมาชิก", "04": "ลาเรียน", "05": "เยี่ยมชม", "06": "ขอข้อมูล", "07": "ขอเข้าพบ", "08": "ประชาสัมพันธ์", "09": "ขอเชิญเข้าร่วม" };
@@ -766,7 +774,7 @@
 
         // --- User Management & History ---
         async function loadUsers() {
-            const tbody = document.getElementById('usersTableBody'); tbody.innerHTML = '<tr><td colspan="4" class="text-center py-5">กำลังโหลด...</td></tr>';
+            const tbody = document.getElementById('usersTableBody'); tbody.innerHTML = '<tr><td colspan="5" class="text-center py-5">กำลังโหลด...</td></tr>';
             try {
                 const {data, error} = await supabaseClient.from('users').select('*').order('role');
                 if (error) throw error;
@@ -774,25 +782,62 @@
                 data.forEach(u => {
                     let badge = u.role === 'Administrator' ? 'bg-red-100 text-red-700' : (u.role === 'President' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700');
                     let deptDisp = u.department === 'ทั้งหมด' ? 'ทั้งหมด (Admin/Pres)' : (deptNames[u.department] || u.department);
+                    
+                    let actBtns = '-';
+                    if (currentUser.role === 'Administrator') {
+                        actBtns = `<button onclick="editUser('${u.id}')" class="text-blue-600 mr-3 hover:underline">แก้ไข</button><button onclick="deleteUser('${u.id}', '${u.username}')" class="text-red-600 hover:underline">ลบ</button>`;
+                    }
+
                     tbody.innerHTML += `<tr>
                         <td class="px-6 py-4 font-mono text-sm">${u.username}</td>
                         <td class="px-6 py-4"><button onclick="viewUserHistory('${u.fullname}')" class="font-bold text-blue-600 hover:text-blue-800 hover:underline transition-colors">${u.fullname}</button></td>
                         <td class="px-6 py-4"><span class="px-2 py-1 rounded text-xs font-bold ${badge}">${u.role}</span></td>
                         <td class="px-6 py-4 text-sm">${deptDisp}</td>
+                        <td class="px-6 py-4 text-right text-sm">${actBtns}</td>
                     </tr>`;
                 });
-            } catch (err) { tbody.innerHTML = '<tr><td colspan="4" class="text-center py-5 text-red-500">ไม่สามารถโหลดข้อมูลผู้ใช้ได้</td></tr>'; }
+            } catch (err) { tbody.innerHTML = '<tr><td colspan="5" class="text-center py-5 text-red-500">ไม่สามารถโหลดข้อมูลผู้ใช้ได้</td></tr>'; }
         }
         function openUserModal() { document.getElementById('userForm').reset(); document.getElementById('u-id').value = ''; document.getElementById('userModal').classList.remove('hidden'); }
         function closeUserModal() { document.getElementById('userModal').classList.add('hidden'); }
+        async function editUser(id) {
+            try {
+                const {data, error} = await supabaseClient.from('users').select('*').eq('id', id).single();
+                if(error) throw error;
+                document.getElementById('u-id').value = data.id; 
+                document.getElementById('u-username').value = data.username; 
+                document.getElementById('u-password').value = data.password; 
+                document.getElementById('u-fullname').value = data.fullname; 
+                document.getElementById('u-role').value = data.role; 
+                document.getElementById('u-dept').value = data.department;
+                document.getElementById('userModal').classList.remove('hidden');
+            } catch (err) { showToast('ไม่สามารถดึงข้อมูลได้', 'error'); }
+        }
         async function submitUser(e) {
             e.preventDefault(); 
+            const id = document.getElementById('u-id').value;
             const obj = { username: document.getElementById('u-username').value, password: document.getElementById('u-password').value, fullname: document.getElementById('u-fullname').value, role: document.getElementById('u-role').value, department: document.getElementById('u-dept').value };
             try {
-                const { error } = await supabaseClient.from('users').insert([obj]); 
-                if(error) throw error; showToast('เพิ่มข้อมูลผู้ใช้สำเร็จ');
+                if (id) {
+                    const { error } = await supabaseClient.from('users').update(obj).eq('id', id); 
+                    if(error) throw error; showToast('อัปเดตข้อมูลผู้ใช้สำเร็จ');
+                } else {
+                    const { error } = await supabaseClient.from('users').insert([obj]); 
+                    if(error) throw error; showToast('เพิ่มข้อมูลผู้ใช้สำเร็จ');
+                }
                 closeUserModal(); loadUsers();
             } catch (err) { showToast('เกิดข้อผิดพลาด: ' + err.message, 'error'); }
+        }
+        async function deleteUser(id, username) {
+            if(username === 'admin' || username === currentUser.username) return showToast("ไม่สามารถลบบัญชีหลัก หรือบัญชีตัวเองได้", "error");
+            showConfirm('ยืนยันการลบผู้ใช้', `ลบผู้ใช้ ${username} ใช่หรือไม่?`, async () => {
+                try {
+                    const { error } = await supabaseClient.from('users').delete().eq('id', id); 
+                    if (error) throw error;
+                    showToast('ลบผู้ใช้สำเร็จ');
+                    loadUsers(); 
+                } catch(err) { showToast('ลบไม่สำเร็จ: ' + err.message, 'error'); }
+            });
         }
 
         async function viewUserHistory(fullname) {
@@ -870,6 +915,18 @@
         }
 
         // --- ระบบ Dashboard (ย่อ) ---
+        function toggleDeptChart(type) {
+            currentDeptChartType = type;
+            if (type === 'bar') {
+                document.getElementById('btn-dept-bar').className = "px-3 py-1.5 rounded-md bg-white text-orange-600 shadow-sm transition-all";
+                document.getElementById('btn-dept-pie').className = "px-3 py-1.5 rounded-md text-gray-500 hover:text-gray-800 transition-all";
+            } else {
+                document.getElementById('btn-dept-pie').className = "px-3 py-1.5 rounded-md bg-white text-orange-600 shadow-sm transition-all";
+                document.getElementById('btn-dept-bar').className = "px-3 py-1.5 rounded-md text-gray-500 hover:text-gray-800 transition-all";
+            }
+            renderDeptChart(allCurrentTasks, currentDashboardView);
+        }
+
         function checkTaskOverdueStatus(task) { if (task.status === 'completed' || !task.due_date) return { isOverdue: false, days: 0 }; const d = new Date(task.due_date); const t = new Date(); d.setHours(0,0,0,0); t.setHours(0,0,0,0); if (t > d) return { isOverdue: true, days: Math.ceil(Math.abs(t - d) / 86400000) }; return { isOverdue: false, days: 0 }; }
         function setTaskFilter(status) { activeStatusFilter = status; activeDateFilter = null; highlightStatusCard(); renderTaskTable(); }
         function highlightStatusCard() { ['all', 'completed', 'in_progress', 'pending'].forEach(st => document.getElementById(`card-${st}`).classList.remove('card-active') ); document.getElementById(`card-${activeStatusFilter}`).classList.add('card-active'); }
@@ -907,10 +964,48 @@
         }
         function renderDeptChart(tasks, viewMode) {
             if (deptChartInstance) deptChartInstance.destroy();
-            let lbs = [], cd = [], pg = [], pd = [];
-            if (viewMode === 'all') { const dpt = Object.keys(deptNames); lbs = dpt.map(d=>d+'.'); dpt.forEach(d => { const dt = tasks.filter(t=>t.department===d); cd.push(dt.filter(t=>t.status==='completed').length); pg.push(dt.filter(t=>t.status==='in_progress').length); pd.push(dt.filter(t=>t.status==='pending').length); }); } 
-            else { lbs = [viewMode+'.']; cd=[tasks.filter(t=>t.status==='completed').length]; pg=[tasks.filter(t=>t.status==='in_progress').length]; pd=[tasks.filter(t=>t.status==='pending').length]; }
-            deptChartInstance = new Chart(document.getElementById('deptChart').getContext('2d'), { type: 'bar', data: { labels: lbs, datasets: [{ label: 'เสร็จสิ้น', data: cd, backgroundColor: '#10b981', borderRadius: 4 }, { label: 'กำลังทำ', data: pg, backgroundColor: '#f59e0b', borderRadius: 4 }, { label: 'รอเริ่ม', data: pd, backgroundColor: '#e5e7eb', borderRadius: 4 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'top', labels:{font:{family:'Sarabun'}} } }, scales: { x: { stacked: true, ticks:{font:{family:'Sarabun'}} }, y: { stacked: true, beginAtZero: true, ticks: { stepSize: 1, font:{family:'Sarabun'} } } } } });
+            
+            if (currentDeptChartType === 'bar') {
+                let lbs = [], cd = [], pg = [], pd = [];
+                if (viewMode === 'all') { const dpt = Object.keys(deptNames); lbs = dpt.map(d=>d+'.'); dpt.forEach(d => { const dt = tasks.filter(t=>t.department===d); cd.push(dt.filter(t=>t.status==='completed').length); pg.push(dt.filter(t=>t.status==='in_progress').length); pd.push(dt.filter(t=>t.status==='pending').length); }); } 
+                else { lbs = [viewMode+'.']; cd=[tasks.filter(t=>t.status==='completed').length]; pg=[tasks.filter(t=>t.status==='in_progress').length]; pd=[tasks.filter(t=>t.status==='pending').length]; }
+                deptChartInstance = new Chart(document.getElementById('deptChart').getContext('2d'), { type: 'bar', data: { labels: lbs, datasets: [{ label: 'เสร็จสิ้น', data: cd, backgroundColor: '#10b981', borderRadius: 4 }, { label: 'กำลังทำ', data: pg, backgroundColor: '#f59e0b', borderRadius: 4 }, { label: 'รอเริ่ม', data: pd, backgroundColor: '#e5e7eb', borderRadius: 4 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'top', labels:{font:{family:'Sarabun'}} } }, scales: { x: { stacked: true, ticks:{font:{family:'Sarabun'}} }, y: { stacked: true, beginAtZero: true, ticks: { stepSize: 1, font:{family:'Sarabun'} } } } } });
+            } else {
+                if (viewMode === 'all') {
+                    // กราฟวงกลม: แสดงสัดส่วนปริมาณงานทุกฝ่าย
+                    const dpt = Object.keys(deptNames);
+                    let data = dpt.map(d => tasks.filter(t => t.department === d).length);
+                    let labels = dpt.map(d => deptNames[d]);
+                    deptChartInstance = new Chart(document.getElementById('deptChart').getContext('2d'), { 
+                        type: 'pie', 
+                        data: { 
+                            labels: labels, 
+                            datasets: [{ 
+                                data: data, 
+                                backgroundColor: ['#3b82f6', '#f97316', '#10b981', '#8b5cf6', '#ec4899', '#f59e0b', '#64748b', '#06b6d4', '#84cc16'], 
+                                borderWidth: 0 
+                            }] 
+                        }, 
+                        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right', labels:{font:{family:'Sarabun'}} } } } 
+                    });
+                } else {
+                    // กราฟวงกลม: แสดงสถานะงานของ 1 ฝ่าย
+                    let cd = 0, pg = 0, pd = 0;
+                    let targetTasks = tasks.filter(t => t.department === viewMode);
+                    cd = targetTasks.filter(t => t.status === 'completed').length;
+                    pg = targetTasks.filter(t => t.status === 'in_progress').length;
+                    pd = targetTasks.filter(t => t.status === 'pending').length;
+                    
+                    deptChartInstance = new Chart(document.getElementById('deptChart').getContext('2d'), { 
+                        type: 'pie', 
+                        data: { 
+                            labels: ['เสร็จสิ้น', 'กำลังทำ', 'รอเริ่ม'], 
+                            datasets: [{ data: [cd, pg, pd], backgroundColor: ['#10b981', '#f59e0b', '#e5e7eb'], borderWidth: 0 }] 
+                        }, 
+                        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right', labels:{font:{family:'Sarabun'}} } } } 
+                    });
+                }
+            }
         }
         const thMonths = ["มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน", "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"];
         function changeMonth(step) { calMonth += step; if(calMonth > 11) { calMonth=0; calYear++; } if(calMonth < 0) { calMonth=11; calYear--; } renderCalendar(); }
@@ -1022,12 +1117,12 @@
                     data.forEach(d => {
                         const canEditDelete = ['Administrator', 'President'].includes(currentUser.role) || (currentUser.role === 'Working Team' && currentUser.department === d.department);
                         let dBtn = canEditDelete ? `<button onclick="deleteDoc(${d.id}, '${d.title}')" class="text-red-500 bg-red-50 px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-red-500 hover:text-white transition-colors">ลบเอกสาร</button>` : '';
-                        let pdf = d.pdf_link && d.pdf_link !== "-" ? `<a href="${d.pdf_link}" target="_blank" class="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg text-xs font-bold mt-4 inline-flex items-center shadow-sm transition-colors"><svg class="w-4 h-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg> ดาวน์โหลด PDF</a>` : '';
+                        let pdf = d.pdf_link && d.pdf_link !== "-" ? `<a href="${d.pdf_link}" target="_blank" class="bg-gray-800 text-white px-4 py-2 rounded-lg text-xs font-bold mt-3 inline-block">เปิดเอกสาร (PDF)</a>` : '';
                         
                         let dateDocDisplay = d.doc_date ? new Date(d.doc_date).toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric' }) : '-';
 
                         res.innerHTML += `
-                        <div class="bg-white rounded-2xl border border-gray-200 p-6 mb-4 shadow-sm hover:border-orange-300 transition-colors relative">
+                        <div class="bg-white rounded-2xl border p-6 mb-4 shadow-sm hover:border-orange-300 transition-colors relative">
                             <div class="flex justify-between items-start mb-2">
                                 <span class="text-orange-500 font-bold text-xs bg-orange-50 px-2.5 py-1 rounded-md">หมวด: ${d.category} - ${catNames[d.category] || 'ทั่วไป'}</span>
                                 <div class="text-right bg-gray-50 px-3 py-1.5 rounded-lg">

@@ -306,7 +306,6 @@
                                 <option value="อสพ">เอกสารสัมพันธ์ (อสพ.)</option><option value="สมช">ฝ่ายสมาชิกสัมพันธ์ (สมช.)</option><option value="สธส">ฝ่ายสาธารณสุขสัมพันธ์ (สธส.)</option>
                                 <option value="วนธ">ฝ่ายวัฒนธรรม (วนธ.)</option><option value="กษส">ฝ่ายเกษตรสัมพันธ์ (กษส.)</option><option value="ชสพ">ฝ่ายชุมชนสัมพันธ์ (ชสพ.)</option>
                                 <option value="กกส">ฝ่ายกิจกรรมสัมพันธ์ (กกส.)</option><option value="ศสพ">ฝ่ายศึกษาสัมพันธ์ (ศสพ.)</option><option value="อกป">ฝ่ายอำนวยการและปฏิสัมพันธ์ (อกป.)</option>
-                                <option value="ฝ่ายประชาสัมพันธ์">ฝ่ายประชาสัมพันธ์</option><option value="ฝ่ายเทคโนโลยีและสารสนเทศ">ฝ่ายเทคโนโลยีและสารสนเทศ</option><option value="ฝ่ายการศึกษาและฝึกอบรม">ฝ่ายการศึกษาและฝึกอบรม</option><option value="ฝ่ายภาพ วิดิโอ และโพรดักชัน">ฝ่ายภาพ วิดิโอ และโพรดักชัน</option>
                             </select>
                         </div>
                         <div><label class="block text-xs font-medium text-gray-700 mb-1">เลขที่เอกสาร *</label><input type="text" id="modalDocId" required class="w-full px-3 py-2 border rounded-lg text-sm bg-gray-50 outline-none focus:ring-2 focus:ring-orange-500"></div>
@@ -481,7 +480,7 @@
                         <div id="notifDropdown" class="absolute right-0 mt-2 w-80 bg-white rounded-xl shadow-xl border border-gray-100 hidden flex-col z-[100] max-h-96 overflow-hidden">
                             <div class="px-4 py-3 border-b border-gray-50 bg-gray-50/50 flex justify-between items-center">
                                 <span class="font-bold text-sm text-gray-800">การแจ้งเตือน</span>
-                                <button onclick="markAllNotifsRead(event)" class="text-[10px] text-blue-500 hover:underline">ทำเครื่องหมายว่าอ่านแล้ว</button>
+                                <button onclick="markAllNotifsRead(event)" class="text-[10px] text-blue-500 hover:underline">อ่านทั้งหมด</button>
                             </div>
                             <div id="notifList" class="overflow-y-auto flex-1 p-2 space-y-1">
                                 <!-- Notifs go here -->
@@ -510,7 +509,7 @@
                         </div>
                         <div class="flex flex-col sm:flex-row gap-3">
                             <select id="docDepartment" class="w-full sm:w-1/4 px-3 py-2.5 border border-gray-300 rounded-xl bg-gray-50 text-sm focus:ring-2 focus:ring-orange-500 outline-none">
-                                <option value="">ทุกฝ่าย (All)</option><option value="หัวหน้าภูมิภาค">หัวหน้าภูมิภาค</option><option value="อสพ">เอกสารสัมพันธ์ (อสพ.)</option><option value="สมช">ฝ่ายสมาชิกสัมพันธ์ (สมช.)</option><option value="สธส">ฝ่ายสาธารณสุขสัมพันธ์ (สธส.)</option><option value="วนธ">ฝ่ายวัฒนธรรม (วนธ.)</option><option value="กษส">ฝ่ายเกษตรสัมพันธ์ (กษส.)</option><option value="ชสพ">ฝ่ายชุมชนสัมพันธ์ (ชสพ.)</option><option value="กกส">ฝ่ายกิจกรรมสัมพันธ์ (กกส.)</option><option value="ศสพ">ฝ่ายศึกษาสัมพันธ์ (ศสพ.)</option><option value="อกป">ฝ่ายอำนวยการและปฏิสัมพันธ์ (อกป.)</option><option value="ฝ่ายประชาสัมพันธ์">ฝ่ายประชาสัมพันธ์</option><option value="ฝ่ายเทคโนโลยีและสารสนเทศ">ฝ่ายเทคโนโลยีและสารสนเทศ</option><option value="ฝ่ายการศึกษาและฝึกอบรม">ฝ่ายการศึกษาและฝึกอบรม</option><option value="ฝ่ายภาพ วิดิโอ และโพรดักชัน">ฝ่ายภาพ วิดิโอ และโพรดักชัน</option>
+                                <option value="">ทุกฝ่าย (All)</option><option value="อสพ">เอกสารสัมพันธ์ (อสพ.)</option><option value="สมช">ฝ่ายสมาชิกสัมพันธ์ (สมช.)</option><option value="สธส">ฝ่ายสาธารณสุขสัมพันธ์ (สธส.)</option><option value="วนธ">ฝ่ายวัฒนธรรม (วนธ.)</option><option value="กษส">ฝ่ายเกษตรสัมพันธ์ (กษส.)</option><option value="ชสพ">ฝ่ายชุมชนสัมพันธ์ (ชสพ.)</option><option value="กกส">ฝ่ายกิจกรรมสัมพันธ์ (กกส.)</option><option value="ศสพ">ฝ่ายศึกษาสัมพันธ์ (ศสพ.)</option><option value="อกป">ฝ่ายอำนวยการและปฏิสัมพันธ์ (อกป.)</option>
                             </select>
                             <select id="docCategory" class="w-full sm:w-1/4 px-3 py-2.5 border border-gray-300 rounded-xl bg-gray-50 text-sm focus:ring-2 focus:ring-orange-500 outline-none">
                                 <option value="">ทุกหมวดหมู่ (All)</option><option value="01">01 - ทั่วไป</option><option value="02">02 - รับรองการทำกิจกรรม</option><option value="03">03 - รับรองสมาชิก</option><option value="04">04 - ลาเรียน</option><option value="05">05 - เยี่ยมชม</option><option value="06">06 - ขอข้อมูล</option><option value="07">07 - ขอเข้าพบ</option><option value="08">08 - ประชาสัมพันธ์</option><option value="09">09 - ขอเชิญเข้าร่วม</option>
@@ -577,7 +576,7 @@
                     <!-- KANBAN BOARD SECTION (Eisenhower Matrix) -->
                     <div id="kanbanSection" class="hidden mb-10">
                         <div class="flex justify-between items-center mb-4">
-                            <h3 class="text-lg font-bold text-gray-800 flex items-center">
+                            <h3 id="kanbanTitleUI" class="text-lg font-bold text-gray-800 flex items-center">
                                 <svg class="w-5 h-5 mr-2 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2" /></svg>
                                 กระดานบริหารจัดการ (Quadrant)
                             </h3>
@@ -756,7 +755,22 @@
         let currentDeptChartType = 'bar';
         let currentViewingTaskId = null;
 
-        const deptNames = { "หัวหน้าภูมิภาค": "หัวหน้าภูมิภาค", "อสพ": "เอกสารสัมพันธ์ (อสพ.)", "สมช": "ฝ่ายสมาชิกสัมพันธ์ (สมช.)", "สธส": "ฝ่ายสาธารณสุขสัมพันธ์ (สธส.)", "วนธ": "ฝ่ายวัฒนธรรม (วนธ.)", "กษส": "ฝ่ายเกษตรสัมพันธ์ (กษส.)", "ชสพ": "ฝ่ายชุมชนสัมพันธ์ (ชสพ.)", "กกส": "ฝ่ายกิจกรรมสัมพันธ์ (กกส.)", "ศสพ": "ฝ่ายศึกษาสัมพันธ์ (ศสพ.)", "อกป": "ฝ่ายอำนวยการและปฏิสัมพันธ์ (อกป.)", "ฝ่ายประชาสัมพันธ์": "ฝ่ายประชาสัมพันธ์", "ฝ่ายเทคโนโลยีและสารสนเทศ": "ฝ่ายเทคโนโลยีและสารสนเทศ", "ฝ่ายการศึกษาและฝึกอบรม": "ฝ่ายการศึกษาและฝึกอบรม", "ฝ่ายภาพ วิดิโอ และโพรดักชัน": "ฝ่ายภาพ วิดิโอ และโพรดักชัน" };
+        const deptNames = { 
+            "หัวหน้าภูมิภาค": "หัวหน้าภูมิภาค", 
+            "อสพ": "เอกสารสัมพันธ์ (อสพ.)", 
+            "สมช": "ฝ่ายสมาชิกสัมพันธ์ (สมช.)", 
+            "สธส": "ฝ่ายสาธารณสุขสัมพันธ์ (สธส.)", 
+            "วนธ": "ฝ่ายวัฒนธรรม (วนธ.)", 
+            "กษส": "ฝ่ายเกษตรสัมพันธ์ (กษส.)", 
+            "ชสพ": "ฝ่ายชุมชนสัมพันธ์ (ชสพ.)", 
+            "กกส": "ฝ่ายกิจกรรมสัมพันธ์ (กกส.)", 
+            "ศสพ": "ฝ่ายศึกษาสัมพันธ์ (ศสพ.)", 
+            "อกป": "ฝ่ายอำนวยการและปฏิสัมพันธ์ (อกป.)", 
+            "ฝ่ายประชาสัมพันธ์": "ฝ่ายประชาสัมพันธ์", 
+            "ฝ่ายเทคโนโลยีและสารสนเทศ": "ฝ่ายเทคโนโลยีและสารสนเทศ", 
+            "ฝ่ายการศึกษาและฝึกอบรม": "ฝ่ายการศึกษาและฝึกอบรม", 
+            "ฝ่ายภาพ วิดิโอ และโพรดักชัน": "ฝ่ายภาพ วิดิโอ และโพรดักชัน" 
+        };
         const catNames = { "01": "ทั่วไป", "02": "รับรองการทำกิจกรรม", "03": "รับรองสมาชิก", "04": "ลาเรียน", "05": "เยี่ยมชม", "06": "ขอข้อมูล", "07": "ขอเข้าพบ", "08": "ประชาสัมพันธ์", "09": "ขอเชิญเข้าร่วม" };
 
         const quadNames = { "q1": "1. ด่วน-สำคัญ", "q2": "2. ด่วน-ไม่สำคัญ", "q3": "3. ไม่ด่วน-สำคัญ", "q4": "4. ไม่ด่วน-ไม่สำคัญ", "revise": "5. แก้ไข", "approved": "6. อนุมัติ" };
@@ -768,7 +782,7 @@
             const container = document.getElementById('toast-container');
             const toast = document.createElement('div');
             const colorClass = type === 'success' ? 'bg-emerald-500' : (type === 'error' ? 'bg-red-500' : 'bg-blue-500');
-            const icon = type === 'success' ? '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />' : '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />';
+            const icon = type === 'success' ? '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />' : '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />';
             
             toast.className = `flex items-center gap-3 px-4 py-3 rounded-xl text-white shadow-lg transform transition-all duration-300 translate-x-full opacity-0 ${colorClass}`;
             toast.innerHTML = `<svg class="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">${icon}</svg><p class="text-sm font-medium">${message}</p>`;
@@ -791,6 +805,10 @@
             document.getElementById('confirmModal').classList.add('opacity-0');
             setTimeout(() => { document.getElementById('confirmModal').classList.add('hidden'); document.getElementById('confirmModal').classList.remove('flex'); confirmActionCallback = null; }, 200);
         }
+        document.getElementById('confirmBtn').addEventListener('click', () => {
+            if (confirmActionCallback) confirmActionCallback();
+            closeConfirm();
+        });
         
         function renderSidebarMenu() {
             const menuContainer = document.getElementById('dynamicDeptMenu');
@@ -840,7 +858,7 @@
             let roleDisplay = 'ผู้ใช้ทั่วไป';
             if (user.role === 'Administrator') roleDisplay = 'ผู้ดูแลระบบ (Admin)';
             else if (user.role === 'President') roleDisplay = 'ประธาน (President)';
-            else if (user.role === 'Working Team') roleDisplay = `คณะทำงาน (${user.department})`;
+            else if (user.role === 'Working Team') roleDisplay = `คณะทำงาน`;
 
             document.getElementById('userFullName').innerText = user.fullname; document.getElementById('userRole').innerText = roleDisplay; document.getElementById('userInitial').innerText = user.fullname.charAt(0);
             
@@ -851,7 +869,7 @@
             if (user.role === 'Administrator') {
                 document.getElementById('adminOnlyMenu').classList.remove('hidden');
             }
-            if (['Administrator', 'President'].includes(user.role) || (user.role === 'Working Team' && user.department === 'สมช')) {
+            if (['Administrator', 'President'].includes(user.role) || (user.role === 'Working Team' && currentUser.department.includes('สมช'))) {
                 document.getElementById('csvUploadSection').classList.remove('hidden');
             }
             
@@ -894,14 +912,17 @@
             else { document.getElementById('dashboardTitle').innerText = `กระดานฝ่าย: ${deptNames[deptCode] || deptCode}`; }
             
             const btnAdd = document.getElementById('addTaskBtnUI'); 
-            const canAdd = ['Administrator', 'President'].includes(currentUser.role) || (currentUser.role === 'Working Team' && currentUser.department === deptCode);
+            const canAdd = ['Administrator', 'President'].includes(currentUser.role) || (currentUser.role === 'Working Team' && currentUser.department.includes(deptCode));
             if (canAdd) btnAdd.classList.remove('hidden'); else btnAdd.classList.add('hidden');
             
             // Kanban Visibility
             const kSection = document.getElementById('kanbanSection');
-            if (deptCode !== 'all' && (['President', 'Administrator'].includes(currentUser.role) || currentUser.department === deptCode)) {
+            const kTitle = document.getElementById('kanbanTitleUI');
+            if (deptCode === 'all' && ['President', 'Administrator'].includes(currentUser.role)) {
+                if(kTitle) kTitle.innerHTML = '<svg class="w-5 h-5 mr-2 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2" /></svg>กระดานบริหารจัดการรวม (ทุกฝ่าย)';
                 kSection.classList.remove('hidden');
-            } else if (deptCode === 'all' && ['President', 'Administrator'].includes(currentUser.role)) {
+            } else if (deptCode !== 'all' && (['President', 'Administrator'].includes(currentUser.role) || currentUser.department.includes(deptCode))) {
+                if(kTitle) kTitle.innerHTML = '<svg class="w-5 h-5 mr-2 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2" /></svg>กระดานบริหารจัดการ (Quadrant)';
                 kSection.classList.remove('hidden');
             } else {
                 kSection.classList.add('hidden');
@@ -966,7 +987,7 @@
                 tbody.innerHTML = '';
                 data.forEach(u => {
                     let badge = u.role === 'Administrator' ? 'bg-red-100 text-red-700' : (u.role === 'President' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700');
-                    let deptDisp = u.department === 'ทั้งหมด' ? 'ทั้งหมด (Admin/Pres)' : (deptNames[u.department] || u.department);
+                    let deptDisp = u.department === 'ทั้งหมด' ? 'ทั้งหมด (Admin/Pres)' : u.department;
                     tbody.innerHTML += `<tr>
                         <td class="px-6 py-4 font-mono text-sm">${u.username}</td>
                         <td class="px-6 py-4"><button onclick="viewUserHistory('${u.fullname}')" class="font-bold text-blue-600 hover:text-blue-800 hover:underline transition-colors">${u.fullname}</button></td>
@@ -1017,7 +1038,10 @@
                 tbody.innerHTML = '<tr><td colspan="3" class="text-center py-5 text-red-500">เกิดข้อผิดพลาดในการโหลด</td></tr>';
             }
         }
-        function closeUserHistoryModal() { document.getElementById('userHistoryModal').classList.add('hidden'); document.getElementById('userHistoryModal').classList.remove('flex'); }
+        function closeUserHistoryModal() {
+            document.getElementById('userHistoryModal').classList.add('hidden');
+            document.getElementById('userHistoryModal').classList.remove('flex');
+        }
 
         // --- Members CSV Upload ---
         async function handleCSVUpload(event) {
@@ -1094,7 +1118,7 @@
                     if (t.status === 'completed') {
                         if (!t.due_date) onTimeCount++;
                         else {
-                            const d = new Date(t.due_date); const c = new Date(t.created_at); // สมมติว่าเสร็จตอนที่สร้าง (ในอนาคตควรมี completed_at)
+                            const d = new Date(t.due_date); const c = new Date(t.created_at);
                             if (!checkTaskOverdueStatus(t).isOverdue) onTimeCount++;
                         }
                     }
@@ -1180,11 +1204,9 @@
                 let b = t.status==='completed'?'<span class="text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-md text-xs font-bold border border-emerald-200">เสร็จสิ้น</span>':(t.status==='in_progress'?'<span class="text-amber-700 bg-amber-50 px-2.5 py-1 rounded-md text-xs font-bold border border-amber-200">กำลังทำ</span>':'<span class="text-gray-600 bg-gray-100 px-2.5 py-1 rounded-md text-xs font-bold border border-gray-200">รอเริ่ม</span>');
                 let dDisplay = t.due_date ? new Date(t.due_date).toLocaleDateString('th-TH') : '-'; if (ov.isOverdue) { b = `<span class="text-red-700 bg-red-50 px-2.5 py-1 rounded-md text-xs font-bold border border-red-200 animate-pulse">เลยกำหนด ${ov.days} วัน</span>`; dDisplay = `<span class="text-red-500 font-bold">${dDisplay}</span>`; }
                 
-                const canEditDelete = ['Administrator', 'President'].includes(currentUser.role) || (currentUser.role === 'Working Team' && currentUser.department === t.department);
+                const canEditDelete = ['Administrator', 'President'].includes(currentUser.role) || (currentUser.role === 'Working Team' && currentUser.department.includes(t.department));
                 let act = `<button onclick="viewTask(${t.id})" class="text-gray-600 bg-gray-100 px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-gray-200 transition-colors mr-2">รายละเอียด</button>`;
-                if (canEditDelete) {
-                    act += `<button onclick="editTask(${t.id})" class="text-blue-600 bg-blue-50 px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-blue-100 transition-colors mr-2">อัปเดต</button><button onclick="deleteTask(${t.id}, '${t.title}')" class="text-red-600 bg-red-50 px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-red-100 transition-colors">ลบ</button>`;
-                }
+                
                 const deptFullName = deptNames[t.department] || t.department;
                 
                 let titleHtml = t.title;
@@ -1202,22 +1224,13 @@
                 else { lbs = [viewMode+'.']; cd=[tasks.filter(t=>t.status==='completed').length]; pg=[tasks.filter(t=>t.status==='in_progress').length]; pd=[tasks.filter(t=>t.status==='pending').length]; }
                 deptChartInstance = new Chart(document.getElementById('deptChart').getContext('2d'), { type: 'bar', data: { labels: lbs, datasets: [{ label: 'เสร็จสิ้น', data: cd, backgroundColor: '#10b981', borderRadius: 4 }, { label: 'กำลังทำ', data: pg, backgroundColor: '#f59e0b', borderRadius: 4 }, { label: 'รอเริ่ม', data: pd, backgroundColor: '#e5e7eb', borderRadius: 4 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'top', labels:{font:{family:'Sarabun'}} } }, scales: { x: { stacked: true, ticks:{font:{family:'Sarabun'}} }, y: { stacked: true, beginAtZero: true, ticks: { stepSize: 1, font:{family:'Sarabun'} } } } } });
             } else {
-                if (viewMode === 'all') {
-                    const dpt = Object.keys(deptNames);
-                    let data = dpt.map(d => tasks.filter(t => t.department === d).length);
-                    let labels = dpt.map(d => deptNames[d]);
-                    deptChartInstance = new Chart(document.getElementById('deptChart').getContext('2d'), { 
-                        type: 'pie', 
-                        data: { labels: labels, datasets: [{ data: data, backgroundColor: ['#3b82f6', '#f97316', '#10b981', '#8b5cf6', '#ec4899', '#f59e0b', '#64748b', '#06b6d4', '#84cc16', '#ef4444', '#14b8a6', '#6366f1', '#a855f7', '#f43f5e'], borderWidth: 0 }] }, 
-                        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right', labels:{font:{family:'Sarabun', size:10}} } } } 
-                    });
-                } else {
-                    let cd = 0, pg = 0, pd = 0; let targetTasks = tasks.filter(t => t.department === viewMode);
-                    cd = targetTasks.filter(t => t.status === 'completed').length; pg = targetTasks.filter(t => t.status === 'in_progress').length; pd = targetTasks.filter(t => t.status === 'pending').length;
-                    deptChartInstance = new Chart(document.getElementById('deptChart').getContext('2d'), { 
-                        type: 'pie', data: { labels: ['เสร็จสิ้น', 'กำลังทำ', 'รอเริ่ม'], datasets: [{ data: [cd, pg, pd], backgroundColor: ['#10b981', '#f59e0b', '#e5e7eb'], borderWidth: 0 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right', labels:{font:{family:'Sarabun'}} } } } 
-                    });
-                }
+                let cd = 0, pg = 0, pd = 0;
+                let targetTasks = viewMode === 'all' ? tasks : tasks.filter(t => t.department === viewMode);
+                cd = targetTasks.filter(t => t.status === 'completed').length;
+                pg = targetTasks.filter(t => t.status === 'in_progress').length;
+                pd = targetTasks.filter(t => t.status === 'pending').length;
+                
+                deptChartInstance = new Chart(document.getElementById('deptChart').getContext('2d'), { type: 'pie', data: { labels: ['เสร็จสิ้น', 'กำลังทำ', 'รอเริ่ม'], datasets: [{ data: [cd, pg, pd], backgroundColor: ['#10b981', '#f59e0b', '#e5e7eb'], borderWidth: 0 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right', labels:{font:{family:'Sarabun'}} } } } });
             }
         }
         const thMonths = ["มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน", "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"];
@@ -1336,7 +1349,7 @@
                     document.getElementById('action-president').classList.remove('hidden');
                     document.getElementById('action-dept').classList.remove('hidden');
                     document.getElementById('vt-change-quadrant').value = data.quadrant || 'q1';
-                } else if (currentUser.department === data.department) {
+                } else if (currentUser.department.includes(data.department)) {
                     document.getElementById('action-president').classList.add('hidden');
                     document.getElementById('action-dept').classList.remove('hidden');
                     document.getElementById('vt-change-quadrant').value = data.quadrant || 'q1';
@@ -1359,7 +1372,7 @@
                 showToast('อัปเดตสถานะบอร์ดสำเร็จ');
                 
                 // แจ้งเตือนฝ่าย ถ้าประธานกดอนุมัติ/ตีกลับ
-                if (['approve', 'revise'].includes(newStatus) && currentUser.role === 'President') {
+                if (['approved', 'revise'].includes(newStatus) && currentUser.role === 'President') {
                     const {data} = await supabaseClient.from('tasks').select('department, title').eq('id', currentViewingTaskId).single();
                     let msg = newStatus === 'approved' ? `อนุมัติงาน: ${data.title}` : `ตีกลับ/แก้ไขงาน: ${data.title}`;
                     await supabaseClient.from('notifications').insert([{target_group: data.department, message: msg, task_id: currentViewingTaskId}]);
@@ -1425,7 +1438,7 @@
                 
                 if (data && data.length > 0) {
                     data.forEach(d => {
-                        const canEditDelete = ['Administrator', 'President'].includes(currentUser.role) || (currentUser.role === 'Working Team' && currentUser.department === d.department);
+                        const canEditDelete = ['Administrator', 'President'].includes(currentUser.role) || (currentUser.role === 'Working Team' && currentUser.department.includes(d.department));
                         let dBtn = canEditDelete ? `<button onclick="deleteDoc(${d.id}, '${d.title}')" class="text-red-500 bg-red-50 px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-red-500 hover:text-white transition-colors">ลบเอกสาร</button>` : '';
                         let pdf = d.pdf_link && d.pdf_link !== "-" ? `<a href="${d.pdf_link}" target="_blank" class="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg text-xs font-bold mt-4 inline-flex items-center shadow-sm transition-colors"><svg class="w-4 h-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg> ดาวน์โหลด PDF</a>` : '';
                         
@@ -1527,17 +1540,23 @@
 
         function openAddModal() { 
             document.getElementById('addDocForm').reset(); 
-            if (['Working Team'].includes(currentUser.role)) { document.getElementById('modalDept').value = currentUser.department; document.getElementById('modalDept').disabled = true; } 
-            else { document.getElementById('modalDept').disabled = false; }
+            if (['Working Team'].includes(currentUser.role)) { 
+                // เลือกค่าเริ่มต้นให้ถ้ามีฝ่ายเดียว
+                const dpts = currentUser.department.split(',').map(d=>d.trim());
+                if(dpts.length > 0) document.getElementById('modalDept').value = dpts[0]; 
+            } 
             document.getElementById('addDocModal').classList.remove('hidden'); 
         } 
         function closeAddModal() { document.getElementById('addDocModal').classList.add('hidden'); }
         
         function openAddTaskModal() { 
             document.getElementById('addTaskForm').reset(); document.getElementById('taskId').value=''; document.getElementById('taskDesc').value='';
-            if (['Working Team'].includes(currentUser.role)) { document.getElementById('taskDept').value = currentUser.department; document.getElementById('taskDept').disabled = true; } 
-            else if (currentDashboardView !== 'all') { document.getElementById('taskDept').value = currentDashboardView; document.getElementById('taskDept').disabled = false; } 
-            else { document.getElementById('taskDept').disabled = false; }
+            if (['Working Team'].includes(currentUser.role)) { 
+                const dpts = currentUser.department.split(',').map(d=>d.trim());
+                if(dpts.length > 0) document.getElementById('taskDept').value = dpts[0]; 
+            } 
+            else if (currentDashboardView !== 'all') { document.getElementById('taskDept').value = currentDashboardView; } 
+            
             document.querySelector('input[name="t-placement"][value="both"]').checked = true;
             toggleTaskPlacementUI();
             document.getElementById('addTaskModal').classList.remove('hidden'); 
@@ -1545,6 +1564,15 @@
         function closeAddTaskModal() { document.getElementById('addTaskModal').classList.add('hidden'); }
         
         function toggleSidebar() { const sb = document.getElementById('sidebar'); sb.classList.toggle('hidden'); sb.classList.toggle('absolute'); sb.classList.toggle('inset-y-0'); sb.classList.toggle('left-0'); }
+        
+        // Safety check for google charts drawing
+        function drawThailandMap() {
+            if (typeof google === 'undefined' || !google.visualization || !google.visualization.GeoChart) return;
+            const provCounts = {}; allMembersData.forEach(m => { let prov = m.province || ''; if (prov && !prov.includes('อื่น')) provCounts[prov] = (provCounts[prov] || 0) + 1; });
+            let mapData = [['Province', 'จำนวนสมาชิก']]; Object.keys(provCounts).forEach(p => mapData.push([p, provCounts[p]]));
+            var chart = new google.visualization.GeoChart(document.getElementById('thailandMap'));
+            chart.draw(google.visualization.arrayToDataTable(mapData), { region: 'TH', displayMode: 'regions', resolution: 'provinces', colorAxis: {colors: ['#e0f2fe', '#1d4ed8']}, backgroundColor: 'transparent', datalessRegionColor: '#f3f4f6', defaultColor: '#f5f5f5', tooltip: {textStyle: {fontName: 'Sarabun'}} });
+        }
     </script>
 </body>
 </html>

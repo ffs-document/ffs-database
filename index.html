@@ -20,12 +20,14 @@
         .calendar-day { min-height: 110px; transition: all 0.2s ease; cursor: pointer; }
         .calendar-day:hover { transform: scale(1.02); z-index: 10; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); border-color: #fbd38d; }
         .card-active { ring-2 ring-orange-500 bg-orange-50/30 transform scale-[1.02] shadow-md; border-color: #f97316 !important; }
-        /* Trello Kanban Scroll */
-        .kanban-container { display: flex; gap: 1rem; overflow-x: auto; padding-bottom: 1rem; scroll-snap-type: x mandatory; }
-        .kanban-col { min-width: 280px; max-width: 280px; background: #f8fafc; border-radius: 0.75rem; padding: 0.75rem; display: flex; flex-direction: column; max-height: 600px; scroll-snap-align: start; }
-        .kanban-cards { flex-grow: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 0.5rem; padding-right: 0.25rem; }
-        .kanban-card { background: white; padding: 0.75rem; border-radius: 0.5rem; box-shadow: 0 1px 2px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; cursor: pointer; transition: all 0.2s; }
-        .kanban-card:hover { border-color: #fbd38d; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
+        
+        /* Trello Kanban Style */
+        .trello-board { display: flex; gap: 1rem; overflow-x: auto; height: calc(100vh - 120px); padding-bottom: 1rem; align-items: flex-start; scroll-snap-type: x mandatory; }
+        .trello-col { background-color: #ebecf0; border-radius: 0.75rem; min-width: 320px; max-width: 320px; display: flex; flex-direction: column; max-height: 100%; scroll-snap-align: start; }
+        .trello-col-header { padding: 1rem; font-weight: 700; font-size: 0.875rem; display: flex; justify-content: space-between; align-items: center; color: #172b4d; border-top-width: 4px; border-top-style: solid; border-top-left-radius: 0.75rem; border-top-right-radius: 0.75rem; }
+        .trello-col-cards { padding: 0 0.75rem 0.75rem 0.75rem; overflow-y: auto; display: flex; flex-direction: column; gap: 0.5rem; }
+        .trello-card { background-color: #fff; border-radius: 0.5rem; box-shadow: 0 1px 2px rgba(9,30,66,0.25); padding: 0.75rem; cursor: pointer; transition: background-color 0.2s, box-shadow 0.2s; border: 1px solid transparent; }
+        .trello-card:hover { background-color: #f4f5f7; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); border-color: #cbd5e1; }
     </style>
 </head>
 <body class="bg-gray-50 h-screen overflow-hidden text-gray-900 selection:bg-orange-200 selection:text-orange-900 relative">
@@ -47,7 +49,6 @@
                 <div class="space-y-4">
                     <div><input type="text" id="userInput" placeholder="รหัสสมาชิก (เช่น admin)" class="block w-full px-4 py-2.5 border border-gray-300 rounded-xl bg-gray-50 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"></div>
                     <div><input type="password" id="passwordInput" placeholder="รหัสผ่าน" class="block w-full px-4 py-2.5 border border-gray-300 rounded-xl bg-gray-50 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"></div>
-                    <div id="loginError" class="hidden text-[11px] text-red-600 bg-red-50 p-2 rounded-lg text-center border border-red-100"><span id="errorMessage"></span></div>
                     <button id="loginBtn" onclick="handleLogin()" class="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-2.5 rounded-xl text-sm transition-all shadow-xs"><span id="loginBtnText">เข้าสู่ระบบ</span></button>
                 </div>
             </div>
@@ -147,6 +148,8 @@
                             <option value="q2">2. ด่วน-ไม่สำคัญ</option>
                             <option value="q3">3. ไม่ด่วน-สำคัญ</option>
                             <option value="q4">4. ไม่ด่วน-ไม่สำคัญ</option>
+                            <option value="revise">5. แก้ไข</option>
+                            <option value="approved">6. อนุมัติ</option>
                         </select>
                     </div>
                 </div>
@@ -163,7 +166,6 @@
             </div>
             <div class="p-6">
                 <form id="userForm" onsubmit="submitUser(event)" class="space-y-4">
-                    <input type="hidden" id="u-id">
                     <div><label class="block text-xs font-medium text-gray-700 mb-1">รหัสสมาชิก (ใช้สำหรับล็อกอิน) *</label><input type="text" id="u-username" required class="w-full px-3 py-2 border rounded-lg text-sm bg-gray-50 focus:ring-2 focus:ring-orange-500 outline-none"></div>
                     <div><label class="block text-xs font-medium text-gray-700 mb-1">รหัสผ่าน *</label><input type="text" id="u-password" required class="w-full px-3 py-2 border rounded-lg text-sm bg-gray-50 focus:ring-2 focus:ring-orange-500 outline-none"></div>
                     <div><label class="block text-xs font-medium text-gray-700 mb-1">ชื่อ-นามสกุล *</label><input type="text" id="u-fullname" required class="w-full px-3 py-2 border rounded-lg text-sm bg-gray-50 focus:ring-2 focus:ring-orange-500 outline-none"></div>
@@ -306,6 +308,7 @@
                                 <option value="อสพ">เอกสารสัมพันธ์ (อสพ.)</option><option value="สมช">ฝ่ายสมาชิกสัมพันธ์ (สมช.)</option><option value="สธส">ฝ่ายสาธารณสุขสัมพันธ์ (สธส.)</option>
                                 <option value="วนธ">ฝ่ายวัฒนธรรม (วนธ.)</option><option value="กษส">ฝ่ายเกษตรสัมพันธ์ (กษส.)</option><option value="ชสพ">ฝ่ายชุมชนสัมพันธ์ (ชสพ.)</option>
                                 <option value="กกส">ฝ่ายกิจกรรมสัมพันธ์ (กกส.)</option><option value="ศสพ">ฝ่ายศึกษาสัมพันธ์ (ศสพ.)</option><option value="อกป">ฝ่ายอำนวยการและปฏิสัมพันธ์ (อกป.)</option>
+                                <option value="ฝ่ายประชาสัมพันธ์">ฝ่ายประชาสัมพันธ์</option><option value="ฝ่ายเทคโนโลยีและสารสนเทศ">ฝ่ายเทคโนโลยีและสารสนเทศ</option><option value="ฝ่ายการศึกษาและฝึกอบรม">ฝ่ายการศึกษาและฝึกอบรม</option><option value="ฝ่ายภาพ วิดิโอ และโพรดักชัน">ฝ่ายภาพ วิดิโอ และโพรดักชัน</option>
                             </select>
                         </div>
                         <div><label class="block text-xs font-medium text-gray-700 mb-1">เลขที่เอกสาร *</label><input type="text" id="modalDocId" required class="w-full px-3 py-2 border rounded-lg text-sm bg-gray-50 outline-none focus:ring-2 focus:ring-orange-500"></div>
@@ -359,7 +362,12 @@
                                 <option value="ฝ่ายประชาสัมพันธ์">ฝ่ายประชาสัมพันธ์</option><option value="ฝ่ายเทคโนโลยีและสารสนเทศ">ฝ่ายเทคโนโลยีและสารสนเทศ</option><option value="ฝ่ายการศึกษาและฝึกอบรม">ฝ่ายการศึกษาและฝึกอบรม</option><option value="ฝ่ายภาพ วิดิโอ และโพรดักชัน">ฝ่ายภาพ วิดิโอ และโพรดักชัน</option>
                             </select>
                         </div>
-                        <div id="ui-task-status"><label class="block text-xs font-medium text-gray-700 mb-1">สถานะในตาราง *</label><select id="taskStatus" class="w-full px-3 py-2 border rounded-lg text-sm bg-gray-50 outline-none focus:ring-2 focus:ring-orange-500"><option value="pending">รอดำเนินการ</option><option value="in_progress">กำลังดำเนินการ</option><option value="completed">เสร็จสิ้นแล้ว</option></select></div>
+                        <div id="ui-task-status"><label class="block text-xs font-medium text-gray-700 mb-1">สถานะในตาราง *</label>
+                            <select id="taskStatus" class="w-full px-3 py-2 border rounded-lg text-sm bg-gray-50 outline-none focus:ring-2 focus:ring-orange-500">
+                                <option value="in_progress">กำลังดำเนินการ</option>
+                                <option value="completed">เสร็จสิ้นแล้ว</option>
+                            </select>
+                        </div>
                     </div>
 
                     <div id="ui-task-quadrant" class="bg-gray-50 border border-gray-200 p-3 rounded-xl mt-2 hidden">
@@ -435,10 +443,17 @@
                 <!-- การจัดการระบบสำหรับผู้บริหาร/Admin -->
                 <div id="managementMenuSection" class="hidden">
                     <p class="px-6 text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2">การบริหารจัดการระบบ</p>
+                    
+                    <a href="#" onclick="switchView('executive-board')" id="nav-executive-board" class="flex items-center px-6 py-2.5 nav-inactive border-r-4 border-transparent hover:bg-gray-50 transition-all">
+                        <svg class="w-5 h-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2" /></svg>
+                        <span class="text-sm">กระดานสำหรับผู้บริหาร</span>
+                    </a>
+
                     <a href="#" onclick="switchView('users')" id="nav-users" class="flex items-center px-6 py-2.5 nav-inactive border-r-4 border-transparent hover:bg-gray-50 transition-all">
                         <svg class="w-5 h-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
                         <span class="text-sm">จัดการผู้ใช้งาน</span>
                     </a>
+
                     <div id="adminOnlyMenu" class="hidden">
                         <a href="#" onclick="switchView('settings')" id="nav-settings" class="flex items-center px-6 py-2.5 nav-inactive border-r-4 border-transparent hover:bg-gray-50 hover:text-orange-500 transition-all">
                             <svg class="w-5 h-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /></svg>
@@ -469,6 +484,10 @@
                 <div class="flex items-center">
                     <button onclick="toggleSidebar()" class="text-gray-500 hover:text-orange-500 focus:outline-none md:hidden mr-4 transition-colors"><svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" /></svg></button>
                     <div class="hidden md:flex items-center space-x-2 text-xs bg-emerald-50 px-3 py-1.5 rounded-full border border-emerald-100"><span class="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></span><span class="font-medium text-emerald-700">FFs Database Online</span></div>
+                    <button id="alertPresidentBtn" onclick="sendAlertToPresident()" class="hidden ml-4 bg-red-100 hover:bg-red-200 text-red-600 font-bold px-3 py-1.5 rounded-lg text-xs transition-colors flex items-center">
+                        <svg class="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" /></svg>
+                        แจ้งเตือนประธานให้ตรวจงาน
+                    </button>
                 </div>
                 <div class="flex items-center gap-4">
                     <!-- Notification Bell -->
@@ -491,17 +510,17 @@
                 </div>
             </header>
 
-            <main class="flex-1 overflow-y-auto p-4 sm:p-6 bg-gray-50">
+            <main class="flex-1 overflow-y-auto bg-gray-50 relative">
                 
                 <!-- 0. หน้า ปิดปรับปรุง (Maintenance View) -->
-                <div id="view-maintenance" class="max-w-3xl mx-auto hidden flex-col items-center justify-center h-[70vh] animate-fade-in text-center">
+                <div id="view-maintenance" class="max-w-3xl mx-auto hidden flex-col items-center justify-center h-[70vh] animate-fade-in text-center p-6">
                     <div class="bg-gray-200 p-6 rounded-full mb-6 text-gray-500"><svg class="w-20 h-20" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg></div>
                     <h2 class="text-3xl font-bold text-gray-900 mb-3">ระบบกำลังปิดปรับปรุง</h2>
                     <p class="text-gray-500 max-w-md mx-auto">ผู้ดูแลระบบกำลังดำเนินการปรับปรุงแก้ไขระบบในส่วนนี้ เพื่อประสบการณ์การใช้งานที่ดียิ่งขึ้น กรุณาเข้าใช้งานใหม่ในภายหลัง</p>
                 </div>
 
                 <!-- 1. หน้าคลังเอกสาร -->
-                <div id="view-document" class="max-w-5xl mx-auto hidden animate-fade-in pb-10">
+                <div id="view-document" class="max-w-5xl mx-auto hidden animate-fade-in pb-10 p-4 sm:p-6">
                     <div class="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm mb-6">
                         <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-4">
                             <div><h2 class="text-lg font-bold text-gray-900">ฐานข้อมูลเอกสารอ้างอิง</h2></div>
@@ -509,7 +528,7 @@
                         </div>
                         <div class="flex flex-col sm:flex-row gap-3">
                             <select id="docDepartment" class="w-full sm:w-1/4 px-3 py-2.5 border border-gray-300 rounded-xl bg-gray-50 text-sm focus:ring-2 focus:ring-orange-500 outline-none">
-                                <option value="">ทุกฝ่าย (All)</option><option value="อสพ">เอกสารสัมพันธ์ (อสพ.)</option><option value="สมช">ฝ่ายสมาชิกสัมพันธ์ (สมช.)</option><option value="สธส">ฝ่ายสาธารณสุขสัมพันธ์ (สธส.)</option><option value="วนธ">ฝ่ายวัฒนธรรม (วนธ.)</option><option value="กษส">ฝ่ายเกษตรสัมพันธ์ (กษส.)</option><option value="ชสพ">ฝ่ายชุมชนสัมพันธ์ (ชสพ.)</option><option value="กกส">ฝ่ายกิจกรรมสัมพันธ์ (กกส.)</option><option value="ศสพ">ฝ่ายศึกษาสัมพันธ์ (ศสพ.)</option><option value="อกป">ฝ่ายอำนวยการและปฏิสัมพันธ์ (อกป.)</option>
+                                <option value="">ทุกฝ่าย (All)</option><option value="หัวหน้าภูมิภาค">หัวหน้าภูมิภาค</option><option value="อสพ">เอกสารสัมพันธ์ (อสพ.)</option><option value="สมช">ฝ่ายสมาชิกสัมพันธ์ (สมช.)</option><option value="สธส">ฝ่ายสาธารณสุขสัมพันธ์ (สธส.)</option><option value="วนธ">ฝ่ายวัฒนธรรม (วนธ.)</option><option value="กษส">ฝ่ายเกษตรสัมพันธ์ (กษส.)</option><option value="ชสพ">ฝ่ายชุมชนสัมพันธ์ (ชสพ.)</option><option value="กกส">ฝ่ายกิจกรรมสัมพันธ์ (กกส.)</option><option value="ศสพ">ฝ่ายศึกษาสัมพันธ์ (ศสพ.)</option><option value="อกป">ฝ่ายอำนวยการและปฏิสัมพันธ์ (อกป.)</option>
                             </select>
                             <select id="docCategory" class="w-full sm:w-1/4 px-3 py-2.5 border border-gray-300 rounded-xl bg-gray-50 text-sm focus:ring-2 focus:ring-orange-500 outline-none">
                                 <option value="">ทุกหมวดหมู่ (All)</option><option value="01">01 - ทั่วไป</option><option value="02">02 - รับรองการทำกิจกรรม</option><option value="03">03 - รับรองสมาชิก</option><option value="04">04 - ลาเรียน</option><option value="05">05 - เยี่ยมชม</option><option value="06">06 - ขอข้อมูล</option><option value="07">07 - ขอเข้าพบ</option><option value="08">08 - ประชาสัมพันธ์</option><option value="09">09 - ขอเชิญเข้าร่วม</option>
@@ -522,7 +541,7 @@
                 </div>
 
                 <!-- 1.5. หน้าเทมเพลตเอกสาร -->
-                <div id="view-templates" class="max-w-5xl mx-auto hidden animate-fade-in pb-10">
+                <div id="view-templates" class="max-w-5xl mx-auto hidden animate-fade-in pb-10 p-4 sm:p-6">
                     <div class="flex justify-between items-center mb-6">
                         <div><h2 class="text-2xl font-bold text-gray-900">คลังเทมเพลตเอกสารองค์กร</h2><p class="text-sm text-gray-500">ดาวน์โหลดตัวอย่างแบบฟอร์มและเอกสารมาตรฐาน</p></div>
                         <button id="addTemplateBtnUI" onclick="openAddTemplateModal()" class="hidden bg-orange-500 hover:bg-orange-600 text-white text-sm font-bold px-4 py-2 rounded-lg items-center shadow-sm transition-colors">+ เพิ่มเทมเพลต</button>
@@ -531,7 +550,7 @@
                 </div>
 
                 <!-- 2. หน้า Dashboard / ปฏิทิน / แชท -->
-                <div id="view-dashboard" class="max-w-7xl mx-auto hidden animate-fade-in pb-10">
+                <div id="view-dashboard" class="max-w-7xl mx-auto hidden animate-fade-in pb-10 p-4 sm:p-6">
                     <div class="flex justify-between items-center mb-6">
                         <div><h2 id="dashboardTitle" class="text-2xl font-bold text-gray-900">กระดานภาพรวมระบบ</h2><p id="dashboardSubtitle" class="text-sm text-gray-500">ระบบติดตามและวิเคราะห์ความคืบหน้า (Smart Dashboard)</p></div>
                         <button id="addTaskBtnUI" onclick="openAddTaskModal()" class="hidden bg-orange-500 hover:bg-orange-600 text-white text-sm font-bold px-4 py-2 rounded-lg items-center shadow-sm transition-colors">+ เพิ่มงาน</button>
@@ -553,8 +572,9 @@
                         <div id="card-all" onclick="setTaskFilter('all')" class="bg-white p-5 rounded-2xl border border-gray-200 shadow-sm flex items-center cursor-pointer transition-all hover:ring-2 hover:ring-orange-500 card-active"><div class="p-3 bg-blue-50 text-blue-600 rounded-xl mr-3"><svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg></div><div><p class="text-[11px] text-gray-500 font-bold uppercase">งานในตารางทั้งหมด</p><h3 id="stat-total" class="text-2xl font-bold text-gray-900">0</h3></div></div>
                         <div id="card-completed" onclick="setTaskFilter('completed')" class="bg-white p-5 rounded-2xl border border-gray-200 shadow-sm flex items-center cursor-pointer transition-all hover:ring-2 hover:ring-emerald-500"><div class="p-3 bg-emerald-50 text-emerald-600 rounded-xl mr-3"><svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg></div><div><p class="text-[11px] text-gray-500 font-bold uppercase">เสร็จสิ้น</p><h3 id="stat-completed" class="text-2xl font-bold text-gray-900">0</h3></div></div>
                         <div id="card-in_progress" onclick="setTaskFilter('in_progress')" class="bg-white p-5 rounded-2xl border border-gray-200 shadow-sm flex items-center cursor-pointer transition-all hover:ring-2 hover:ring-amber-500"><div class="p-3 bg-amber-50 text-amber-600 rounded-xl mr-3"><svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg></div><div><p class="text-[11px] text-gray-500 font-bold uppercase">กำลังดำเนินการ</p><h3 id="stat-progress" class="text-2xl font-bold text-gray-900">0</h3></div></div>
-                        <div id="card-pending" onclick="setTaskFilter('pending')" class="bg-white p-5 rounded-2xl border border-gray-200 shadow-sm flex items-center cursor-pointer transition-all hover:ring-2 hover:ring-gray-500"><div class="p-3 bg-gray-100 text-gray-600 rounded-xl mr-3"><svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg></div><div><p class="text-[11px] text-gray-500 font-bold uppercase">รอดำเนินการ</p><h3 id="stat-pending" class="text-2xl font-bold text-gray-900">0</h3></div></div>
+                        <div id="card-overdue" onclick="setTaskFilter('overdue')" class="bg-red-50 p-5 rounded-2xl border border-red-200 shadow-sm flex items-center cursor-pointer transition-all hover:ring-2 hover:ring-red-500"><div class="p-3 bg-red-100 text-red-600 rounded-xl mr-3"><svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg></div><div><p class="text-[11px] text-red-500 font-bold uppercase">เลยกำหนด</p><h3 id="stat-overdue" class="text-2xl font-bold text-red-700">0</h3></div></div>
                     </div>
+                    
                     <!-- กราฟ + แชท -->
                     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
                         <div class="bg-white rounded-2xl border border-gray-200 shadow-sm flex flex-col col-span-1 overflow-hidden h-80">
@@ -573,7 +593,7 @@
                         </div>
                     </div>
 
-                    <!-- KANBAN BOARD SECTION (Eisenhower Matrix) -->
+                    <!-- KANBAN BOARD SECTION (Eisenhower Matrix) สำหรับหน้าฝ่ายปกติ -->
                     <div id="kanbanSection" class="hidden mb-10">
                         <div class="flex justify-between items-center mb-4">
                             <h3 id="kanbanTitleUI" class="text-lg font-bold text-gray-800 flex items-center">
@@ -601,7 +621,7 @@
                             <div class="grid grid-cols-7 gap-2 text-center text-xs font-bold text-gray-500 mb-2 uppercase"><div>อาทิตย์</div><div>จันทร์</div><div>อังคาร</div><div>พุธ</div><div>พฤหัสบดี</div><div>ศุกร์</div><div>เสาร์</div></div>
                             <div id="calendarGrid" class="grid grid-cols-7 gap-2"></div>
                             <div class="mt-4 flex flex-wrap gap-4 justify-center text-xs text-gray-500 font-medium">
-                                <span class="flex items-center"><div class="w-3 h-3 bg-emerald-500 rounded-full mr-1.5"></div>เสร็จสิ้น</span><span class="flex items-center"><div class="w-3 h-3 bg-amber-500 rounded-full mr-1.5"></div>กำลังทำ</span><span class="flex items-center"><div class="w-3 h-3 bg-red-500 rounded-full mr-1.5"></div>เลยกำหนด</span><span class="ml-4 text-orange-600 bg-orange-50 px-2 py-0.5 rounded border border-orange-200">* คลิกที่วันที่ เพื่อดูตารางงานเฉพาะวันนั้น</span>
+                                <span class="flex items-center"><div class="w-3 h-3 bg-emerald-500 rounded-full mr-1.5"></div>เสร็จสิ้น</span><span class="flex items-center"><div class="w-3 h-3 bg-amber-500 rounded-full mr-1.5"></div>กำลังดำเนินการ</span><span class="flex items-center"><div class="w-3 h-3 bg-red-500 rounded-full mr-1.5"></div>เลยกำหนด</span><span class="ml-4 text-orange-600 bg-orange-50 px-2 py-0.5 rounded border border-orange-200">* คลิกที่วันที่ เพื่อดูตารางงานเฉพาะวันนั้น</span>
                             </div>
                         </div>
                     </div>
@@ -622,8 +642,23 @@
                     </div>
                 </div>
 
+                <!-- 2.5 Executive Board View (Trello style) -->
+                <div id="view-executive-board" class="h-full flex flex-col hidden animate-fade-in pb-4 px-2">
+                    <div class="flex justify-between items-center mb-4 px-4 pt-4 shrink-0">
+                        <h2 class="text-2xl font-bold text-gray-900 flex items-center">
+                            <svg class="w-6 h-6 mr-2 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2" /></svg>
+                            กระดานบริหารจัดการรวม (Executive Board)
+                        </h2>
+                    </div>
+                    <div class="flex-1 overflow-x-auto px-4 pb-4 w-full">
+                        <div class="trello-board" id="executiveKanbanBoard">
+                            <!-- Executive Kanban Columns -->
+                        </div>
+                    </div>
+                </div>
+
                 <!-- 3. หน้า ทะเบียนสถิติสมาชิก (Members Analytics) -->
-                <div id="view-members" class="max-w-7xl mx-auto hidden animate-fade-in pb-10">
+                <div id="view-members" class="max-w-7xl mx-auto hidden animate-fade-in pb-10 p-4 sm:p-6">
                     <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
                         <div>
                             <h2 class="text-2xl font-bold text-gray-900">ทะเบียนสถิติสมาชิก</h2>
@@ -665,7 +700,7 @@
                         </div>
                         <div class="p-6">
                             <div id="provBarContainer" class="relative h-64 w-full block"><canvas id="provChart"></canvas></div>
-                            <div id="provMapContainer" class="relative w-full flex justify-center hidden"><div id="thailandMap" style="width: 100%; height: 400px; max-width: 600px;"></div></div>
+                            <div id="provMapContainer" class="relative w-full justify-center hidden"><div id="thailandMap" style="width: 100%; height: 400px; max-width: 600px;"></div></div>
                         </div>
                     </div>
 
@@ -691,10 +726,10 @@
                 </div>
 
                 <!-- 4. หน้า จัดการผู้ใช้งาน (User Management) -->
-                <div id="view-users" class="max-w-5xl mx-auto hidden animate-fade-in pb-10">
+                <div id="view-users" class="max-w-5xl mx-auto hidden animate-fade-in pb-10 p-4 sm:p-6">
                     <div class="flex justify-between items-center mb-6">
-                        <div><h2 class="text-2xl font-bold text-gray-900">จัดการข้อมูลผู้ใช้งาน</h2><p class="text-sm text-gray-500">เพิ่ม ลบ และปรับปรุงสิทธิ์การเข้าใช้งานระบบ</p></div>
-                        <button onclick="openUserModal()" class="bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold px-4 py-2.5 rounded-lg shadow-sm">+ เพิ่มผู้ใช้งาน</button>
+                        <div><h2 class="text-2xl font-bold text-gray-900">จัดการข้อมูลผู้ใช้งาน</h2><p class="text-sm text-gray-500">ดูรายชื่อผู้ใช้งานทั้งหมด และประวัติการทำรายการ</p></div>
+                        <button id="addUserBtnUI" onclick="openUserModal()" class="bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold px-4 py-2.5 rounded-lg shadow-sm">+ เพิ่มผู้ใช้งาน</button>
                     </div>
                     <div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
                         <div class="overflow-x-auto">
@@ -709,7 +744,7 @@
                 </div>
 
                 <!-- 6. หน้า ตั้งค่าโมดูลระบบ (Admin Settings) -->
-                <div id="view-settings" class="max-w-4xl mx-auto hidden animate-fade-in pb-10">
+                <div id="view-settings" class="max-w-4xl mx-auto hidden animate-fade-in pb-10 p-4 sm:p-6">
                     <div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden mb-6">
                         <div class="px-6 py-5 bg-gray-50 border-b border-gray-200 flex items-center">
                             <div class="w-10 h-10 bg-gray-200 rounded-full flex justify-center items-center mr-3 text-gray-600"><svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /></svg></div>
@@ -720,7 +755,7 @@
                 </div>
 
                 <!-- 7. หน้าประวัติการลบ (Audit Log - เฉพาะ Admin) -->
-                <div id="view-audit" class="max-w-5xl mx-auto hidden animate-fade-in pb-10">
+                <div id="view-audit" class="max-w-5xl mx-auto hidden animate-fade-in pb-10 p-4 sm:p-6">
                     <div class="bg-white rounded-2xl border border-red-200 shadow-sm overflow-hidden">
                         <div class="px-6 py-4 bg-red-50 border-b border-red-100 flex items-center">
                             <svg class="w-6 h-6 text-red-600 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
@@ -868,7 +903,10 @@
             }
             if (user.role === 'Administrator') {
                 document.getElementById('adminOnlyMenu').classList.remove('hidden');
+            } else if (user.role === 'President') {
+                document.getElementById('addUserBtnUI').classList.add('hidden'); // ซ่อนปุ่มเพิ่มผู้ใช้ของ President
             }
+            
             if (['Administrator', 'President'].includes(user.role) || (user.role === 'Working Team' && currentUser.department.includes('สมช'))) {
                 document.getElementById('csvUploadSection').classList.remove('hidden');
             }
@@ -884,8 +922,8 @@
             if (['document', 'dashboard', 'members', 'templates'].includes(viewName)) { 
                 if (systemSettings[viewName] === false && currentUser.role !== 'Administrator') targetView = 'maintenance'; 
             }
-            ['document', 'dashboard', 'audit', 'members', 'settings', 'maintenance', 'templates', 'users'].forEach(v => { const el = document.getElementById(`view-${v}`); if(el) { el.classList.add('hidden'); el.classList.remove('block', 'flex'); } });
-            ['document', 'members', 'audit', 'settings', 'templates', 'users'].forEach(nav => { const el = document.getElementById(`nav-${nav}`); if(el) { el.classList.replace('nav-active', 'nav-inactive'); el.classList.replace('bg-orange-50', 'border-transparent'); el.classList.replace('text-red-600', 'nav-inactive'); } });
+            ['document', 'dashboard', 'audit', 'members', 'settings', 'maintenance', 'templates', 'users', 'executive-board'].forEach(v => { const el = document.getElementById(`view-${v}`); if(el) { el.classList.add('hidden'); el.classList.remove('block', 'flex'); } });
+            ['document', 'members', 'audit', 'settings', 'templates', 'users', 'executive-board'].forEach(nav => { const el = document.getElementById(`nav-${nav}`); if(el) { el.classList.replace('nav-active', 'nav-inactive'); el.classList.replace('bg-orange-50', 'border-transparent'); el.classList.replace('text-red-600', 'nav-inactive'); } });
             
             const activeEl = document.getElementById(`view-${targetView}`); if(activeEl) { activeEl.classList.remove('hidden'); if(targetView === 'maintenance') activeEl.classList.add('flex'); else activeEl.classList.add('block'); }
             if (targetView !== 'maintenance') { const activeNav = document.getElementById(`nav-${viewName}`); if(activeNav) { if(viewName === 'audit') activeNav.classList.replace('nav-inactive', 'text-red-600'); else if(viewName !== 'dashboard') { activeNav.classList.replace('nav-inactive', 'nav-active'); activeNav.classList.replace('border-transparent', 'bg-orange-50'); } } }
@@ -900,6 +938,7 @@
             else if (targetView === 'settings') loadSettings();
             else if (targetView === 'templates') loadTemplates();
             else if (targetView === 'users') loadUsers();
+            else if (targetView === 'executive-board') loadExecutiveBoard();
         }
 
         function switchDashboardView(deptCode) {
@@ -917,18 +956,33 @@
             
             // Kanban Visibility
             const kSection = document.getElementById('kanbanSection');
-            const kTitle = document.getElementById('kanbanTitleUI');
-            if (deptCode === 'all' && ['President', 'Administrator'].includes(currentUser.role)) {
-                if(kTitle) kTitle.innerHTML = '<svg class="w-5 h-5 mr-2 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2" /></svg>กระดานบริหารจัดการรวม (ทุกฝ่าย)';
-                kSection.classList.remove('hidden');
-            } else if (deptCode !== 'all' && (['President', 'Administrator'].includes(currentUser.role) || currentUser.department.includes(deptCode))) {
-                if(kTitle) kTitle.innerHTML = '<svg class="w-5 h-5 mr-2 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2" /></svg>กระดานบริหารจัดการ (Quadrant)';
+            if (deptCode !== 'all' && (['President', 'Administrator'].includes(currentUser.role) || currentUser.department.includes(deptCode))) {
                 kSection.classList.remove('hidden');
             } else {
                 kSection.classList.add('hidden');
             }
 
+            // Alert Button Visibility
+            const alertBtn = document.getElementById('alertPresidentBtn');
+            if (currentUser.role === 'Working Team' && currentUser.department.includes(deptCode) && deptCode !== 'all') {
+                alertBtn.classList.remove('hidden');
+            } else {
+                alertBtn.classList.add('hidden');
+            }
+
             highlightStatusCard(); loadDashboardData(); loadActivities();
+        }
+
+        // --- Alert President ---
+        async function sendAlertToPresident() {
+            try {
+                await supabaseClient.from('notifications').insert([{
+                    target_group: 'President', 
+                    message: `ฝ่าย ${currentUser.department} แจ้งเตือนให้ตรวจสอบกระดานงาน`, 
+                    task_id: null 
+                }]);
+                showToast('ส่งแจ้งเตือนถึงประธานเรียบร้อยแล้ว', 'success');
+            } catch(e) { showToast('ไม่สามารถส่งแจ้งเตือนได้', 'error'); }
         }
 
         // --- Notifications ---
@@ -966,7 +1020,8 @@
                 
                 data.forEach(n => {
                     let bg = n.is_read ? 'bg-white' : 'bg-blue-50';
-                    list.innerHTML += `<div class="px-3 py-2 rounded-lg ${bg} hover:bg-gray-100 transition-colors cursor-pointer" onclick="viewTask(${n.task_id}); toggleNotifications();"><p class="text-xs text-gray-800">${n.message}</p><p class="text-[9px] text-gray-400 mt-1">${new Date(n.created_at).toLocaleString('th-TH')}</p></div>`;
+                    let clickAct = n.task_id ? `viewTask(${n.task_id}); toggleNotifications();` : `toggleNotifications();`;
+                    list.innerHTML += `<div class="px-3 py-2 rounded-lg ${bg} hover:bg-gray-100 transition-colors cursor-pointer" onclick="${clickAct}"><p class="text-xs text-gray-800">${n.message}</p><p class="text-[9px] text-gray-400 mt-1">${new Date(n.created_at).toLocaleString('th-TH')}</p></div>`;
                 });
             } catch(e) {}
         }
@@ -988,6 +1043,7 @@
                 data.forEach(u => {
                     let badge = u.role === 'Administrator' ? 'bg-red-100 text-red-700' : (u.role === 'President' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700');
                     let deptDisp = u.department === 'ทั้งหมด' ? 'ทั้งหมด (Admin/Pres)' : u.department;
+                    
                     tbody.innerHTML += `<tr>
                         <td class="px-6 py-4 font-mono text-sm">${u.username}</td>
                         <td class="px-6 py-4"><button onclick="viewUserHistory('${u.fullname}')" class="font-bold text-blue-600 hover:text-blue-800 hover:underline transition-colors">${u.fullname}</button></td>
@@ -1097,9 +1153,16 @@
             renderDeptChart(allCurrentTasks, currentDashboardView);
         }
 
-        function checkTaskOverdueStatus(task) { if (task.status === 'completed' || !task.due_date) return { isOverdue: false, days: 0 }; const d = new Date(task.due_date); const t = new Date(); d.setHours(0,0,0,0); t.setHours(0,0,0,0); if (t > d) return { isOverdue: true, days: Math.ceil(Math.abs(t - d) / 86400000) }; return { isOverdue: false, days: 0 }; }
+        function checkTaskOverdueStatus(task) { 
+            if (task.status === 'completed' || !task.due_date) return { isOverdue: false, days: 0 }; 
+            const d = new Date(task.due_date); const t = new Date(); 
+            d.setHours(0,0,0,0); t.setHours(0,0,0,0); 
+            if (t > d) return { isOverdue: true, days: Math.ceil(Math.abs(t - d) / 86400000) }; 
+            return { isOverdue: false, days: 0 }; 
+        }
+
         function setTaskFilter(status) { activeStatusFilter = status; activeDateFilter = null; highlightStatusCard(); renderTaskTable(); }
-        function highlightStatusCard() { ['all', 'completed', 'in_progress', 'pending'].forEach(st => document.getElementById(`card-${st}`).classList.remove('card-active') ); document.getElementById(`card-${activeStatusFilter}`).classList.add('card-active'); }
+        function highlightStatusCard() { ['all', 'completed', 'in_progress', 'overdue'].forEach(st => document.getElementById(`card-${st}`).classList.remove('card-active') ); document.getElementById(`card-${activeStatusFilter}`).classList.add('card-active'); }
         function clearFilters() { activeStatusFilter = 'all'; activeDateFilter = null; highlightStatusCard(); renderTaskTable(); renderCalendar(); }
         
         async function loadDashboardData() {
@@ -1110,17 +1173,14 @@
                 if(error) throw error;
                 allCurrentTasks = tasks || []; 
                 
-                // คำนวณ Achievement
-                let onTimeCount = 0;
                 let tableTasks = allCurrentTasks.filter(t => t.placement === 'table' || t.placement === 'both' || !t.placement);
                 
+                // คำนวณ Achievement
+                let onTimeCount = 0;
                 tableTasks.forEach(t => {
                     if (t.status === 'completed') {
                         if (!t.due_date) onTimeCount++;
-                        else {
-                            const d = new Date(t.due_date); const c = new Date(t.created_at);
-                            if (!checkTaskOverdueStatus(t).isOverdue) onTimeCount++;
-                        }
+                        else { if (!checkTaskOverdueStatus(t).isOverdue) onTimeCount++; }
                     }
                 });
 
@@ -1133,44 +1193,57 @@
 
                 document.getElementById('stat-total').innerText = tableTasks.length; 
                 document.getElementById('stat-completed').innerText = tableTasks.filter(t=>t.status==='completed').length; 
-                document.getElementById('stat-progress').innerText = tableTasks.filter(t=>t.status==='in_progress').length; 
-                document.getElementById('stat-pending').innerText = tableTasks.filter(t=>t.status==='pending').length;
+                document.getElementById('stat-progress').innerText = tableTasks.filter(t=>t.status==='in_progress' && !checkTaskOverdueStatus(t).isOverdue).length; 
+                document.getElementById('stat-overdue').innerText = tableTasks.filter(t=>t.status!=='completed' && checkTaskOverdueStatus(t).isOverdue).length;
                 
                 renderCalendar(); renderTaskTable(); renderDeptChart(tableTasks, currentDashboardView); renderKanbanBoard();
             } catch (err) { console.error(err); }
         }
 
+        async function loadExecutiveBoard() {
+            const kb = document.getElementById('executiveKanbanBoard'); kb.innerHTML = '<div class="w-full text-center py-10 text-gray-400">กำลังโหลดกระดาน...</div>';
+            try {
+                const { data: tasks, error } = await supabaseClient.from('tasks').select('*').is('deleted_at', null).in('placement', ['quadrant', 'both']);
+                if(error) throw error;
+                renderKanban(kb, tasks || [], true);
+            } catch (err) { kb.innerHTML = '<div class="w-full text-center py-10 text-red-500">โหลดข้อมูลไม่สำเร็จ</div>'; }
+        }
+
         function renderKanbanBoard() {
-            const kb = document.getElementById('kanbanBoard'); kb.innerHTML = '';
+            const kb = document.getElementById('kanbanBoard'); 
+            const qTasks = allCurrentTasks.filter(t => t.placement === 'quadrant' || t.placement === 'both');
+            renderKanban(kb, qTasks, false);
+        }
+
+        function renderKanban(container, tasks, isExecutive) {
+            container.innerHTML = '';
             const columns = [
-                { id: 'q1', name: '1. ด่วน-สำคัญ', color: 'border-red-400 bg-red-50 text-red-800' },
-                { id: 'q2', name: '2. ด่วน-ไม่สำคัญ', color: 'border-orange-400 bg-orange-50 text-orange-800' },
-                { id: 'q3', name: '3. ไม่ด่วน-สำคัญ', color: 'border-blue-400 bg-blue-50 text-blue-800' },
-                { id: 'q4', name: '4. ไม่ด่วน-ไม่สำคัญ', color: 'border-gray-400 bg-gray-100 text-gray-800' },
-                { id: 'revise', name: '5. แก้ไข', color: 'border-purple-400 bg-purple-50 text-purple-800' },
-                { id: 'approved', name: '6. อนุมัติ', color: 'border-green-400 bg-green-50 text-green-800' }
+                { id: 'q1', name: '1. ด่วน-สำคัญ', color: 'border-red-400 text-red-800' },
+                { id: 'q2', name: '2. ด่วน-ไม่สำคัญ', color: 'border-orange-400 text-orange-800' },
+                { id: 'q3', name: '3. ไม่ด่วน-สำคัญ', color: 'border-blue-400 text-blue-800' },
+                { id: 'q4', name: '4. ไม่ด่วน-ไม่สำคัญ', color: 'border-gray-400 text-gray-800' },
+                { id: 'revise', name: '5. แก้ไข', color: 'border-purple-400 text-purple-800' },
+                { id: 'approved', name: '6. อนุมัติ', color: 'border-green-400 text-green-800' }
             ];
 
-            const qTasks = allCurrentTasks.filter(t => t.placement === 'quadrant' || t.placement === 'both');
-
             columns.forEach(col => {
-                const tasksInCol = qTasks.filter(t => (t.quadrant || 'q1') === col.id);
+                const tasksInCol = tasks.filter(t => (t.quadrant || 'q1') === col.id);
                 let cardsHtml = '';
                 tasksInCol.forEach(t => {
-                    let dpt = currentDashboardView === 'all' ? `<p class="text-[9px] font-bold text-gray-400 mt-1">${deptNames[t.department]||t.department}</p>` : '';
-                    cardsHtml += `<div onclick="viewTask(${t.id})" class="kanban-card">
-                        <p class="text-sm font-bold text-gray-800 leading-tight">${t.title}</p>
+                    let dpt = (isExecutive || currentDashboardView === 'all') ? `<p class="text-[10px] font-medium text-gray-400 mt-2">${deptNames[t.department]||t.department}</p>` : '';
+                    cardsHtml += `<div onclick="viewTask(${t.id})" class="trello-card">
+                        <p class="text-sm font-bold text-gray-800 leading-snug">${t.title}</p>
                         ${dpt}
                     </div>`;
                 });
 
-                kb.innerHTML += `
-                <div class="kanban-col border-t-4 ${col.color}">
-                    <div class="flex justify-between items-center mb-3">
-                        <h4 class="font-bold text-sm">${col.name}</h4>
-                        <span class="text-xs bg-white bg-opacity-50 px-2 py-0.5 rounded-full">${tasksInCol.length}</span>
+                container.innerHTML += `
+                <div class="trello-col border-t-4 ${col.color}">
+                    <div class="trello-col-header">
+                        <span>${col.name}</span>
+                        <span class="bg-gray-200 text-gray-600 px-2 py-0.5 rounded-full text-xs">${tasksInCol.length}</span>
                     </div>
-                    <div class="kanban-cards no-scrollbar">${cardsHtml}</div>
+                    <div class="trello-col-cards no-scrollbar">${cardsHtml}</div>
                 </div>`;
             });
         }
@@ -1193,7 +1266,10 @@
             const tbody = document.getElementById('taskTableBody'); tbody.innerHTML = '';
             let ft = allCurrentTasks.filter(t => t.placement === 'table' || t.placement === 'both' || !t.placement);
             
-            if (activeStatusFilter !== 'all') ft = ft.filter(t => t.status === activeStatusFilter); 
+            if (activeStatusFilter === 'completed') ft = ft.filter(t => t.status === 'completed');
+            if (activeStatusFilter === 'in_progress') ft = ft.filter(t => t.status !== 'completed' && !checkTaskOverdueStatus(t).isOverdue);
+            if (activeStatusFilter === 'overdue') ft = ft.filter(t => t.status !== 'completed' && checkTaskOverdueStatus(t).isOverdue);
+            
             if (activeDateFilter) ft = ft.filter(t => t.due_date === activeDateFilter);
             
             if (activeStatusFilter !== 'all' || activeDateFilter) { document.getElementById('clearFilterBtn').classList.remove('hidden'); document.getElementById('tableTitle').innerHTML = `รายการงาน <span class="text-orange-600">(${activeDateFilter?'วันที่ '+new Date(activeDateFilter).toLocaleDateString('th-TH'):'กรองสถานะ'})</span>`; } else { document.getElementById('clearFilterBtn').classList.add('hidden'); document.getElementById('tableTitle').innerText = "รายการงาน (มุมมองตารางปกติ)"; }
@@ -1201,12 +1277,19 @@
             
             ft.forEach(t => { 
                 const ov = checkTaskOverdueStatus(t);
-                let b = t.status==='completed'?'<span class="text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-md text-xs font-bold border border-emerald-200">เสร็จสิ้น</span>':(t.status==='in_progress'?'<span class="text-amber-700 bg-amber-50 px-2.5 py-1 rounded-md text-xs font-bold border border-amber-200">กำลังทำ</span>':'<span class="text-gray-600 bg-gray-100 px-2.5 py-1 rounded-md text-xs font-bold border border-gray-200">รอเริ่ม</span>');
-                let dDisplay = t.due_date ? new Date(t.due_date).toLocaleDateString('th-TH') : '-'; if (ov.isOverdue) { b = `<span class="text-red-700 bg-red-50 px-2.5 py-1 rounded-md text-xs font-bold border border-red-200 animate-pulse">เลยกำหนด ${ov.days} วัน</span>`; dDisplay = `<span class="text-red-500 font-bold">${dDisplay}</span>`; }
+                let b = '';
+                if (ov.isOverdue) b = `<span class="text-red-700 bg-red-50 px-2.5 py-1 rounded-md text-xs font-bold border border-red-200 animate-pulse">เลยกำหนด ${ov.days} วัน</span>`;
+                else if (t.status === 'completed') b = `<span class="text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-md text-xs font-bold border border-emerald-200">เสร็จสิ้น</span>`;
+                else b = `<span class="text-amber-700 bg-amber-50 px-2.5 py-1 rounded-md text-xs font-bold border border-amber-200">กำลังดำเนินการ</span>`;
+                
+                let dDisplay = t.due_date ? new Date(t.due_date).toLocaleDateString('th-TH') : '-'; 
+                if (ov.isOverdue) dDisplay = `<span class="text-red-500 font-bold">${dDisplay}</span>`;
                 
                 const canEditDelete = ['Administrator', 'President'].includes(currentUser.role) || (currentUser.role === 'Working Team' && currentUser.department.includes(t.department));
                 let act = `<button onclick="viewTask(${t.id})" class="text-gray-600 bg-gray-100 px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-gray-200 transition-colors mr-2">รายละเอียด</button>`;
-                
+                if (canEditDelete) {
+                    act += `<button onclick="editTask(${t.id})" class="text-blue-600 bg-blue-50 px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-blue-100 transition-colors mr-2">อัปเดต</button><button onclick="deleteTask(${t.id}, '${t.title}')" class="text-red-600 bg-red-50 px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-red-100 transition-colors">ลบ</button>`;
+                }
                 const deptFullName = deptNames[t.department] || t.department;
                 
                 let titleHtml = t.title;
@@ -1218,19 +1301,36 @@
         function renderDeptChart(tasks, viewMode) {
             if (deptChartInstance) deptChartInstance.destroy();
             
+            let targetTasks = viewMode === 'all' ? tasks : tasks.filter(t => t.department.includes(viewMode) || viewMode.includes(t.department));
+            let cd = targetTasks.filter(t => t.status === 'completed').length;
+            let pg = targetTasks.filter(t => t.status !== 'completed' && !checkTaskOverdueStatus(t).isOverdue).length;
+            let pd = targetTasks.filter(t => t.status !== 'completed' && checkTaskOverdueStatus(t).isOverdue).length;
+
             if (currentDeptChartType === 'bar') {
-                let lbs = [], cd = [], pg = [], pd = [];
-                if (viewMode === 'all') { const dpt = Object.keys(deptNames); lbs = dpt.map(d=>d+'.'); dpt.forEach(d => { const dt = tasks.filter(t=>t.department===d); cd.push(dt.filter(t=>t.status==='completed').length); pg.push(dt.filter(t=>t.status==='in_progress').length); pd.push(dt.filter(t=>t.status==='pending').length); }); } 
-                else { lbs = [viewMode+'.']; cd=[tasks.filter(t=>t.status==='completed').length]; pg=[tasks.filter(t=>t.status==='in_progress').length]; pd=[tasks.filter(t=>t.status==='pending').length]; }
-                deptChartInstance = new Chart(document.getElementById('deptChart').getContext('2d'), { type: 'bar', data: { labels: lbs, datasets: [{ label: 'เสร็จสิ้น', data: cd, backgroundColor: '#10b981', borderRadius: 4 }, { label: 'กำลังทำ', data: pg, backgroundColor: '#f59e0b', borderRadius: 4 }, { label: 'รอเริ่ม', data: pd, backgroundColor: '#e5e7eb', borderRadius: 4 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'top', labels:{font:{family:'Sarabun'}} } }, scales: { x: { stacked: true, ticks:{font:{family:'Sarabun'}} }, y: { stacked: true, beginAtZero: true, ticks: { stepSize: 1, font:{family:'Sarabun'} } } } } });
+                let lbs = [], cd_arr = [], pg_arr = [], pd_arr = [];
+                if (viewMode === 'all') { 
+                    const dpt = Object.keys(deptNames); lbs = dpt.map(d=>d+'.'); 
+                    dpt.forEach(d => { 
+                        const dt = tasks.filter(t=>t.department.includes(d) || d.includes(t.department)); 
+                        cd_arr.push(dt.filter(t=>t.status==='completed').length); 
+                        pg_arr.push(dt.filter(t=>t.status!=='completed' && !checkTaskOverdueStatus(t).isOverdue).length); 
+                        pd_arr.push(dt.filter(t=>t.status!=='completed' && checkTaskOverdueStatus(t).isOverdue).length); 
+                    }); 
+                } 
+                else { 
+                    lbs = [viewMode+'.']; cd_arr=[cd]; pg_arr=[pg]; pd_arr=[pd]; 
+                }
+                deptChartInstance = new Chart(document.getElementById('deptChart').getContext('2d'), { 
+                    type: 'bar', 
+                    data: { labels: lbs, datasets: [{ label: 'เสร็จสิ้น', data: cd_arr, backgroundColor: '#10b981', borderRadius: 4 }, { label: 'กำลังดำเนินการ', data: pg_arr, backgroundColor: '#f59e0b', borderRadius: 4 }, { label: 'เลยกำหนด', data: pd_arr, backgroundColor: '#ef4444', borderRadius: 4 }] }, 
+                    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'top', labels:{font:{family:'Sarabun'}} } }, scales: { x: { stacked: true, ticks:{font:{family:'Sarabun'}} }, y: { stacked: true, beginAtZero: true, ticks: { stepSize: 1, font:{family:'Sarabun'} } } } } 
+                });
             } else {
-                let cd = 0, pg = 0, pd = 0;
-                let targetTasks = viewMode === 'all' ? tasks : tasks.filter(t => t.department === viewMode);
-                cd = targetTasks.filter(t => t.status === 'completed').length;
-                pg = targetTasks.filter(t => t.status === 'in_progress').length;
-                pd = targetTasks.filter(t => t.status === 'pending').length;
-                
-                deptChartInstance = new Chart(document.getElementById('deptChart').getContext('2d'), { type: 'pie', data: { labels: ['เสร็จสิ้น', 'กำลังทำ', 'รอเริ่ม'], datasets: [{ data: [cd, pg, pd], backgroundColor: ['#10b981', '#f59e0b', '#e5e7eb'], borderWidth: 0 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right', labels:{font:{family:'Sarabun'}} } } } });
+                deptChartInstance = new Chart(document.getElementById('deptChart').getContext('2d'), { 
+                    type: 'pie', 
+                    data: { labels: ['เสร็จสิ้น', 'กำลังดำเนินการ', 'เลยกำหนด'], datasets: [{ data: [cd, pg, pd], backgroundColor: ['#10b981', '#f59e0b', '#ef4444'], borderWidth: 0 }] }, 
+                    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right', labels:{font:{family:'Sarabun'}} } } } 
+                });
             }
         }
         const thMonths = ["มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน", "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"];
@@ -1250,10 +1350,10 @@
                     let bars = '';
                     tasksToday.slice(0, 3).forEach(t => {
                         const ov = checkTaskOverdueStatus(t);
-                        let colorCls = 'bg-gray-100 text-gray-600 border-gray-200';
+                        let colorCls = '';
                         if (ov.isOverdue) { colorCls = 'bg-red-100 text-red-700 border-red-200'; }
                         else if (t.status === 'completed') { colorCls = 'bg-emerald-100 text-emerald-700 border-emerald-200'; }
-                        else if (t.status === 'in_progress') { colorCls = 'bg-amber-100 text-amber-700 border-amber-200'; }
+                        else { colorCls = 'bg-amber-100 text-amber-700 border-amber-200'; }
                         bars += `<div class="text-[10px] px-1.5 py-0.5 rounded border truncate w-full mb-1 font-medium ${colorCls}" title="${t.title}">${t.title}</div>`;
                     });
                     if (tasksToday.length > 3) {
@@ -1288,7 +1388,9 @@
                         await supabaseClient.from('notifications').insert([{target_group: 'President', message: `มีงานใหม่เพิ่มลงในบอร์ด: ${tData.title}`, task_id: data[0].id}]);
                     }
                 } 
-                closeAddTaskModal(); showToast('บันทึกงานสำเร็จ'); loadDashboardData(); 
+                closeAddTaskModal(); showToast('บันทึกงานสำเร็จ'); 
+                if (document.getElementById('view-executive-board').classList.contains('flex')) loadExecutiveBoard();
+                else loadDashboardData(); 
             } catch (err) { showToast('ข้อผิดพลาด: ' + err.message, 'error'); } 
         }
         async function editTask(id) { 
@@ -1310,7 +1412,11 @@
                 try {
                     const { error } = await supabaseClient.from('tasks').update({ deleted_at: new Date().toISOString(), deleted_by: currentUser.fullname }).eq('id', id); 
                     if (error) throw error;
-                    loadDashboardData(); logActivity('ลบงาน', `ลบเรื่อง: ${title}`); showToast('ลบงานสำเร็จ', 'success');
+                    
+                    if (document.getElementById('view-executive-board').classList.contains('flex')) loadExecutiveBoard();
+                    else loadDashboardData(); 
+                    
+                    logActivity('ลบงาน', `ลบเรื่อง: ${title}`); showToast('ลบงานสำเร็จ');
                 } catch(e) { showToast("ลบไม่สำเร็จ: " + e.message, 'error'); } 
             });
         }
@@ -1323,13 +1429,15 @@
                 document.getElementById('vt-dept').innerText = deptNames[data.department] || data.department;
                 document.getElementById('vt-assignee').innerText = data.assignee || '-';
                 
-                let b = data.status==='completed'?'<span class="text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-md text-xs font-bold border border-emerald-200">เสร็จสิ้น</span>':(data.status==='in_progress'?'<span class="text-amber-700 bg-amber-50 px-2.5 py-1 rounded-md text-xs font-bold border border-amber-200">กำลังทำ</span>':'<span class="text-gray-600 bg-gray-100 px-2.5 py-1 rounded-md text-xs font-bold border border-gray-200">รอเริ่ม</span>');
                 const ov = checkTaskOverdueStatus(data);
+                let b = '';
+                if (ov.isOverdue) b = `<span class="text-red-700 bg-red-50 px-2.5 py-1 rounded-md text-xs font-bold border border-red-200 animate-pulse">เลยกำหนด ${ov.days} วัน</span>`;
+                else if (data.status === 'completed') b = `<span class="text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-md text-xs font-bold border border-emerald-200">เสร็จสิ้น</span>`;
+                else b = `<span class="text-amber-700 bg-amber-50 px-2.5 py-1 rounded-md text-xs font-bold border border-amber-200">กำลังดำเนินการ</span>`;
+                
                 let dueDisplay = data.due_date ? new Date(data.due_date).toLocaleDateString('th-TH') : '-'; 
-                if (ov.isOverdue) { 
-                    b = `<span class="text-red-700 bg-red-50 px-2.5 py-1 rounded-md text-xs font-bold border border-red-200 animate-pulse">เลยกำหนด ${ov.days} วัน</span>`; 
-                    dueDisplay = `<span class="text-red-500 font-bold">${dueDisplay}</span>`; 
-                }
+                if (ov.isOverdue) { dueDisplay = `<span class="text-red-500 font-bold">${dueDisplay}</span>`; }
+                
                 document.getElementById('vt-status').innerHTML = b;
                 document.getElementById('vt-due').innerHTML = dueDisplay;
                 document.getElementById('vt-desc').innerText = data.description || 'ไม่มีการระบุรายละเอียดเพิ่มเติม';
@@ -1374,11 +1482,13 @@
                 // แจ้งเตือนฝ่าย ถ้าประธานกดอนุมัติ/ตีกลับ
                 if (['approved', 'revise'].includes(newStatus) && currentUser.role === 'President') {
                     const {data} = await supabaseClient.from('tasks').select('department, title').eq('id', currentViewingTaskId).single();
-                    let msg = newStatus === 'approved' ? `อนุมัติงาน: ${data.title}` : `ตีกลับ/แก้ไขงาน: ${data.title}`;
+                    let msg = newStatus === 'approved' ? `ประธานอนุมัติงาน: ${data.title}` : `ประธานแจ้งแก้ไขงาน: ${data.title}`;
                     await supabaseClient.from('notifications').insert([{target_group: data.department, message: msg, task_id: currentViewingTaskId}]);
                 }
 
-                viewTask(currentViewingTaskId); loadDashboardData();
+                viewTask(currentViewingTaskId); 
+                if (document.getElementById('view-executive-board').classList.contains('flex')) loadExecutiveBoard();
+                else loadDashboardData();
             } catch(e) { showToast('อัปเดตไม่สำเร็จ', 'error'); }
         }
 

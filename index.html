@@ -20,20 +20,19 @@
         .calendar-day { min-height: 110px; transition: all 0.2s ease; cursor: pointer; }
         .calendar-day:hover { transform: scale(1.02); z-index: 10; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); border-color: #fbd38d; }
         .card-active { ring-2 ring-orange-500 bg-orange-50/30 transform scale-[1.02] shadow-md; border-color: #f97316 !important; }
-        .toggle-checkbox:checked { right: 0; border-color: #f97316; }
-        .toggle-checkbox:checked + .toggle-label { background-color: #f97316; }
+        /* Trello Kanban Scroll */
+        .kanban-container { display: flex; gap: 1rem; overflow-x: auto; padding-bottom: 1rem; scroll-snap-type: x mandatory; }
+        .kanban-col { min-width: 280px; max-width: 280px; background: #f8fafc; border-radius: 0.75rem; padding: 0.75rem; display: flex; flex-direction: column; max-height: 600px; scroll-snap-align: start; }
+        .kanban-cards { flex-grow: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 0.5rem; padding-right: 0.25rem; }
+        .kanban-card { background: white; padding: 0.75rem; border-radius: 0.5rem; box-shadow: 0 1px 2px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; cursor: pointer; transition: all 0.2s; }
+        .kanban-card:hover { border-color: #fbd38d; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
     </style>
 </head>
 <body class="bg-gray-50 h-screen overflow-hidden text-gray-900 selection:bg-orange-200 selection:text-orange-900 relative">
 
-    <!-- ========================================== -->
-    <!-- Custom Toast Notifications -->
-    <!-- ========================================== -->
     <div id="toast-container" class="fixed top-6 right-6 z-[200] flex flex-col gap-3 pointer-events-none"></div>
 
-    <!-- ========================================== -->
-    <!-- หน้าต่างเข้าสู่ระบบ (Login Gate) -->
-    <!-- ========================================== -->
+    <!-- Login -->
     <div id="loginGate" class="fixed inset-0 bg-gray-900/40 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
         <div class="bg-white rounded-2xl shadow-xl w-full max-w-sm overflow-hidden animate-fade-in border border-gray-100">
             <div class="h-2 bg-orange-500 w-full"></div>
@@ -55,11 +54,7 @@
         </div>
     </div>
 
-    <!-- ========================================== -->
-    <!-- Modals ต่างๆ -->
-    <!-- ========================================== -->
-    
-    <!-- Custom Confirm Modal -->
+    <!-- Confirm Modal -->
     <div id="confirmModal" class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm z-[200] hidden flex items-center justify-center p-4 transition-opacity">
         <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden animate-fade-in border border-gray-100">
             <div class="p-6 text-center">
@@ -76,25 +71,85 @@
         </div>
     </div>
 
-    <!-- Modal: View Task Details (ดูรายละเอียดงาน) -->
+    <!-- Modal: View Task & Comments (Trello Style) -->
     <div id="viewTaskModal" class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm z-[110] hidden flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-xl flex flex-col overflow-hidden animate-fade-in">
-            <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
-                <h3 class="text-lg font-bold text-gray-900 flex items-center"><svg class="w-5 h-5 mr-2 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>รายละเอียดงาน / ภารกิจ</h3>
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-3xl flex flex-col overflow-hidden animate-fade-in max-h-[90vh]">
+            <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50 shrink-0">
+                <div class="flex items-center">
+                    <svg class="w-5 h-5 mr-2 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>
+                    <h3 class="text-lg font-bold text-gray-900">รายละเอียดงาน / Board</h3>
+                </div>
                 <button onclick="closeViewTaskModal()" class="text-gray-400 hover:text-gray-600"><svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg></button>
             </div>
-            <div class="p-6 space-y-5">
-                <div><p class="text-xs text-gray-400 font-bold mb-1 uppercase tracking-wider">ชื่องาน / กิจกรรม</p><p id="vt-title" class="text-base font-bold text-gray-900 bg-orange-50/50 border border-orange-100 p-3 rounded-lg"></p></div>
-                <div class="grid grid-cols-2 gap-5">
-                    <div><p class="text-xs text-gray-400 font-bold mb-1 uppercase tracking-wider">ฝ่ายที่รับผิดชอบ</p><p id="vt-dept" class="text-sm font-bold text-gray-800"></p></div>
-                    <div><p class="text-xs text-gray-400 font-bold mb-1 uppercase tracking-wider">สถานะ</p><div id="vt-status"></div></div>
-                    <div><p class="text-xs text-gray-400 font-bold mb-1 uppercase tracking-wider">ผู้รับผิดชอบหลัก</p><p id="vt-assignee" class="text-sm font-medium text-gray-800"></p></div>
-                    <div><p class="text-xs text-gray-400 font-bold mb-1 uppercase tracking-wider">กำหนดส่ง (Due Date)</p><p id="vt-due" class="text-sm font-medium text-gray-800"></p></div>
+            
+            <div class="p-6 overflow-y-auto flex-1 bg-white grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- Left: Details -->
+                <div class="md:col-span-2 space-y-5">
+                    <div>
+                        <p id="vt-title" class="text-xl font-bold text-gray-900 leading-tight mb-2"></p>
+                        <p class="text-sm text-gray-500">ในกระดานของฝ่าย <span id="vt-dept" class="font-bold text-gray-700"></span></p>
+                    </div>
+                    
+                    <div class="flex flex-wrap gap-4 pt-2">
+                        <div class="bg-gray-50 px-3 py-2 rounded-lg border border-gray-100">
+                            <p class="text-[10px] text-gray-400 font-bold uppercase mb-1">ผู้รับผิดชอบ</p>
+                            <p id="vt-assignee" class="text-sm font-medium text-gray-800"></p>
+                        </div>
+                        <div class="bg-gray-50 px-3 py-2 rounded-lg border border-gray-100">
+                            <p class="text-[10px] text-gray-400 font-bold uppercase mb-1">กำหนดส่ง</p>
+                            <p id="vt-due" class="text-sm font-medium text-gray-800"></p>
+                        </div>
+                        <div class="bg-gray-50 px-3 py-2 rounded-lg border border-gray-100">
+                            <p class="text-[10px] text-gray-400 font-bold uppercase mb-1">สถานะตาราง</p>
+                            <div id="vt-status"></div>
+                        </div>
+                        <div class="bg-gray-50 px-3 py-2 rounded-lg border border-gray-100 hidden" id="vt-quadrant-box">
+                            <p class="text-[10px] text-gray-400 font-bold uppercase mb-1">ตำแหน่งในบอร์ด</p>
+                            <div id="vt-quadrant-badge"></div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <p class="text-sm font-bold text-gray-800 mb-2 flex items-center"><svg class="w-4 h-4 mr-1 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7" /></svg> รายละเอียด</p>
+                        <div id="vt-desc" class="text-sm text-gray-600 bg-gray-50 p-4 rounded-xl min-h-[100px] whitespace-pre-wrap border border-gray-100"></div>
+                    </div>
+
+                    <!-- Comment Activity (Trello Style) -->
+                    <div class="pt-4 border-t border-gray-100">
+                        <p class="text-sm font-bold text-gray-800 mb-3 flex items-center"><svg class="w-4 h-4 mr-1 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z" /></svg> กิจกรรมและความคิดเห็น</p>
+                        <div class="flex gap-3 mb-4">
+                            <div class="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-xs shrink-0" id="vt-user-init">U</div>
+                            <div class="flex-1">
+                                <textarea id="newCommentTxt" rows="2" placeholder="เขียนความคิดเห็น หรือแนบลิงก์ไฟล์..." class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white focus:ring-2 focus:ring-blue-500 outline-none"></textarea>
+                                <button onclick="addComment()" class="mt-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold px-4 py-1.5 rounded-md transition-colors">ส่งความคิดเห็น</button>
+                            </div>
+                        </div>
+                        <div id="commentsList" class="space-y-4">
+                            <!-- Comments go here -->
+                        </div>
+                    </div>
                 </div>
-                <div><p class="text-xs text-gray-400 font-bold mb-1 uppercase tracking-wider">รายละเอียด / บันทึกเพิ่มเติม</p><div id="vt-desc" class="text-sm font-medium text-gray-700 bg-gray-50 border border-gray-100 p-4 rounded-xl min-h-[100px] whitespace-pre-wrap"></div></div>
-            </div>
-            <div class="px-6 py-4 border-t border-gray-100 bg-gray-50 flex justify-end">
-                <button onclick="closeViewTaskModal()" class="px-6 py-2.5 text-sm font-bold text-gray-700 bg-white border border-gray-200 hover:bg-gray-100 rounded-xl transition-colors shadow-sm">ปิดหน้าต่าง</button>
+
+                <!-- Right: Actions (For President / Owner) -->
+                <div class="md:col-span-1 bg-gray-50 rounded-xl p-4 border border-gray-100 h-fit space-y-4">
+                    <p class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">การจัดการ (Actions)</p>
+                    
+                    <div id="action-president" class="hidden space-y-2 pb-4 border-b border-gray-200">
+                        <p class="text-[10px] font-bold text-purple-600 uppercase mb-1">สำหรับ President</p>
+                        <button onclick="changeQuadrantStatus('approved')" class="w-full bg-green-600 hover:bg-green-700 text-white text-sm font-bold py-2 rounded-lg flex items-center justify-center transition-colors"><svg class="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg> อนุมัติงาน</button>
+                        <button onclick="changeQuadrantStatus('revise')" class="w-full bg-purple-600 hover:bg-purple-700 text-white text-sm font-bold py-2 rounded-lg flex items-center justify-center transition-colors"><svg class="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12.066 11.2a1 1 0 000 1.6l5.334 4A1 1 0 0019 16V8a1 1 0 00-1.6-.8l-5.333 4zM4.066 11.2a1 1 0 000 1.6l5.334 4A1 1 0 0011 16V8a1 1 0 00-1.6-.8l-5.334 4z"/></svg> ตีกลับ / แจ้งแก้ไข</button>
+                    </div>
+
+                    <div id="action-dept" class="hidden space-y-2">
+                        <p class="text-[10px] font-bold text-blue-600 uppercase mb-1">ย้ายตำแหน่งกระดาน</p>
+                        <select id="vt-change-quadrant" onchange="changeQuadrantStatus(this.value)" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white outline-none">
+                            <option value="q1">1. ด่วน-สำคัญ</option>
+                            <option value="q2">2. ด่วน-ไม่สำคัญ</option>
+                            <option value="q3">3. ไม่ด่วน-สำคัญ</option>
+                            <option value="q4">4. ไม่ด่วน-ไม่สำคัญ</option>
+                        </select>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -125,9 +180,11 @@
                             <label class="block text-xs font-medium text-gray-700 mb-1">ฝ่าย *</label>
                             <select id="u-dept" required class="w-full px-3 py-2 border rounded-lg text-sm bg-gray-50 outline-none">
                                 <option value="ทั้งหมด">ทั้งหมด (Admin/Pres)</option>
+                                <option value="หัวหน้าภูมิภาค">หัวหน้าภูมิภาค</option>
                                 <option value="อสพ">เอกสารสัมพันธ์ (อสพ.)</option><option value="สมช">ฝ่ายสมาชิกสัมพันธ์ (สมช.)</option><option value="สธส">ฝ่ายสาธารณสุขสัมพันธ์ (สธส.)</option>
                                 <option value="วนธ">ฝ่ายวัฒนธรรม (วนธ.)</option><option value="กษส">ฝ่ายเกษตรสัมพันธ์ (กษส.)</option><option value="ชสพ">ฝ่ายชุมชนสัมพันธ์ (ชสพ.)</option>
                                 <option value="กกส">ฝ่ายกิจกรรมสัมพันธ์ (กกส.)</option><option value="ศสพ">ฝ่ายศึกษาสัมพันธ์ (ศสพ.)</option><option value="อกป">ฝ่ายอำนวยการและปฏิสัมพันธ์ (อกป.)</option>
+                                <option value="ฝ่ายประชาสัมพันธ์">ฝ่ายประชาสัมพันธ์</option><option value="ฝ่ายเทคโนโลยีและสารสนเทศ">ฝ่ายเทคโนโลยีและสารสนเทศ</option><option value="ฝ่ายการศึกษาและฝึกอบรม">ฝ่ายการศึกษาและฝึกอบรม</option><option value="ฝ่ายภาพ วิดิโอ และโพรดักชัน">ฝ่ายภาพ วิดิโอ และโพรดักชัน</option>
                             </select>
                         </div>
                     </div>
@@ -245,9 +302,11 @@
                         <div>
                             <label class="block text-xs font-medium text-gray-700 mb-1">ส่วนงาน/ฝ่าย *</label>
                             <select id="modalDept" required class="w-full px-3 py-2 border rounded-lg text-sm bg-gray-50 outline-none focus:ring-2 focus:ring-orange-500">
+                                <option value="หัวหน้าภูมิภาค">หัวหน้าภูมิภาค</option>
                                 <option value="อสพ">เอกสารสัมพันธ์ (อสพ.)</option><option value="สมช">ฝ่ายสมาชิกสัมพันธ์ (สมช.)</option><option value="สธส">ฝ่ายสาธารณสุขสัมพันธ์ (สธส.)</option>
                                 <option value="วนธ">ฝ่ายวัฒนธรรม (วนธ.)</option><option value="กษส">ฝ่ายเกษตรสัมพันธ์ (กษส.)</option><option value="ชสพ">ฝ่ายชุมชนสัมพันธ์ (ชสพ.)</option>
                                 <option value="กกส">ฝ่ายกิจกรรมสัมพันธ์ (กกส.)</option><option value="ศสพ">ฝ่ายศึกษาสัมพันธ์ (ศสพ.)</option><option value="อกป">ฝ่ายอำนวยการและปฏิสัมพันธ์ (อกป.)</option>
+                                <option value="ฝ่ายประชาสัมพันธ์">ฝ่ายประชาสัมพันธ์</option><option value="ฝ่ายเทคโนโลยีและสารสนเทศ">ฝ่ายเทคโนโลยีและสารสนเทศ</option><option value="ฝ่ายการศึกษาและฝึกอบรม">ฝ่ายการศึกษาและฝึกอบรม</option><option value="ฝ่ายภาพ วิดิโอ และโพรดักชัน">ฝ่ายภาพ วิดิโอ และโพรดักชัน</option>
                             </select>
                         </div>
                         <div><label class="block text-xs font-medium text-gray-700 mb-1">เลขที่เอกสาร *</label><input type="text" id="modalDocId" required class="w-full px-3 py-2 border rounded-lg text-sm bg-gray-50 outline-none focus:ring-2 focus:ring-orange-500"></div>
@@ -269,6 +328,7 @@
         </div>
     </div>
 
+    <!-- Modal: จัดการงาน -->
     <div id="addTaskModal" class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm z-[110] hidden flex items-center justify-center p-4">
         <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg flex flex-col overflow-hidden animate-fade-in">
             <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
@@ -278,21 +338,44 @@
             <div class="p-6">
                 <form id="addTaskForm" onsubmit="submitNewTask(event)" class="space-y-4">
                     <input type="hidden" id="taskId">
+                    
+                    <div class="bg-blue-50/50 border border-blue-100 p-3 rounded-xl mb-4">
+                        <label class="block text-xs font-bold text-blue-800 mb-2">เลือกตำแหน่งที่ต้องการให้งานแสดง (Placement) *</label>
+                        <div class="flex gap-4">
+                            <label class="flex items-center text-sm cursor-pointer"><input type="radio" name="t-placement" value="table" class="mr-2" onchange="toggleTaskPlacementUI()"> ตารางปกติ</label>
+                            <label class="flex items-center text-sm cursor-pointer"><input type="radio" name="t-placement" value="quadrant" class="mr-2" onchange="toggleTaskPlacementUI()"> กระดานผู้บริหาร (Quadrant)</label>
+                            <label class="flex items-center text-sm cursor-pointer"><input type="radio" name="t-placement" value="both" checked class="mr-2" onchange="toggleTaskPlacementUI()"> แสดงทั้งสองที่</label>
+                        </div>
+                    </div>
+
                     <div><label class="block text-xs font-medium text-gray-700 mb-1">ชื่องาน / กิจกรรม *</label><input type="text" id="taskTitle" required class="w-full px-3 py-2 border rounded-lg text-sm bg-gray-50 outline-none focus:ring-2 focus:ring-orange-500"></div>
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <label class="block text-xs font-medium text-gray-700 mb-1">ฝ่าย *</label>
                             <select id="taskDept" required class="w-full px-3 py-2 border rounded-lg text-sm bg-gray-50 outline-none focus:ring-2 focus:ring-orange-500">
+                                <option value="หัวหน้าภูมิภาค">หัวหน้าภูมิภาค</option>
                                 <option value="อสพ">เอกสารสัมพันธ์ (อสพ.)</option><option value="สมช">ฝ่ายสมาชิกสัมพันธ์ (สมช.)</option><option value="สธส">ฝ่ายสาธารณสุขสัมพันธ์ (สธส.)</option>
                                 <option value="วนธ">ฝ่ายวัฒนธรรม (วนธ.)</option><option value="กษส">ฝ่ายเกษตรสัมพันธ์ (กษส.)</option><option value="ชสพ">ฝ่ายชุมชนสัมพันธ์ (ชสพ.)</option>
                                 <option value="กกส">ฝ่ายกิจกรรมสัมพันธ์ (กกส.)</option><option value="ศสพ">ฝ่ายศึกษาสัมพันธ์ (ศสพ.)</option><option value="อกป">ฝ่ายอำนวยการและปฏิสัมพันธ์ (อกป.)</option>
+                                <option value="ฝ่ายประชาสัมพันธ์">ฝ่ายประชาสัมพันธ์</option><option value="ฝ่ายเทคโนโลยีและสารสนเทศ">ฝ่ายเทคโนโลยีและสารสนเทศ</option><option value="ฝ่ายการศึกษาและฝึกอบรม">ฝ่ายการศึกษาและฝึกอบรม</option><option value="ฝ่ายภาพ วิดิโอ และโพรดักชัน">ฝ่ายภาพ วิดิโอ และโพรดักชัน</option>
                             </select>
                         </div>
-                        <div><label class="block text-xs font-medium text-gray-700 mb-1">สถานะ *</label><select id="taskStatus" required class="w-full px-3 py-2 border rounded-lg text-sm bg-gray-50 outline-none focus:ring-2 focus:ring-orange-500"><option value="pending">รอดำเนินการ</option><option value="in_progress">กำลังดำเนินการ</option><option value="completed">เสร็จสิ้นแล้ว</option></select></div>
+                        <div id="ui-task-status"><label class="block text-xs font-medium text-gray-700 mb-1">สถานะในตาราง *</label><select id="taskStatus" class="w-full px-3 py-2 border rounded-lg text-sm bg-gray-50 outline-none focus:ring-2 focus:ring-orange-500"><option value="pending">รอดำเนินการ</option><option value="in_progress">กำลังดำเนินการ</option><option value="completed">เสร็จสิ้นแล้ว</option></select></div>
                     </div>
+
+                    <div id="ui-task-quadrant" class="bg-gray-50 border border-gray-200 p-3 rounded-xl mt-2 hidden">
+                        <label class="block text-xs font-bold text-gray-700 mb-1">หมวดหมู่ในกระดานคัมบัง (Quadrant) *</label>
+                        <select id="taskQuadrant" class="w-full px-3 py-2 border rounded-lg text-sm bg-white outline-none focus:ring-2 focus:ring-blue-500">
+                            <option value="q1">1. ด่วน-สำคัญ</option>
+                            <option value="q2">2. ด่วน-ไม่สำคัญ</option>
+                            <option value="q3">3. ไม่ด่วน-สำคัญ</option>
+                            <option value="q4">4. ไม่ด่วน-ไม่สำคัญ</option>
+                        </select>
+                    </div>
+
                     <div class="grid grid-cols-2 gap-4">
-                        <div><label class="block text-xs font-medium text-gray-700 mb-1">ผู้รับผิดชอบ</label><input type="text" id="taskAssignee" class="w-full px-3 py-2 border rounded-lg text-sm bg-gray-50 outline-none focus:ring-2 focus:ring-orange-500"></div>
-                        <div><label class="block text-xs font-medium text-gray-700 mb-1">กำหนดส่ง</label><input type="date" id="taskDueDate" class="w-full px-3 py-2 border rounded-lg text-sm bg-gray-50 outline-none focus:ring-2 focus:ring-orange-500"></div>
+                        <div id="ui-task-assignee"><label class="block text-xs font-medium text-gray-700 mb-1">ผู้รับผิดชอบ (บังคับถ้าลงตาราง)</label><input type="text" id="taskAssignee" class="w-full px-3 py-2 border rounded-lg text-sm bg-gray-50 outline-none focus:ring-2 focus:ring-orange-500"></div>
+                        <div id="ui-task-due"><label class="block text-xs font-medium text-gray-700 mb-1">กำหนดส่ง (บังคับถ้าลงตาราง)</label><input type="date" id="taskDueDate" class="w-full px-3 py-2 border rounded-lg text-sm bg-gray-50 outline-none focus:ring-2 focus:ring-orange-500"></div>
                     </div>
                     
                     <div class="md:col-span-2">
@@ -388,7 +471,25 @@
                     <button onclick="toggleSidebar()" class="text-gray-500 hover:text-orange-500 focus:outline-none md:hidden mr-4 transition-colors"><svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" /></svg></button>
                     <div class="hidden md:flex items-center space-x-2 text-xs bg-emerald-50 px-3 py-1.5 rounded-full border border-emerald-100"><span class="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></span><span class="font-medium text-emerald-700">FFs Database Online</span></div>
                 </div>
-                <button onclick="logout()" class="text-xs text-gray-500 hover:text-red-600 font-medium border border-gray-200 bg-white px-3 py-1.5 rounded-xl transition-all cursor-pointer">ออกจากระบบ</button>
+                <div class="flex items-center gap-4">
+                    <!-- Notification Bell -->
+                    <div class="relative cursor-pointer group" onclick="toggleNotifications()">
+                        <svg class="w-6 h-6 text-gray-500 group-hover:text-orange-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" /></svg>
+                        <span id="notifBadge" class="absolute -top-1 -right-1 bg-red-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full hidden">0</span>
+                        
+                        <!-- Dropdown Notifications -->
+                        <div id="notifDropdown" class="absolute right-0 mt-2 w-80 bg-white rounded-xl shadow-xl border border-gray-100 hidden flex-col z-[100] max-h-96 overflow-hidden">
+                            <div class="px-4 py-3 border-b border-gray-50 bg-gray-50/50 flex justify-between items-center">
+                                <span class="font-bold text-sm text-gray-800">การแจ้งเตือน</span>
+                                <button onclick="markAllNotifsRead(event)" class="text-[10px] text-blue-500 hover:underline">ทำเครื่องหมายว่าอ่านแล้ว</button>
+                            </div>
+                            <div id="notifList" class="overflow-y-auto flex-1 p-2 space-y-1">
+                                <!-- Notifs go here -->
+                            </div>
+                        </div>
+                    </div>
+                    <button onclick="logout()" class="text-xs text-gray-500 hover:text-red-600 font-medium border border-gray-200 bg-white px-3 py-1.5 rounded-xl transition-all cursor-pointer">ออกจากระบบ</button>
+                </div>
             </header>
 
             <main class="flex-1 overflow-y-auto p-4 sm:p-6 bg-gray-50">
@@ -409,10 +510,10 @@
                         </div>
                         <div class="flex flex-col sm:flex-row gap-3">
                             <select id="docDepartment" class="w-full sm:w-1/4 px-3 py-2.5 border border-gray-300 rounded-xl bg-gray-50 text-sm focus:ring-2 focus:ring-orange-500 outline-none">
-                                <option value="">ทุกฝ่าย (All)</option><option value="อสพ">เอกสารสัมพันธ์ (อสพ.)</option><option value="สมช">ฝ่ายสมาชิกสัมพันธ์ (สมช.)</option><option value="สธส">ฝ่ายสาธารณสุขสัมพันธ์ (สธส.)</option><option value="วนธ">ฝ่ายวัฒนธรรม (วนธ.)</option><option value="กษส">ฝ่ายเกษตรสัมพันธ์ (กษส.)</option><option value="ชสพ">ฝ่ายชุมชนสัมพันธ์ (ชสพ.)</option><option value="กกส">ฝ่ายกิจกรรมสัมพันธ์ (กกส.)</option><option value="ศสพ">ฝ่ายศึกษาสัมพันธ์ (ศสพ.)</option><option value="อกป">ฝ่ายอำนวยการและปฏิสัมพันธ์ (อกป.)</option>
+                                <option value="">ทุกฝ่าย (All)</option><option value="หัวหน้าภูมิภาค">หัวหน้าภูมิภาค</option><option value="อสพ">เอกสารสัมพันธ์ (อสพ.)</option><option value="สมช">ฝ่ายสมาชิกสัมพันธ์ (สมช.)</option><option value="สธส">ฝ่ายสาธารณสุขสัมพันธ์ (สธส.)</option><option value="วนธ">ฝ่ายวัฒนธรรม (วนธ.)</option><option value="กษส">ฝ่ายเกษตรสัมพันธ์ (กษส.)</option><option value="ชสพ">ฝ่ายชุมชนสัมพันธ์ (ชสพ.)</option><option value="กกส">ฝ่ายกิจกรรมสัมพันธ์ (กกส.)</option><option value="ศสพ">ฝ่ายศึกษาสัมพันธ์ (ศสพ.)</option><option value="อกป">ฝ่ายอำนวยการและปฏิสัมพันธ์ (อกป.)</option><option value="ฝ่ายประชาสัมพันธ์">ฝ่ายประชาสัมพันธ์</option><option value="ฝ่ายเทคโนโลยีและสารสนเทศ">ฝ่ายเทคโนโลยีและสารสนเทศ</option><option value="ฝ่ายการศึกษาและฝึกอบรม">ฝ่ายการศึกษาและฝึกอบรม</option><option value="ฝ่ายภาพ วิดิโอ และโพรดักชัน">ฝ่ายภาพ วิดิโอ และโพรดักชัน</option>
                             </select>
                             <select id="docCategory" class="w-full sm:w-1/4 px-3 py-2.5 border border-gray-300 rounded-xl bg-gray-50 text-sm focus:ring-2 focus:ring-orange-500 outline-none">
-                                <option value="">ทุกหมวดหมู่ (All)</option><option value="01">01 - ทั่วไป</option><option value="02">02 - รับรองกิจกรรม</option><option value="03">03 - รับรองสมาชิก</option><option value="04">04 - ลาเรียน</option><option value="05">05 - เยี่ยมชม</option><option value="06">06 - ขอข้อมูล</option><option value="07">07 - ขอเข้าพบ</option><option value="08">08 - ประชาสัมพันธ์</option><option value="09">09 - ขอเชิญเข้าร่วม</option>
+                                <option value="">ทุกหมวดหมู่ (All)</option><option value="01">01 - ทั่วไป</option><option value="02">02 - รับรองการทำกิจกรรม</option><option value="03">03 - รับรองสมาชิก</option><option value="04">04 - ลาเรียน</option><option value="05">05 - เยี่ยมชม</option><option value="06">06 - ขอข้อมูล</option><option value="07">07 - ขอเข้าพบ</option><option value="08">08 - ประชาสัมพันธ์</option><option value="09">09 - ขอเชิญเข้าร่วม</option>
                             </select>
                             <input type="text" id="docSearchInput" placeholder="เลขเอกสาร หรือ ชื่อเรื่อง..." class="w-full flex-grow px-4 py-2.5 border border-gray-300 rounded-xl bg-gray-50 text-sm focus:ring-2 focus:ring-orange-500 outline-none">
                             <button onclick="searchDocument()" class="w-full sm:w-auto bg-gray-800 hover:bg-gray-900 text-white font-medium px-6 py-2.5 rounded-xl text-sm transition-all shadow-xs">ค้นหา</button>
@@ -436,9 +537,21 @@
                         <div><h2 id="dashboardTitle" class="text-2xl font-bold text-gray-900">กระดานภาพรวมระบบ</h2><p id="dashboardSubtitle" class="text-sm text-gray-500">ระบบติดตามและวิเคราะห์ความคืบหน้า (Smart Dashboard)</p></div>
                         <button id="addTaskBtnUI" onclick="openAddTaskModal()" class="hidden bg-orange-500 hover:bg-orange-600 text-white text-sm font-bold px-4 py-2 rounded-lg items-center shadow-sm transition-colors">+ เพิ่มงาน</button>
                     </div>
+
+                    <!-- Achievement Banner -->
+                    <div id="achievementBanner" class="hidden mb-6 bg-gradient-to-r from-emerald-500 to-teal-400 rounded-2xl p-4 shadow-sm text-white flex items-center justify-between">
+                        <div class="flex items-center">
+                            <span class="text-3xl mr-3">🏆</span>
+                            <div>
+                                <h3 class="font-bold text-lg leading-tight">ยอดเยี่ยมมาก!</h3>
+                                <p class="text-sm text-emerald-50" id="achievementText">ฝ่ายนี้ทำงานเสร็จตรงเวลามาแล้ว 0 งาน</p>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- สรุปตัวเลข (Clickable Cards) -->
                     <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-                        <div id="card-all" onclick="setTaskFilter('all')" class="bg-white p-5 rounded-2xl border border-gray-200 shadow-sm flex items-center cursor-pointer transition-all hover:ring-2 hover:ring-orange-500 card-active"><div class="p-3 bg-blue-50 text-blue-600 rounded-xl mr-3"><svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg></div><div><p class="text-[11px] text-gray-500 font-bold uppercase">งานทั้งหมด</p><h3 id="stat-total" class="text-2xl font-bold text-gray-900">0</h3></div></div>
+                        <div id="card-all" onclick="setTaskFilter('all')" class="bg-white p-5 rounded-2xl border border-gray-200 shadow-sm flex items-center cursor-pointer transition-all hover:ring-2 hover:ring-orange-500 card-active"><div class="p-3 bg-blue-50 text-blue-600 rounded-xl mr-3"><svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg></div><div><p class="text-[11px] text-gray-500 font-bold uppercase">งานในตารางทั้งหมด</p><h3 id="stat-total" class="text-2xl font-bold text-gray-900">0</h3></div></div>
                         <div id="card-completed" onclick="setTaskFilter('completed')" class="bg-white p-5 rounded-2xl border border-gray-200 shadow-sm flex items-center cursor-pointer transition-all hover:ring-2 hover:ring-emerald-500"><div class="p-3 bg-emerald-50 text-emerald-600 rounded-xl mr-3"><svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg></div><div><p class="text-[11px] text-gray-500 font-bold uppercase">เสร็จสิ้น</p><h3 id="stat-completed" class="text-2xl font-bold text-gray-900">0</h3></div></div>
                         <div id="card-in_progress" onclick="setTaskFilter('in_progress')" class="bg-white p-5 rounded-2xl border border-gray-200 shadow-sm flex items-center cursor-pointer transition-all hover:ring-2 hover:ring-amber-500"><div class="p-3 bg-amber-50 text-amber-600 rounded-xl mr-3"><svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg></div><div><p class="text-[11px] text-gray-500 font-bold uppercase">กำลังดำเนินการ</p><h3 id="stat-progress" class="text-2xl font-bold text-gray-900">0</h3></div></div>
                         <div id="card-pending" onclick="setTaskFilter('pending')" class="bg-white p-5 rounded-2xl border border-gray-200 shadow-sm flex items-center cursor-pointer transition-all hover:ring-2 hover:ring-gray-500"><div class="p-3 bg-gray-100 text-gray-600 rounded-xl mr-3"><svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg></div><div><p class="text-[11px] text-gray-500 font-bold uppercase">รอดำเนินการ</p><h3 id="stat-pending" class="text-2xl font-bold text-gray-900">0</h3></div></div>
@@ -460,6 +573,21 @@
                             <div class="relative h-64 w-full"><canvas id="deptChart"></canvas></div>
                         </div>
                     </div>
+
+                    <!-- KANBAN BOARD SECTION (Eisenhower Matrix) -->
+                    <div id="kanbanSection" class="hidden mb-10">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="text-lg font-bold text-gray-800 flex items-center">
+                                <svg class="w-5 h-5 mr-2 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2" /></svg>
+                                กระดานบริหารจัดการ (Quadrant)
+                            </h3>
+                            <span class="text-xs text-gray-500 bg-white border px-3 py-1 rounded-full shadow-sm">* แสดงเฉพาะผู้บริหารและคณะทำงานฝ่ายนี้เท่านั้น</span>
+                        </div>
+                        <div class="kanban-container" id="kanbanBoard">
+                            <!-- Columns generated via JS -->
+                        </div>
+                    </div>
+
                     <!-- ปฏิทิน -->
                     <div class="bg-white rounded-2xl border border-gray-200 shadow-sm flex flex-col mb-6 overflow-hidden">
                         <div class="px-6 py-4 border-b border-gray-100 bg-gray-50 flex justify-between items-center">
@@ -474,20 +602,20 @@
                             <div class="grid grid-cols-7 gap-2 text-center text-xs font-bold text-gray-500 mb-2 uppercase"><div>อาทิตย์</div><div>จันทร์</div><div>อังคาร</div><div>พุธ</div><div>พฤหัสบดี</div><div>ศุกร์</div><div>เสาร์</div></div>
                             <div id="calendarGrid" class="grid grid-cols-7 gap-2"></div>
                             <div class="mt-4 flex flex-wrap gap-4 justify-center text-xs text-gray-500 font-medium">
-                                <span class="flex items-center"><div class="w-3 h-3 bg-emerald-500 rounded-full mr-1.5"></div>เสร็จสิ้น</span><span class="flex items-center"><div class="w-3 h-3 bg-amber-500 rounded-full mr-1.5"></div>กำลังทำ</span><span class="flex items-center"><div class="w-3 h-3 bg-red-500 rounded-full mr-1.5"></div>รอเริ่ม/เลยกำหนด</span><span class="ml-4 text-orange-600 bg-orange-50 px-2 py-0.5 rounded border border-orange-200">* คลิกที่วันที่ เพื่อดูตารางงานเฉพาะวันนั้น</span>
+                                <span class="flex items-center"><div class="w-3 h-3 bg-emerald-500 rounded-full mr-1.5"></div>เสร็จสิ้น</span><span class="flex items-center"><div class="w-3 h-3 bg-amber-500 rounded-full mr-1.5"></div>กำลังทำ</span><span class="flex items-center"><div class="w-3 h-3 bg-red-500 rounded-full mr-1.5"></div>เลยกำหนด</span><span class="ml-4 text-orange-600 bg-orange-50 px-2 py-0.5 rounded border border-orange-200">* คลิกที่วันที่ เพื่อดูตารางงานเฉพาะวันนั้น</span>
                             </div>
                         </div>
                     </div>
-                    <!-- ตารางงาน -->
+                    <!-- ตารางงานปกติ -->
                     <div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden mb-10">
                         <div class="px-6 py-4 border-b border-gray-100 bg-gray-50 flex justify-between items-center">
-                            <h3 class="text-sm font-bold text-gray-800" id="tableTitle">รายการงาน / ภารกิจทั้งหมด</h3>
+                            <h3 class="text-sm font-bold text-gray-800" id="tableTitle">รายการงาน (มุมมองตารางปกติ)</h3>
                             <button onclick="clearFilters()" id="clearFilterBtn" class="hidden text-xs text-orange-600 font-bold hover:underline">แสดงทั้งหมด (ล้างตัวกรอง)</button>
                         </div>
                         <div class="overflow-x-auto">
                             <table class="w-full text-left text-sm text-gray-600">
                                 <thead class="bg-white text-xs text-gray-400 uppercase border-b border-gray-100">
-                                    <tr><th class="px-6 py-4 font-medium">ภารกิจ</th><th class="px-6 py-4 font-medium">ฝ่าย</th><th class="px-6 py-4 font-medium">กำหนดส่ง</th><th class="px-6 py-4 font-medium text-center">สถานะ</th><th class="px-6 py-4 font-medium text-right">จัดการ</th></tr>
+                                    <tr><th class="px-6 py-4 font-medium w-1/3">ภารกิจ</th><th class="px-6 py-4 font-medium">ฝ่าย</th><th class="px-6 py-4 font-medium">กำหนดส่ง</th><th class="px-6 py-4 font-medium text-center">สถานะ</th><th class="px-6 py-4 font-medium text-right">จัดการ</th></tr>
                                 </thead>
                                 <tbody id="taskTableBody" class="divide-y divide-gray-50"></tbody>
                             </table>
@@ -573,7 +701,7 @@
                         <div class="overflow-x-auto">
                             <table class="w-full text-left text-sm text-gray-600">
                                 <thead class="bg-gray-50 text-xs text-gray-500 uppercase border-b border-gray-200">
-                                    <tr><th class="px-6 py-3">รหัสสมาชิก</th><th class="px-6 py-3">ชื่อ-นามสกุล</th><th class="px-6 py-3">สิทธิ์ (Role)</th><th class="px-6 py-3">ฝ่าย</th><th class="px-6 py-3 text-right">จัดการ</th></tr>
+                                    <tr><th class="px-6 py-3">รหัสสมาชิก</th><th class="px-6 py-3">ชื่อ-นามสกุล</th><th class="px-6 py-3">สิทธิ์ (Role)</th><th class="px-6 py-3">ฝ่าย</th></tr>
                                 </thead>
                                 <tbody id="usersTableBody" class="divide-y divide-gray-100"></tbody>
                             </table>
@@ -581,7 +709,7 @@
                     </div>
                 </div>
 
-                <!-- 5. หน้า ประวัติการทำงาน (History Log) -->
+                <!-- 6. หน้า ตั้งค่าโมดูลระบบ (Admin Settings) -->
                 <div id="view-settings" class="max-w-4xl mx-auto hidden animate-fade-in pb-10">
                     <div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden mb-6">
                         <div class="px-6 py-5 bg-gray-50 border-b border-gray-200 flex items-center">
@@ -626,9 +754,12 @@
         let calMonth = new Date().getMonth(); let calYear = new Date().getFullYear();
         let allCurrentTasks = []; let activeStatusFilter = 'all'; let activeDateFilter = null; let currentDashboardView = 'all'; 
         let currentDeptChartType = 'bar';
+        let currentViewingTaskId = null;
 
-        const deptNames = { "อสพ": "เอกสารสัมพันธ์ (อสพ.)", "สมช": "ฝ่ายสมาชิกสัมพันธ์ (สมช.)", "สธส": "ฝ่ายสาธารณสุขสัมพันธ์ (สธส.)", "วนธ": "ฝ่ายวัฒนธรรม (วนธ.)", "กษส": "ฝ่ายเกษตรสัมพันธ์ (กษส.)", "ชสพ": "ฝ่ายชุมชนสัมพันธ์ (ชสพ.)", "กกส": "ฝ่ายกิจกรรมสัมพันธ์ (กกส.)", "ศสพ": "ฝ่ายศึกษาสัมพันธ์ (ศสพ.)", "อกป": "ฝ่ายอำนวยการและปฏิสัมพันธ์ (อกป.)" };
+        const deptNames = { "หัวหน้าภูมิภาค": "หัวหน้าภูมิภาค", "อสพ": "เอกสารสัมพันธ์ (อสพ.)", "สมช": "ฝ่ายสมาชิกสัมพันธ์ (สมช.)", "สธส": "ฝ่ายสาธารณสุขสัมพันธ์ (สธส.)", "วนธ": "ฝ่ายวัฒนธรรม (วนธ.)", "กษส": "ฝ่ายเกษตรสัมพันธ์ (กษส.)", "ชสพ": "ฝ่ายชุมชนสัมพันธ์ (ชสพ.)", "กกส": "ฝ่ายกิจกรรมสัมพันธ์ (กกส.)", "ศสพ": "ฝ่ายศึกษาสัมพันธ์ (ศสพ.)", "อกป": "ฝ่ายอำนวยการและปฏิสัมพันธ์ (อกป.)", "ฝ่ายประชาสัมพันธ์": "ฝ่ายประชาสัมพันธ์", "ฝ่ายเทคโนโลยีและสารสนเทศ": "ฝ่ายเทคโนโลยีและสารสนเทศ", "ฝ่ายการศึกษาและฝึกอบรม": "ฝ่ายการศึกษาและฝึกอบรม", "ฝ่ายภาพ วิดิโอ และโพรดักชัน": "ฝ่ายภาพ วิดิโอ และโพรดักชัน" };
         const catNames = { "01": "ทั่วไป", "02": "รับรองการทำกิจกรรม", "03": "รับรองสมาชิก", "04": "ลาเรียน", "05": "เยี่ยมชม", "06": "ขอข้อมูล", "07": "ขอเข้าพบ", "08": "ประชาสัมพันธ์", "09": "ขอเชิญเข้าร่วม" };
+
+        const quadNames = { "q1": "1. ด่วน-สำคัญ", "q2": "2. ด่วน-ไม่สำคัญ", "q3": "3. ไม่ด่วน-สำคัญ", "q4": "4. ไม่ด่วน-ไม่สำคัญ", "revise": "5. แก้ไข", "approved": "6. อนุมัติ" };
 
         google.charts.load('current', { 'packages': ['geochart'] });
 
@@ -637,7 +768,7 @@
             const container = document.getElementById('toast-container');
             const toast = document.createElement('div');
             const colorClass = type === 'success' ? 'bg-emerald-500' : (type === 'error' ? 'bg-red-500' : 'bg-blue-500');
-            const icon = type === 'success' ? '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />' : '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />';
+            const icon = type === 'success' ? '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />' : '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />';
             
             toast.className = `flex items-center gap-3 px-4 py-3 rounded-xl text-white shadow-lg transform transition-all duration-300 translate-x-full opacity-0 ${colorClass}`;
             toast.innerHTML = `<svg class="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">${icon}</svg><p class="text-sm font-medium">${message}</p>`;
@@ -658,17 +789,9 @@
         }
         function closeConfirm() {
             document.getElementById('confirmModal').classList.add('opacity-0');
-            setTimeout(() => {
-                document.getElementById('confirmModal').classList.add('hidden');
-                document.getElementById('confirmModal').classList.remove('flex');
-                confirmActionCallback = null;
-            }, 200);
+            setTimeout(() => { document.getElementById('confirmModal').classList.add('hidden'); document.getElementById('confirmModal').classList.remove('flex'); confirmActionCallback = null; }, 200);
         }
-        document.getElementById('confirmBtn').addEventListener('click', () => {
-            if (confirmActionCallback) confirmActionCallback();
-            closeConfirm();
-        });
-
+        
         function renderSidebarMenu() {
             const menuContainer = document.getElementById('dynamicDeptMenu');
             Object.keys(deptNames).forEach(code => {
@@ -683,20 +806,23 @@
             else { menu.classList.add('hidden'); arrow.classList.remove('rotate-180'); }
         }
 
-        // --- Login ---
+        // --- Login & Base UI ---
         document.getElementById('passwordInput').addEventListener('keypress', function (e) { if (e.key === 'Enter') handleLogin(); });
         document.getElementById('userInput').addEventListener('keypress', function (e) { if (e.key === 'Enter') handleLogin(); });
 
         async function handleLogin() {
             const u = document.getElementById('userInput').value.trim(); const p = document.getElementById('passwordInput').value.trim();
             if (!u || !p) return; document.getElementById('loginBtnText').innerText = 'ตรวจสอบ...';
-            const { data, error } = await supabaseClient.from('users').select('*').eq('username', u).eq('password', p);
-            if(data && data.length > 0) { 
-                const userData = { ...data[0], loginTime: new Date().getTime() };
-                localStorage.setItem('ffsUser', JSON.stringify(userData)); 
-                showMainSystem(userData); 
-            }
-            else { showToast("รหัสผิดพลาด", "error"); document.getElementById('loginBtnText').innerText = 'เข้าสู่ระบบ'; }
+            try {
+                const { data, error } = await supabaseClient.from('users').select('*').eq('username', u).eq('password', p);
+                if (error) throw error;
+                if(data && data.length > 0) { 
+                    const userData = { ...data[0], loginTime: new Date().getTime() };
+                    localStorage.setItem('ffsUser', JSON.stringify(userData)); 
+                    showMainSystem(userData); 
+                }
+                else { showToast("รหัสผิดพลาด", "error"); document.getElementById('loginBtnText').innerText = 'เข้าสู่ระบบ'; }
+            } catch (err) { showToast("เกิดข้อผิดพลาดในการเชื่อมต่อ", "error"); document.getElementById('loginBtnText').innerText = 'เข้าสู่ระบบ'; }
         }
 
         window.addEventListener('DOMContentLoaded', () => { 
@@ -728,6 +854,8 @@
             if (['Administrator', 'President'].includes(user.role) || (user.role === 'Working Team' && user.department === 'สมช')) {
                 document.getElementById('csvUploadSection').classList.remove('hidden');
             }
+            
+            checkNotifications();
             
             const { data: setts } = await supabaseClient.from('system_settings').select('*'); if (setts) setts.forEach(s => systemSettings[s.module_id] = s.is_active);
             switchView('document'); 
@@ -769,12 +897,69 @@
             const canAdd = ['Administrator', 'President'].includes(currentUser.role) || (currentUser.role === 'Working Team' && currentUser.department === deptCode);
             if (canAdd) btnAdd.classList.remove('hidden'); else btnAdd.classList.add('hidden');
             
+            // Kanban Visibility
+            const kSection = document.getElementById('kanbanSection');
+            if (deptCode !== 'all' && (['President', 'Administrator'].includes(currentUser.role) || currentUser.department === deptCode)) {
+                kSection.classList.remove('hidden');
+            } else if (deptCode === 'all' && ['President', 'Administrator'].includes(currentUser.role)) {
+                kSection.classList.remove('hidden');
+            } else {
+                kSection.classList.add('hidden');
+            }
+
             highlightStatusCard(); loadDashboardData(); loadActivities();
+        }
+
+        // --- Notifications ---
+        async function checkNotifications() {
+            try {
+                let target = currentUser.department;
+                if(currentUser.role === 'President') target = 'President';
+                const { data, error } = await supabaseClient.from('notifications').select('*').eq('target_group', target).eq('is_read', false).order('created_at', { ascending: false });
+                if(data && data.length > 0) {
+                    document.getElementById('notifBadge').innerText = data.length;
+                    document.getElementById('notifBadge').classList.remove('hidden');
+                } else {
+                    document.getElementById('notifBadge').classList.add('hidden');
+                }
+            } catch(e) { console.log(e); }
+        }
+
+        function toggleNotifications() {
+            const dd = document.getElementById('notifDropdown');
+            if(dd.classList.contains('hidden')) {
+                dd.classList.remove('hidden'); dd.classList.add('flex');
+                renderNotifications();
+            } else {
+                dd.classList.add('hidden'); dd.classList.remove('flex');
+            }
+        }
+
+        async function renderNotifications() {
+            const list = document.getElementById('notifList'); list.innerHTML = '<div class="text-center py-4 text-xs text-gray-400">กำลังโหลด...</div>';
+            try {
+                let target = currentUser.department; if(currentUser.role === 'President') target = 'President';
+                const { data } = await supabaseClient.from('notifications').select('*').eq('target_group', target).order('created_at', { ascending: false }).limit(10);
+                list.innerHTML = '';
+                if(!data || data.length === 0) return list.innerHTML = '<div class="text-center py-4 text-xs text-gray-400">ไม่มีการแจ้งเตือนใหม่</div>';
+                
+                data.forEach(n => {
+                    let bg = n.is_read ? 'bg-white' : 'bg-blue-50';
+                    list.innerHTML += `<div class="px-3 py-2 rounded-lg ${bg} hover:bg-gray-100 transition-colors cursor-pointer" onclick="viewTask(${n.task_id}); toggleNotifications();"><p class="text-xs text-gray-800">${n.message}</p><p class="text-[9px] text-gray-400 mt-1">${new Date(n.created_at).toLocaleString('th-TH')}</p></div>`;
+                });
+            } catch(e) {}
+        }
+
+        async function markAllNotifsRead(e) {
+            e.stopPropagation();
+            let target = currentUser.department; if(currentUser.role === 'President') target = 'President';
+            await supabaseClient.from('notifications').update({is_read: true}).eq('target_group', target).eq('is_read', false);
+            checkNotifications(); toggleNotifications();
         }
 
         // --- User Management & History ---
         async function loadUsers() {
-            const tbody = document.getElementById('usersTableBody'); tbody.innerHTML = '<tr><td colspan="5" class="text-center py-5">กำลังโหลด...</td></tr>';
+            const tbody = document.getElementById('usersTableBody'); tbody.innerHTML = '<tr><td colspan="4" class="text-center py-5">กำลังโหลด...</td></tr>';
             try {
                 const {data, error} = await supabaseClient.from('users').select('*').order('role');
                 if (error) throw error;
@@ -782,62 +967,26 @@
                 data.forEach(u => {
                     let badge = u.role === 'Administrator' ? 'bg-red-100 text-red-700' : (u.role === 'President' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700');
                     let deptDisp = u.department === 'ทั้งหมด' ? 'ทั้งหมด (Admin/Pres)' : (deptNames[u.department] || u.department);
-                    
-                    let actBtns = '-';
-                    if (currentUser.role === 'Administrator') {
-                        actBtns = `<button onclick="editUser('${u.id}')" class="text-blue-600 mr-3 hover:underline">แก้ไข</button><button onclick="deleteUser('${u.id}', '${u.username}')" class="text-red-600 hover:underline">ลบ</button>`;
-                    }
-
                     tbody.innerHTML += `<tr>
                         <td class="px-6 py-4 font-mono text-sm">${u.username}</td>
                         <td class="px-6 py-4"><button onclick="viewUserHistory('${u.fullname}')" class="font-bold text-blue-600 hover:text-blue-800 hover:underline transition-colors">${u.fullname}</button></td>
                         <td class="px-6 py-4"><span class="px-2 py-1 rounded text-xs font-bold ${badge}">${u.role}</span></td>
                         <td class="px-6 py-4 text-sm">${deptDisp}</td>
-                        <td class="px-6 py-4 text-right text-sm">${actBtns}</td>
                     </tr>`;
                 });
-            } catch (err) { tbody.innerHTML = '<tr><td colspan="5" class="text-center py-5 text-red-500">ไม่สามารถโหลดข้อมูลผู้ใช้ได้</td></tr>'; }
+            } catch (err) { tbody.innerHTML = '<tr><td colspan="4" class="text-center py-5 text-red-500">ไม่สามารถโหลดข้อมูลผู้ใช้ได้</td></tr>'; }
         }
         function openUserModal() { document.getElementById('userForm').reset(); document.getElementById('u-id').value = ''; document.getElementById('userModal').classList.remove('hidden'); }
         function closeUserModal() { document.getElementById('userModal').classList.add('hidden'); }
-        async function editUser(id) {
-            try {
-                const {data, error} = await supabaseClient.from('users').select('*').eq('id', id).single();
-                if(error) throw error;
-                document.getElementById('u-id').value = data.id; 
-                document.getElementById('u-username').value = data.username; 
-                document.getElementById('u-password').value = data.password; 
-                document.getElementById('u-fullname').value = data.fullname; 
-                document.getElementById('u-role').value = data.role; 
-                document.getElementById('u-dept').value = data.department;
-                document.getElementById('userModal').classList.remove('hidden');
-            } catch (err) { showToast('ไม่สามารถดึงข้อมูลได้', 'error'); }
-        }
+        
         async function submitUser(e) {
             e.preventDefault(); 
-            const id = document.getElementById('u-id').value;
             const obj = { username: document.getElementById('u-username').value, password: document.getElementById('u-password').value, fullname: document.getElementById('u-fullname').value, role: document.getElementById('u-role').value, department: document.getElementById('u-dept').value };
             try {
-                if (id) {
-                    const { error } = await supabaseClient.from('users').update(obj).eq('id', id); 
-                    if(error) throw error; showToast('อัปเดตข้อมูลผู้ใช้สำเร็จ');
-                } else {
-                    const { error } = await supabaseClient.from('users').insert([obj]); 
-                    if(error) throw error; showToast('เพิ่มข้อมูลผู้ใช้สำเร็จ');
-                }
+                const { error } = await supabaseClient.from('users').insert([obj]); 
+                if(error) throw error; showToast('เพิ่มข้อมูลผู้ใช้สำเร็จ');
                 closeUserModal(); loadUsers();
             } catch (err) { showToast('เกิดข้อผิดพลาด: ' + err.message, 'error'); }
-        }
-        async function deleteUser(id, username) {
-            if(username === 'admin' || username === currentUser.username) return showToast("ไม่สามารถลบบัญชีหลัก หรือบัญชีตัวเองได้", "error");
-            showConfirm('ยืนยันการลบผู้ใช้', `ลบผู้ใช้ ${username} ใช่หรือไม่?`, async () => {
-                try {
-                    const { error } = await supabaseClient.from('users').delete().eq('id', id); 
-                    if (error) throw error;
-                    showToast('ลบผู้ใช้สำเร็จ');
-                    loadUsers(); 
-                } catch(err) { showToast('ลบไม่สำเร็จ: ' + err.message, 'error'); }
-            });
         }
 
         async function viewUserHistory(fullname) {
@@ -868,10 +1017,7 @@
                 tbody.innerHTML = '<tr><td colspan="3" class="text-center py-5 text-red-500">เกิดข้อผิดพลาดในการโหลด</td></tr>';
             }
         }
-        function closeUserHistoryModal() {
-            document.getElementById('userHistoryModal').classList.add('hidden');
-            document.getElementById('userHistoryModal').classList.remove('flex');
-        }
+        function closeUserHistoryModal() { document.getElementById('userHistoryModal').classList.add('hidden'); document.getElementById('userHistoryModal').classList.remove('flex'); }
 
         // --- Members CSV Upload ---
         async function handleCSVUpload(event) {
@@ -914,7 +1060,7 @@
             } catch (err) { console.error("Activity load error", err); }
         }
 
-        // --- ระบบ Dashboard (ย่อ) ---
+        // --- ระบบ Dashboard & Kanban ---
         function toggleDeptChart(type) {
             currentDeptChartType = type;
             if (type === 'bar') {
@@ -934,20 +1080,101 @@
         
         async function loadDashboardData() {
             try {
-                let q = supabaseClient.from('tasks').select('*').is('deleted_at', null).order('created_at', { ascending: false }); if (currentDashboardView !== 'all') q = q.eq('department', currentDashboardView);
+                let q = supabaseClient.from('tasks').select('*').is('deleted_at', null).order('created_at', { ascending: false }); 
+                if (currentDashboardView !== 'all') q = q.eq('department', currentDashboardView);
                 const { data: tasks, error } = await q; 
                 if(error) throw error;
                 allCurrentTasks = tasks || []; 
-                document.getElementById('stat-total').innerText = tasks.length; document.getElementById('stat-completed').innerText = tasks.filter(t=>t.status==='completed').length; document.getElementById('stat-progress').innerText = tasks.filter(t=>t.status==='in_progress').length; document.getElementById('stat-pending').innerText = tasks.filter(t=>t.status==='pending').length;
-                renderCalendar(); renderTaskTable(); renderDeptChart(tasks, currentDashboardView);
+                
+                // คำนวณ Achievement
+                let onTimeCount = 0;
+                let tableTasks = allCurrentTasks.filter(t => t.placement === 'table' || t.placement === 'both' || !t.placement);
+                
+                tableTasks.forEach(t => {
+                    if (t.status === 'completed') {
+                        if (!t.due_date) onTimeCount++;
+                        else {
+                            const d = new Date(t.due_date); const c = new Date(t.created_at); // สมมติว่าเสร็จตอนที่สร้าง (ในอนาคตควรมี completed_at)
+                            if (!checkTaskOverdueStatus(t).isOverdue) onTimeCount++;
+                        }
+                    }
+                });
+
+                if (onTimeCount > 0 && currentDashboardView !== 'all') {
+                    document.getElementById('achievementBanner').classList.remove('hidden');
+                    document.getElementById('achievementText').innerText = `ฝ่ายนี้ทำงานเสร็จตรงเวลามาแล้ว ${onTimeCount} งาน`;
+                } else {
+                    document.getElementById('achievementBanner').classList.add('hidden');
+                }
+
+                document.getElementById('stat-total').innerText = tableTasks.length; 
+                document.getElementById('stat-completed').innerText = tableTasks.filter(t=>t.status==='completed').length; 
+                document.getElementById('stat-progress').innerText = tableTasks.filter(t=>t.status==='in_progress').length; 
+                document.getElementById('stat-pending').innerText = tableTasks.filter(t=>t.status==='pending').length;
+                
+                renderCalendar(); renderTaskTable(); renderDeptChart(tableTasks, currentDashboardView); renderKanbanBoard();
             } catch (err) { console.error(err); }
+        }
+
+        function renderKanbanBoard() {
+            const kb = document.getElementById('kanbanBoard'); kb.innerHTML = '';
+            const columns = [
+                { id: 'q1', name: '1. ด่วน-สำคัญ', color: 'border-red-400 bg-red-50 text-red-800' },
+                { id: 'q2', name: '2. ด่วน-ไม่สำคัญ', color: 'border-orange-400 bg-orange-50 text-orange-800' },
+                { id: 'q3', name: '3. ไม่ด่วน-สำคัญ', color: 'border-blue-400 bg-blue-50 text-blue-800' },
+                { id: 'q4', name: '4. ไม่ด่วน-ไม่สำคัญ', color: 'border-gray-400 bg-gray-100 text-gray-800' },
+                { id: 'revise', name: '5. แก้ไข', color: 'border-purple-400 bg-purple-50 text-purple-800' },
+                { id: 'approved', name: '6. อนุมัติ', color: 'border-green-400 bg-green-50 text-green-800' }
+            ];
+
+            const qTasks = allCurrentTasks.filter(t => t.placement === 'quadrant' || t.placement === 'both');
+
+            columns.forEach(col => {
+                const tasksInCol = qTasks.filter(t => (t.quadrant || 'q1') === col.id);
+                let cardsHtml = '';
+                tasksInCol.forEach(t => {
+                    let dpt = currentDashboardView === 'all' ? `<p class="text-[9px] font-bold text-gray-400 mt-1">${deptNames[t.department]||t.department}</p>` : '';
+                    cardsHtml += `<div onclick="viewTask(${t.id})" class="kanban-card">
+                        <p class="text-sm font-bold text-gray-800 leading-tight">${t.title}</p>
+                        ${dpt}
+                    </div>`;
+                });
+
+                kb.innerHTML += `
+                <div class="kanban-col border-t-4 ${col.color}">
+                    <div class="flex justify-between items-center mb-3">
+                        <h4 class="font-bold text-sm">${col.name}</h4>
+                        <span class="text-xs bg-white bg-opacity-50 px-2 py-0.5 rounded-full">${tasksInCol.length}</span>
+                    </div>
+                    <div class="kanban-cards no-scrollbar">${cardsHtml}</div>
+                </div>`;
+            });
+        }
+
+        function toggleTaskPlacementUI() {
+            const placement = document.querySelector('input[name="t-placement"]:checked').value;
+            if (placement === 'table') {
+                document.getElementById('ui-task-quadrant').classList.add('hidden');
+                document.getElementById('ui-task-status').classList.remove('hidden');
+            } else if (placement === 'quadrant') {
+                document.getElementById('ui-task-quadrant').classList.remove('hidden');
+                document.getElementById('ui-task-status').classList.add('hidden');
+            } else {
+                document.getElementById('ui-task-quadrant').classList.remove('hidden');
+                document.getElementById('ui-task-status').classList.remove('hidden');
+            }
         }
 
         function renderTaskTable() {
             const tbody = document.getElementById('taskTableBody'); tbody.innerHTML = '';
-            let ft = allCurrentTasks; if (activeStatusFilter !== 'all') ft = ft.filter(t => t.status === activeStatusFilter); if (activeDateFilter) ft = ft.filter(t => t.due_date === activeDateFilter);
-            if (activeStatusFilter !== 'all' || activeDateFilter) { document.getElementById('clearFilterBtn').classList.remove('hidden'); document.getElementById('tableTitle').innerHTML = `รายการงาน <span class="text-orange-600">(${activeDateFilter?'วันที่ '+new Date(activeDateFilter).toLocaleDateString('th-TH'):'กรองสถานะ'})</span>`; } else { document.getElementById('clearFilterBtn').classList.add('hidden'); document.getElementById('tableTitle').innerText = "รายการงาน / ภารกิจทั้งหมด"; }
+            let ft = allCurrentTasks.filter(t => t.placement === 'table' || t.placement === 'both' || !t.placement);
+            
+            if (activeStatusFilter !== 'all') ft = ft.filter(t => t.status === activeStatusFilter); 
+            if (activeDateFilter) ft = ft.filter(t => t.due_date === activeDateFilter);
+            
+            if (activeStatusFilter !== 'all' || activeDateFilter) { document.getElementById('clearFilterBtn').classList.remove('hidden'); document.getElementById('tableTitle').innerHTML = `รายการงาน <span class="text-orange-600">(${activeDateFilter?'วันที่ '+new Date(activeDateFilter).toLocaleDateString('th-TH'):'กรองสถานะ'})</span>`; } else { document.getElementById('clearFilterBtn').classList.add('hidden'); document.getElementById('tableTitle').innerText = "รายการงาน (มุมมองตารางปกติ)"; }
             if (ft.length === 0) return tbody.innerHTML = '<tr><td colspan="5" class="px-6 py-10 text-center text-gray-400">ไม่พบข้อมูล</td></tr>';
+            
             ft.forEach(t => { 
                 const ov = checkTaskOverdueStatus(t);
                 let b = t.status==='completed'?'<span class="text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-md text-xs font-bold border border-emerald-200">เสร็จสิ้น</span>':(t.status==='in_progress'?'<span class="text-amber-700 bg-amber-50 px-2.5 py-1 rounded-md text-xs font-bold border border-amber-200">กำลังทำ</span>':'<span class="text-gray-600 bg-gray-100 px-2.5 py-1 rounded-md text-xs font-bold border border-gray-200">รอเริ่ม</span>');
@@ -959,7 +1186,11 @@
                     act += `<button onclick="editTask(${t.id})" class="text-blue-600 bg-blue-50 px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-blue-100 transition-colors mr-2">อัปเดต</button><button onclick="deleteTask(${t.id}, '${t.title}')" class="text-red-600 bg-red-50 px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-red-100 transition-colors">ลบ</button>`;
                 }
                 const deptFullName = deptNames[t.department] || t.department;
-                tbody.innerHTML += `<tr class="hover:bg-orange-50/40 transition-colors border-b border-gray-50"><td class="px-6 py-5 font-bold text-gray-900">${t.title}<br><span class="text-xs text-gray-400 font-normal">รับผิดชอบ: ${t.assignee||'-'}</span></td><td class="px-6 py-5"><span class="bg-gray-100 text-gray-600 px-2.5 py-1 rounded-md text-xs font-bold border border-gray-200">${deptFullName}</span></td><td class="px-6 py-5 text-sm">${dDisplay}</td><td class="px-6 py-5 text-center">${b}</td><td class="px-6 py-5 text-right whitespace-nowrap">${act}</td></tr>`;
+                
+                let titleHtml = t.title;
+                if(t.title.length > 50) titleHtml = `<span title="${t.title}">${t.title.substring(0, 50)}...</span>`;
+
+                tbody.innerHTML += `<tr class="hover:bg-orange-50/40 transition-colors border-b border-gray-50"><td class="px-6 py-5 font-bold text-gray-900">${titleHtml}<br><span class="text-xs text-gray-400 font-normal">รับผิดชอบ: ${t.assignee||'-'}</span></td><td class="px-6 py-5"><span class="bg-gray-100 text-gray-600 px-2.5 py-1 rounded-md text-[10px] font-bold border border-gray-200">${deptFullName}</span></td><td class="px-6 py-5 text-sm">${dDisplay}</td><td class="px-6 py-5 text-center">${b}</td><td class="px-6 py-5 text-right whitespace-nowrap">${act}</td></tr>`;
             });
         }
         function renderDeptChart(tasks, viewMode) {
@@ -972,37 +1203,19 @@
                 deptChartInstance = new Chart(document.getElementById('deptChart').getContext('2d'), { type: 'bar', data: { labels: lbs, datasets: [{ label: 'เสร็จสิ้น', data: cd, backgroundColor: '#10b981', borderRadius: 4 }, { label: 'กำลังทำ', data: pg, backgroundColor: '#f59e0b', borderRadius: 4 }, { label: 'รอเริ่ม', data: pd, backgroundColor: '#e5e7eb', borderRadius: 4 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'top', labels:{font:{family:'Sarabun'}} } }, scales: { x: { stacked: true, ticks:{font:{family:'Sarabun'}} }, y: { stacked: true, beginAtZero: true, ticks: { stepSize: 1, font:{family:'Sarabun'} } } } } });
             } else {
                 if (viewMode === 'all') {
-                    // กราฟวงกลม: แสดงสัดส่วนปริมาณงานทุกฝ่าย
                     const dpt = Object.keys(deptNames);
                     let data = dpt.map(d => tasks.filter(t => t.department === d).length);
                     let labels = dpt.map(d => deptNames[d]);
                     deptChartInstance = new Chart(document.getElementById('deptChart').getContext('2d'), { 
                         type: 'pie', 
-                        data: { 
-                            labels: labels, 
-                            datasets: [{ 
-                                data: data, 
-                                backgroundColor: ['#3b82f6', '#f97316', '#10b981', '#8b5cf6', '#ec4899', '#f59e0b', '#64748b', '#06b6d4', '#84cc16'], 
-                                borderWidth: 0 
-                            }] 
-                        }, 
-                        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right', labels:{font:{family:'Sarabun'}} } } } 
+                        data: { labels: labels, datasets: [{ data: data, backgroundColor: ['#3b82f6', '#f97316', '#10b981', '#8b5cf6', '#ec4899', '#f59e0b', '#64748b', '#06b6d4', '#84cc16', '#ef4444', '#14b8a6', '#6366f1', '#a855f7', '#f43f5e'], borderWidth: 0 }] }, 
+                        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right', labels:{font:{family:'Sarabun', size:10}} } } } 
                     });
                 } else {
-                    // กราฟวงกลม: แสดงสถานะงานของ 1 ฝ่าย
-                    let cd = 0, pg = 0, pd = 0;
-                    let targetTasks = tasks.filter(t => t.department === viewMode);
-                    cd = targetTasks.filter(t => t.status === 'completed').length;
-                    pg = targetTasks.filter(t => t.status === 'in_progress').length;
-                    pd = targetTasks.filter(t => t.status === 'pending').length;
-                    
+                    let cd = 0, pg = 0, pd = 0; let targetTasks = tasks.filter(t => t.department === viewMode);
+                    cd = targetTasks.filter(t => t.status === 'completed').length; pg = targetTasks.filter(t => t.status === 'in_progress').length; pd = targetTasks.filter(t => t.status === 'pending').length;
                     deptChartInstance = new Chart(document.getElementById('deptChart').getContext('2d'), { 
-                        type: 'pie', 
-                        data: { 
-                            labels: ['เสร็จสิ้น', 'กำลังทำ', 'รอเริ่ม'], 
-                            datasets: [{ data: [cd, pg, pd], backgroundColor: ['#10b981', '#f59e0b', '#e5e7eb'], borderWidth: 0 }] 
-                        }, 
-                        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right', labels:{font:{family:'Sarabun'}} } } } 
+                        type: 'pie', data: { labels: ['เสร็จสิ้น', 'กำลังทำ', 'รอเริ่ม'], datasets: [{ data: [cd, pg, pd], backgroundColor: ['#10b981', '#f59e0b', '#e5e7eb'], borderWidth: 0 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right', labels:{font:{family:'Sarabun'}} } } } 
                     });
                 }
             }
@@ -1014,7 +1227,8 @@
             const fDay = new Date(calYear, calMonth, 1).getDay(); const dInM = new Date(calYear, calMonth + 1, 0).getDate(); const tDay = new Date();
             for(let i=0; i<fDay; i++) grid.innerHTML += `<div class="bg-transparent calendar-day"></div>`;
             for(let i=1; i<=dInM; i++) {
-                const dStr = `${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(i).padStart(2,'0')}`; const tasksToday = allCurrentTasks.filter(t => t.due_date === dStr);
+                const dStr = `${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(i).padStart(2,'0')}`; 
+                const tasksToday = allCurrentTasks.filter(t => t.due_date === dStr && (t.placement === 'table' || t.placement === 'both' || !t.placement));
                 let isT = (i === tDay.getDate() && calMonth === tDay.getMonth() && calYear === tDay.getFullYear()); let isS = (activeDateFilter === dStr);
                 let bgCls = isS ? 'bg-orange-50 border-orange-500 ring-2 ring-orange-200' : (isT ? 'bg-blue-50 border-blue-300' : 'bg-white border-gray-200 hover:border-orange-400');
                 
@@ -1041,16 +1255,25 @@
         
         async function submitNewTask(e) { 
             e.preventDefault(); const tId = document.getElementById('taskId').value; 
-            const tData = { title: document.getElementById('taskTitle').value, department: document.getElementById('taskDept').value, status: document.getElementById('taskStatus').value, assignee: document.getElementById('taskAssignee').value, due_date: document.getElementById('taskDueDate').value || null, description: document.getElementById('taskDesc').value || null };
+            const plc = document.querySelector('input[name="t-placement"]:checked').value;
+            const tData = { 
+                title: document.getElementById('taskTitle').value, department: document.getElementById('taskDept').value, 
+                status: document.getElementById('taskStatus').value, assignee: document.getElementById('taskAssignee').value, 
+                due_date: document.getElementById('taskDueDate').value || null, description: document.getElementById('taskDesc').value || null,
+                placement: plc, quadrant: plc !== 'table' ? document.getElementById('taskQuadrant').value : null
+            };
             try { 
                 if (tId) { 
                     const { error } = await supabaseClient.from('tasks').update(tData).eq('id', tId); 
                     if (error) throw error;
-                    logActivity(tData.status === 'completed' ? 'ทำภารกิจเสร็จสิ้น' : 'อัปเดตความคืบหน้า', `เรื่อง: ${tData.title}`); 
+                    logActivity('อัปเดตงาน', `เรื่อง: ${tData.title}`); 
                 } else { 
-                    const { error } = await supabaseClient.from('tasks').insert([tData]); 
+                    const { data, error } = await supabaseClient.from('tasks').insert([tData]).select(); 
                     if (error) throw error;
                     logActivity('เพิ่มงานใหม่', `เรื่อง: ${tData.title}`); 
+                    if(plc !== 'table') {
+                        await supabaseClient.from('notifications').insert([{target_group: 'President', message: `มีงานใหม่เพิ่มลงในบอร์ด: ${tData.title}`, task_id: data[0].id}]);
+                    }
                 } 
                 closeAddTaskModal(); showToast('บันทึกงานสำเร็จ'); loadDashboardData(); 
             } catch (err) { showToast('ข้อผิดพลาด: ' + err.message, 'error'); } 
@@ -1059,7 +1282,14 @@
             try {
                 const { data, error } = await supabaseClient.from('tasks').select('*').eq('id', id).single(); 
                 if (error) throw error;
-                document.getElementById('taskId').value=data.id; document.getElementById('taskTitle').value=data.title; document.getElementById('taskDept').value=data.department; document.getElementById('taskStatus').value=data.status; document.getElementById('taskAssignee').value=data.assignee||''; document.getElementById('taskDueDate').value=data.due_date||''; document.getElementById('taskDesc').value=data.description||''; document.getElementById('taskDept').disabled=true; document.getElementById('addTaskModal').classList.remove('hidden'); 
+                document.getElementById('taskId').value=data.id; document.getElementById('taskTitle').value=data.title; document.getElementById('taskDept').value=data.department; document.getElementById('taskStatus').value=data.status; document.getElementById('taskAssignee').value=data.assignee||''; document.getElementById('taskDueDate').value=data.due_date||''; document.getElementById('taskDesc').value=data.description||''; document.getElementById('taskDept').disabled=true; 
+                
+                const plc = data.placement || 'both';
+                document.querySelector(`input[name="t-placement"][value="${plc}"]`).checked = true;
+                toggleTaskPlacementUI();
+                if(plc !== 'table') document.getElementById('taskQuadrant').value = data.quadrant || 'q1';
+
+                document.getElementById('addTaskModal').classList.remove('hidden'); 
             } catch (err) { showToast('ไม่สามารถดึงข้อมูลงานได้', 'error'); }
         }
         async function deleteTask(id, title) { 
@@ -1072,6 +1302,7 @@
             });
         }
         async function viewTask(id) {
+            currentViewingTaskId = id;
             try {
                 const { data, error } = await supabaseClient.from('tasks').select('*').eq('id', id).single();
                 if(error) throw error;
@@ -1088,13 +1319,92 @@
                 }
                 document.getElementById('vt-status').innerHTML = b;
                 document.getElementById('vt-due').innerHTML = dueDisplay;
-                document.getElementById('vt-desc').innerText = data.description || 'ไม่มีการระบุรายละเอียดงาน';
-                
+                document.getElementById('vt-desc').innerText = data.description || 'ไม่มีการระบุรายละเอียดเพิ่มเติม';
+                document.getElementById('vt-user-init').innerText = currentUser.fullname.charAt(0);
+
+                if (data.placement === 'quadrant' || data.placement === 'both') {
+                    document.getElementById('vt-quadrant-box').classList.remove('hidden');
+                    let qText = quadNames[data.quadrant || 'q1'];
+                    let qColor = data.quadrant === 'approved' ? 'text-green-700 bg-green-100' : (data.quadrant === 'revise' ? 'text-purple-700 bg-purple-100' : 'text-blue-700 bg-blue-100');
+                    document.getElementById('vt-quadrant-badge').innerHTML = `<span class="px-2 py-1 rounded text-xs font-bold ${qColor}">${qText}</span>`;
+                } else {
+                    document.getElementById('vt-quadrant-box').classList.add('hidden');
+                }
+
+                // ควบคุมสิทธิ์การจัดการบอร์ด
+                if (['Administrator', 'President'].includes(currentUser.role)) {
+                    document.getElementById('action-president').classList.remove('hidden');
+                    document.getElementById('action-dept').classList.remove('hidden');
+                    document.getElementById('vt-change-quadrant').value = data.quadrant || 'q1';
+                } else if (currentUser.department === data.department) {
+                    document.getElementById('action-president').classList.add('hidden');
+                    document.getElementById('action-dept').classList.remove('hidden');
+                    document.getElementById('vt-change-quadrant').value = data.quadrant || 'q1';
+                } else {
+                    document.getElementById('action-president').classList.add('hidden');
+                    document.getElementById('action-dept').classList.add('hidden');
+                }
+
+                loadComments(id);
                 document.getElementById('viewTaskModal').classList.remove('hidden');
                 document.getElementById('viewTaskModal').classList.add('flex');
-            } catch (err) { showToast('ไม่สามารถดึงข้อมูลรายละเอียดงานได้', 'error'); }
+            } catch (err) { showToast('ไม่สามารถดึงข้อมูลได้', 'error'); }
         }
-        function closeViewTaskModal() { document.getElementById('viewTaskModal').classList.add('hidden'); document.getElementById('viewTaskModal').classList.remove('flex'); }
+        function closeViewTaskModal() { document.getElementById('viewTaskModal').classList.add('hidden'); document.getElementById('viewTaskModal').classList.remove('flex'); currentViewingTaskId = null; }
+
+        async function changeQuadrantStatus(newStatus) {
+            if(!currentViewingTaskId) return;
+            try {
+                await supabaseClient.from('tasks').update({ quadrant: newStatus }).eq('id', currentViewingTaskId);
+                showToast('อัปเดตสถานะบอร์ดสำเร็จ');
+                
+                // แจ้งเตือนฝ่าย ถ้าประธานกดอนุมัติ/ตีกลับ
+                if (['approve', 'revise'].includes(newStatus) && currentUser.role === 'President') {
+                    const {data} = await supabaseClient.from('tasks').select('department, title').eq('id', currentViewingTaskId).single();
+                    let msg = newStatus === 'approved' ? `อนุมัติงาน: ${data.title}` : `ตีกลับ/แก้ไขงาน: ${data.title}`;
+                    await supabaseClient.from('notifications').insert([{target_group: data.department, message: msg, task_id: currentViewingTaskId}]);
+                }
+
+                viewTask(currentViewingTaskId); loadDashboardData();
+            } catch(e) { showToast('อัปเดตไม่สำเร็จ', 'error'); }
+        }
+
+        async function loadComments(taskId) {
+            const list = document.getElementById('commentsList'); list.innerHTML = '<div class="text-xs text-gray-400">กำลังโหลดความคิดเห็น...</div>';
+            try {
+                const {data, error} = await supabaseClient.from('comments').select('*').eq('task_id', taskId).order('created_at', {ascending:false});
+                list.innerHTML = '';
+                if(data.length === 0) return list.innerHTML = '<div class="text-xs text-gray-400">ยังไม่มีความคิดเห็น</div>';
+                data.forEach(c => {
+                    list.innerHTML += `
+                    <div class="flex gap-3">
+                        <div class="w-8 h-8 rounded-full bg-gray-200 text-gray-600 flex items-center justify-center font-bold text-xs shrink-0">${c.user_name.charAt(0)}</div>
+                        <div class="bg-gray-50 border border-gray-100 rounded-xl rounded-tl-none px-4 py-3 flex-1">
+                            <div class="flex justify-between items-baseline mb-1"><span class="text-xs font-bold text-gray-800">${c.user_name}</span><span class="text-[9px] text-gray-400">${new Date(c.created_at).toLocaleString('th-TH')}</span></div>
+                            <p class="text-sm text-gray-700 whitespace-pre-wrap">${c.comment_text}</p>
+                        </div>
+                    </div>`;
+                });
+            } catch(e) { list.innerHTML = ''; }
+        }
+
+        async function addComment() {
+            if(!currentViewingTaskId) return;
+            const txt = document.getElementById('newCommentTxt').value.trim();
+            if(!txt) return;
+            try {
+                await supabaseClient.from('comments').insert([{task_id: currentViewingTaskId, user_name: currentUser.fullname, comment_text: txt}]);
+                
+                // แจ้งเตือนประธาน ถ้าเจ้าของงานคอมเมนต์
+                if (currentUser.role !== 'President') {
+                    const {data} = await supabaseClient.from('tasks').select('title').eq('id', currentViewingTaskId).single();
+                    await supabaseClient.from('notifications').insert([{target_group: 'President', message: `มีความคิดเห็นใหม่ในงาน: ${data.title}`, task_id: currentViewingTaskId}]);
+                }
+
+                document.getElementById('newCommentTxt').value = '';
+                loadComments(currentViewingTaskId);
+            } catch(e) { showToast('ไม่สามารถส่งคอมเมนต์ได้', 'error'); }
+        }
 
         // --- คลังเอกสาร & Audit ---
         async function searchDocument(isInit = false) {
@@ -1117,15 +1427,16 @@
                     data.forEach(d => {
                         const canEditDelete = ['Administrator', 'President'].includes(currentUser.role) || (currentUser.role === 'Working Team' && currentUser.department === d.department);
                         let dBtn = canEditDelete ? `<button onclick="deleteDoc(${d.id}, '${d.title}')" class="text-red-500 bg-red-50 px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-red-500 hover:text-white transition-colors">ลบเอกสาร</button>` : '';
-                        let pdf = d.pdf_link && d.pdf_link !== "-" ? `<a href="${d.pdf_link}" target="_blank" class="bg-gray-800 text-white px-4 py-2 rounded-lg text-xs font-bold mt-3 inline-block">เปิดเอกสาร (PDF)</a>` : '';
+                        let pdf = d.pdf_link && d.pdf_link !== "-" ? `<a href="${d.pdf_link}" target="_blank" class="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg text-xs font-bold mt-4 inline-flex items-center shadow-sm transition-colors"><svg class="w-4 h-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg> ดาวน์โหลด PDF</a>` : '';
                         
                         let dateDocDisplay = d.doc_date ? new Date(d.doc_date).toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric' }) : '-';
+                        let deptKey = d.department.includes('(') ? d.department.split('(')[1].replace(')','') : d.department;
 
                         res.innerHTML += `
                         <div class="bg-white rounded-2xl border p-6 mb-4 shadow-sm hover:border-orange-300 transition-colors relative">
                             <div class="flex justify-between items-start mb-2">
                                 <span class="text-orange-500 font-bold text-xs bg-orange-50 px-2.5 py-1 rounded-md">หมวด: ${d.category} - ${catNames[d.category] || 'ทั่วไป'}</span>
-                                <div class="text-right bg-gray-50 px-3 py-1.5 rounded-lg">
+                                <div class="text-right bg-gray-50 px-3 py-1.5 rounded-lg border border-gray-100">
                                     <p class="text-[10px] text-gray-400 font-medium">วันที่ลงเอกสาร</p>
                                     <p class="text-xs font-bold text-gray-700">${dateDocDisplay}</p>
                                 </div>
@@ -1133,7 +1444,7 @@
                             
                             <div class="mb-4 pr-10">
                                 <h3 class="text-lg font-bold text-gray-900 leading-tight mb-1">เรื่อง ${d.title}</h3>
-                                <p class="text-sm text-gray-500">เลขที่: <span class="font-bold text-gray-700">${d.department}. ${d.doc_id}</span> <span class="ml-2 bg-gray-100 text-gray-400 px-2 py-0.5 rounded-full text-[10px]">ลำดับอ้างอิง: ${d.id}</span></p>
+                                <p class="text-sm text-gray-500">เลขที่: <span class="font-bold text-gray-700">${deptKey}. ${d.doc_id}</span> <span class="ml-2 bg-gray-100 text-gray-400 px-2 py-0.5 rounded-full text-[10px]">ลำดับอ้างอิง: ${d.id}</span></p>
                             </div>
                             
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-600 mb-4 border-t border-b border-gray-50 py-4">
@@ -1227,6 +1538,8 @@
             if (['Working Team'].includes(currentUser.role)) { document.getElementById('taskDept').value = currentUser.department; document.getElementById('taskDept').disabled = true; } 
             else if (currentDashboardView !== 'all') { document.getElementById('taskDept').value = currentDashboardView; document.getElementById('taskDept').disabled = false; } 
             else { document.getElementById('taskDept').disabled = false; }
+            document.querySelector('input[name="t-placement"][value="both"]').checked = true;
+            toggleTaskPlacementUI();
             document.getElementById('addTaskModal').classList.remove('hidden'); 
         } 
         function closeAddTaskModal() { document.getElementById('addTaskModal').classList.add('hidden'); }

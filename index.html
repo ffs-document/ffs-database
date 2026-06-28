@@ -7,7 +7,18 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <!-- กำหนดภาษาไทยให้ Google Charts -->
+    <script type="text/javascript">
+        // โหลด Google Charts
+        var head = document.getElementsByTagName('head')[0];
+        var script = document.createElement('script');
+        script.type = 'text/javascript';
+        script.src = 'https://www.gstatic.com/charts/loader.js';
+        script.onload = function() {
+            google.charts.load('current', { 'packages': ['geochart'], 'language': 'th' });
+        };
+        head.appendChild(script);
+    </script>
     <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Sarabun', sans-serif; }
@@ -26,11 +37,6 @@
         /* Kanban Scroll Snap */
         .kanban-scroll { scroll-snap-type: x mandatory; }
         .kanban-scroll > div { scroll-snap-align: start; }
-
-        .trello-card:hover { background-color: #f4f5f7; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); border-color: #cbd5e1; }
-        
-        /* แทนที่บรรทัด .trello-board เดิมด้วยโค้ดด้านล่างนี้ */
-        .trello-board { display: flex; gap: 1rem; overflow-x: auto; min-height: 75vh; padding-bottom: 1rem; align-items: flex-start; scroll-snap-type: x mandatory; }
     </style>
 </head>
 <body class="bg-gray-50 h-screen overflow-hidden text-gray-900 selection:bg-orange-200 selection:text-orange-900 relative">
@@ -81,7 +87,7 @@
         <div class="bg-white rounded-2xl shadow-2xl w-full max-w-3xl flex flex-col overflow-hidden animate-fade-in max-h-[90vh]">
             <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50 shrink-0">
                 <div class="flex items-center">
-                    <svg class="w-5 h-5 mr-2 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>
+                    <svg class="w-5 h-5 mr-2 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>
                     <h3 class="text-lg font-bold text-gray-900">รายละเอียดงาน / Board</h3>
                 </div>
                 <button onclick="closeViewTaskModal()" class="text-gray-400 hover:text-gray-600"><svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg></button>
@@ -225,16 +231,16 @@
         </div>
     </div>
 
-    <!-- Modal: Print List -->
+    <!-- Modal: Print List (ส่งออก Word) -->
     <div id="printModal" class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm z-[110] hidden flex items-center justify-center p-4">
         <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden animate-fade-in">
             <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
-                <h3 class="text-lg font-bold text-gray-900">ตั้งค่าการพิมพ์รายชื่อ</h3>
+                <h3 class="text-lg font-bold text-gray-900">ตั้งค่าการส่งออกรายชื่อ (Word)</h3>
                 <button onclick="closePrintModal()" class="text-gray-400 hover:text-gray-600"><svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg></button>
             </div>
             <div class="p-6">
                 <div class="mb-4">
-                    <label class="block text-sm font-bold text-gray-700 mb-2">เลือกข้อมูลที่ต้องการแสดง:</label>
+                    <label class="block text-sm font-bold text-gray-700 mb-2">เลือกคอลัมน์ที่ต้องการส่งออก:</label>
                     <div class="grid grid-cols-2 gap-2 text-sm text-gray-600">
                         <label><input type="checkbox" id="p-prefix" checked class="mr-2 text-orange-500"> คำนำหน้า</label>
                         <label><input type="checkbox" id="p-fname" checked class="mr-2 text-orange-500"> ชื่อจริง</label>
@@ -245,15 +251,15 @@
                     </div>
                 </div>
                 <div class="mb-6">
-                    <label class="block text-sm font-bold text-gray-700 mb-2">เลือกลำดับที่จะพิมพ์:</label>
+                    <label class="block text-sm font-bold text-gray-700 mb-2">เลือกลำดับสมาชิกที่ต้องการ:</label>
                     <div class="flex gap-3">
-                        <div class="flex-1"><span class="text-xs text-gray-500">ตั้งแต่ลำดับที่</span><input type="number" id="p-start" min="1" value="1" class="w-full px-3 py-2 border rounded-lg text-sm"></div>
-                        <div class="flex-1"><span class="text-xs text-gray-500">ถึงลำดับที่</span><input type="number" id="p-end" min="1" value="50" class="w-full px-3 py-2 border rounded-lg text-sm"></div>
+                        <div class="flex-1"><span class="text-xs text-gray-500">ตั้งแต่คนที่</span><input type="number" id="p-start" min="1" value="1" class="w-full px-3 py-2 border rounded-lg text-sm"></div>
+                        <div class="flex-1"><span class="text-xs text-gray-500">ถึงคนที่</span><input type="number" id="p-end" min="1" value="50" class="w-full px-3 py-2 border rounded-lg text-sm"></div>
                     </div>
                 </div>
                 <div class="flex justify-end gap-3 pt-4 border-t border-gray-100">
                     <button onclick="closePrintModal()" class="px-5 py-2 text-sm text-gray-600 bg-gray-100 rounded-lg">ยกเลิก</button>
-                    <button onclick="executePrint()" class="px-5 py-2 text-sm font-bold text-white bg-gray-800 rounded-lg">สั่งพิมพ์</button>
+                    <button onclick="executePrint()" class="px-5 py-2 text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-lg shadow-sm">ส่งออกเป็นตาราง Word</button>
                 </div>
             </div>
         </div>
@@ -655,9 +661,8 @@
                             กระดานบริหารจัดการรวม (Executive Board)
                         </h2>
                     </div>
-                    <!-- แก้ไขบรรทัดนี้: ลบ overflow-x-auto ออกไป -->
                     <div class="flex-1 px-4 pb-4 w-full">
-                        <div class="trello-board" id="executiveKanbanBoard">
+                        <div class="flex flex-row gap-4 overflow-x-auto pb-4 items-start w-full kanban-scroll" id="executiveKanbanBoard">
                             <!-- Executive Kanban Columns -->
                         </div>
                     </div>
@@ -670,16 +675,20 @@
                             <h2 class="text-2xl font-bold text-gray-900">ทะเบียนสถิติสมาชิก</h2>
                             <p class="text-sm text-gray-500">ข้อมูลสถิติภาพรวมระดับการศึกษา และภูมิลำเนาของสมาชิก</p>
                         </div>
-                        <div class="flex gap-2">
+                        <div class="flex gap-2 items-center">
                             <!-- ปุ่มอัปโหลด CSV -->
-                            <div id="csvUploadSection" class="hidden">
+                            <div id="csvUploadSection" class="hidden flex items-center gap-2">
+                                <span class="text-[10px] text-gray-400 text-right leading-tight hidden md:block">
+                                    หัวตาราง: member_id, prefix, first_name, last_name, nickname, edu_level, province<br>
+                                    <span class="text-red-500 font-bold">* กรุณา Save As เป็นไฟล์ 'CSV UTF-8' เท่านั้น</span>
+                                </span>
                                 <input type="file" id="csvFileInput" accept=".csv" class="hidden" onchange="handleCSVUpload(event)">
-                                <button onclick="document.getElementById('csvFileInput').click()" class="bg-green-600 hover:bg-green-700 text-white text-sm font-bold px-4 py-2.5 rounded-lg shadow-sm flex items-center transition-colors">
+                                <button onclick="document.getElementById('csvFileInput').click()" class="bg-green-600 hover:bg-green-700 text-white text-sm font-bold px-4 py-2.5 rounded-lg shadow-sm flex items-center transition-colors h-full">
                                     <svg class="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" /></svg> นำเข้าข้อมูล (CSV)
                                 </button>
                             </div>
-                            <button onclick="openPrintModal()" class="bg-gray-800 hover:bg-gray-900 text-white text-sm font-bold px-5 py-2.5 rounded-lg shadow-sm flex items-center transition-colors">
-                                <svg class="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" /></svg> พิมพ์รายชื่อ
+                            <button onclick="openPrintModal()" class="bg-gray-800 hover:bg-gray-900 text-white text-sm font-bold px-5 py-2.5 rounded-lg shadow-sm flex items-center transition-colors h-full">
+                                <svg class="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" /></svg> ส่งออกรายชื่อ (Word)
                             </button>
                         </div>
                     </div>
@@ -734,7 +743,7 @@
                 <!-- 4. หน้า จัดการผู้ใช้งาน (User Management) -->
                 <div id="view-users" class="max-w-5xl mx-auto hidden animate-fade-in pb-10 p-4 sm:p-6">
                     <div class="flex justify-between items-center mb-6">
-                        <div><h2 class="text-2xl font-bold text-gray-900">จัดการข้อมูลผู้ใช้งาน</h2><p class="text-sm text-gray-500">ดูรายชื่อผู้ใช้งานทั้งหมด และประวัติการทำรายการ</p></div>
+                        <div><h2 class="text-2xl font-bold text-gray-900">จัดการข้อมูลผู้ใช้งาน</h2><p class="text-sm text-gray-500">เพิ่ม ลบ และปรับปรุงสิทธิ์การเข้าใช้งานระบบ</p></div>
                         <button id="addUserBtnUI" onclick="openUserModal()" class="bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold px-4 py-2.5 rounded-lg shadow-sm">+ เพิ่มผู้ใช้งาน</button>
                     </div>
                     <div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
@@ -816,8 +825,6 @@
 
         const quadNames = { "q1": "1. ด่วน-สำคัญ", "q2": "2. ด่วน-ไม่สำคัญ", "q3": "3. ไม่ด่วน-สำคัญ", "q4": "4. ไม่ด่วน-ไม่สำคัญ", "revise": "5. แก้ไข", "approved": "6. อนุมัติ" };
 
-        google.charts.load('current', { 'packages': ['geochart'] });
-
         // --- Custom Notifications & Modals ---
         function showToast(message, type = 'success') {
             const container = document.getElementById('toast-container');
@@ -826,6 +833,8 @@
             const icon = type === 'success' ? '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />' : '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />';
             
             toast.className = `flex items-center gap-3 px-4 py-3 rounded-xl text-white shadow-lg transform transition-all duration-300 translate-x-full opacity-0 ${colorClass}`;
+            // Set z-index extremely high to ensure visibility
+            toast.style.zIndex = '9999';
             toast.innerHTML = `<svg class="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">${icon}</svg><p class="text-sm font-medium">${message}</p>`;
             
             container.appendChild(toast);
@@ -870,8 +879,21 @@
         document.getElementById('userInput').addEventListener('keypress', function (e) { if (e.key === 'Enter') handleLogin(); });
 
         async function handleLogin() {
-            const u = document.getElementById('userInput').value.trim(); const p = document.getElementById('passwordInput').value.trim();
-            if (!u || !p) return; document.getElementById('loginBtnText').innerText = 'ตรวจสอบ...';
+            const u = document.getElementById('userInput').value.trim(); 
+            const p = document.getElementById('passwordInput').value.trim();
+            
+            if (!u || !p) {
+                showToast("กรุณากรอกรหัสสมาชิกและรหัสผ่านให้ครบถ้วน", "error");
+                return; 
+            }
+            
+            const btn = document.getElementById('loginBtn');
+            const btnText = document.getElementById('loginBtnText');
+            
+            btnText.innerText = 'กำลังตรวจสอบ...';
+            btn.disabled = true;
+            btn.classList.add('opacity-75', 'cursor-not-allowed');
+
             try {
                 const { data, error } = await supabaseClient.from('users').select('*').eq('username', u).eq('password', p);
                 if (error) throw error;
@@ -880,8 +902,17 @@
                     localStorage.setItem('ffsUser', JSON.stringify(userData)); 
                     showMainSystem(userData); 
                 }
-                else { showToast("รหัสผิดพลาด", "error"); document.getElementById('loginBtnText').innerText = 'เข้าสู่ระบบ'; }
-            } catch (err) { showToast("เกิดข้อผิดพลาดในการเชื่อมต่อ", "error"); document.getElementById('loginBtnText').innerText = 'เข้าสู่ระบบ'; }
+                else { 
+                    showToast("รหัสสมาชิกหรือรหัสผ่านผิดพลาด", "error"); 
+                }
+            } catch (err) { 
+                showToast("เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์", "error"); 
+                console.error(err);
+            } finally {
+                btnText.innerText = 'เข้าสู่ระบบ';
+                btn.disabled = false;
+                btn.classList.remove('opacity-75', 'cursor-not-allowed');
+            }
         }
 
         window.addEventListener('DOMContentLoaded', () => { 
@@ -1145,21 +1176,45 @@
         async function handleCSVUpload(event) {
             const file = event.target.files[0]; if(!file) return;
             const reader = new FileReader();
+            // ระบุให้อ่านไฟล์เป็น UTF-8 
             reader.onload = async function(e) {
-                const text = e.target.result; const rows = text.split('\n'); const dataToInsert = [];
-                for(let i=1; i<rows.length; i++) {
-                    if(!rows[i].trim()) continue;
-                    const vals = rows[i].split(',');
-                    dataToInsert.push({ member_id: vals[0]?.trim(), prefix: vals[1]?.trim(), first_name: vals[2]?.trim(), last_name: vals[3]?.trim(), nickname: vals[4]?.trim(), edu_level: vals[5]?.trim(), province: vals[6]?.trim() });
-                }
                 try {
+                    let text = e.target.result; 
+                    // ลบ BOM เผื่อมีติดมากับไฟล์ Excel
+                    text = text.replace(/^\uFEFF/, '');
+                    const rows = text.split('\n'); 
+                    const dataToInsert = [];
+                    
+                    if (rows.length < 2) throw new Error("ไฟล์ว่างเปล่าหรือไม่มีข้อมูล");
+
+                    for(let i=1; i<rows.length; i++) {
+                        if(!rows[i].trim()) continue;
+                        const vals = rows[i].split(',');
+                        if (vals.length < 7) continue; // ข้อมูลไม่ครบ
+                        dataToInsert.push({ 
+                            member_id: vals[0]?.trim(), 
+                            prefix: vals[1]?.trim(), 
+                            first_name: vals[2]?.trim(), 
+                            last_name: vals[3]?.trim(), 
+                            nickname: vals[4]?.trim(), 
+                            edu_level: vals[5]?.trim(), 
+                            province: vals[6]?.trim() 
+                        });
+                    }
+                    
+                    if (dataToInsert.length === 0) throw new Error("ไม่พบข้อมูลที่สมบูรณ์");
+
                     const { error } = await supabaseClient.from('members').insert(dataToInsert);
                     if (error) throw error;
-                    showToast("นำเข้าข้อมูลสมาชิกสำเร็จ " + dataToInsert.length + " รายการ"); loadMembersData();
-                } catch(err) { showToast("เกิดข้อผิดพลาด: โปรดตรวจสอบฟอร์แมตไฟล์ CSV", "error"); }
+                    showToast("นำเข้าข้อมูลสมาชิกสำเร็จ " + dataToInsert.length + " รายการ"); 
+                    loadMembersData();
+                } catch(err) { 
+                    showToast("เกิดข้อผิดพลาด: โปรดตรวจสอบว่าไฟล์เป็น CSV UTF-8 และมีคอลัมน์ครบถ้วน", "error"); 
+                    console.error(err);
+                }
                 document.getElementById('csvFileInput').value = '';
             };
-            reader.readAsText(file);
+            reader.readAsText(file, 'UTF-8');
         }
 
         // --- ระบบประกาศ/แชท ---
@@ -1286,7 +1341,7 @@
 
         function renderKanban(container, tasks, isExecutive) {
             container.innerHTML = '';
-            // แก้ไขบรรทัดนี้: เพิ่ม min-h-[70vh] เข้าไป เพื่อบังคับให้กล่องสูงเต็มจอ แถบเลื่อนจะได้ลงไปอยู่ล่างสุดเสมอ
+            // บังคับความสูงเต็มจอใน JS ด้วย เพื่อผลัก Scrollbar ลงล่างสุด
             container.className = "flex flex-row gap-4 overflow-x-auto pb-4 items-start w-full min-h-[70vh] kanban-scroll";
             
             const columns = [
@@ -1747,7 +1802,8 @@
         function closeAddTaskModal() { document.getElementById('addTaskModal').classList.add('hidden'); }
         
         function toggleSidebar() { const sb = document.getElementById('sidebar'); sb.classList.toggle('hidden'); sb.classList.toggle('absolute'); sb.classList.toggle('inset-y-0'); sb.classList.toggle('left-0'); }
-        // เพิ่มฟังก์ชัน toggleMapMode กลับเข้าไปตรงนี้ครับ
+        
+        // Safety check for google charts drawing
         function toggleMapMode(mode) {
             if (mode === 'bar') { 
                 document.getElementById('btn-mode-bar').className="px-3 py-1.5 rounded-md bg-white text-orange-600 shadow-sm transition-all"; 
@@ -1759,15 +1815,28 @@
                 document.getElementById('btn-mode-bar').className="px-3 py-1.5 rounded-md text-gray-500 hover:text-gray-800 transition-all"; 
                 document.getElementById('provMapContainer').classList.remove('hidden'); document.getElementById('provMapContainer').classList.add('flex');
                 document.getElementById('provBarContainer').classList.add('hidden'); document.getElementById('provBarContainer').classList.remove('block');
-                drawThailandMap(); 
+                // เพิ่ม Timeout เพื่อให้ UI ขยายตัวก่อนวาดแผนที่ จะได้ไม่บั๊กขนาดกล่องเป็น 0
+                setTimeout(() => { drawThailandMap(); }, 100);
             }
         }
-        
+
+        function drawThailandMap() {
+            if (typeof google === 'undefined' || !google.visualization || !google.visualization.GeoChart) return;
+            const provCounts = {}; allMembersData.forEach(m => { let prov = m.province || ''; if (prov && !prov.includes('อื่น')) provCounts[prov] = (provCounts[prov] || 0) + 1; });
+            let mapData = [['Province', 'จำนวนสมาชิก']]; Object.keys(provCounts).forEach(p => mapData.push([p, provCounts[p]]));
+            var chart = new google.visualization.GeoChart(document.getElementById('thailandMap'));
+            chart.draw(google.visualization.arrayToDataTable(mapData), { region: 'TH', displayMode: 'regions', resolution: 'provinces', colorAxis: {colors: ['#e0f2fe', '#1d4ed8']}, backgroundColor: 'transparent', datalessRegionColor: '#f3f4f6', defaultColor: '#f5f5f5', tooltip: {textStyle: {fontName: 'Sarabun'}} });
+        }
+
         function executePrint() {
             const start = parseInt(document.getElementById('p-start').value)||1; 
             const end = parseInt(document.getElementById('p-end').value)||50;
             const printData = allMembersData.slice(start-1, end); 
-            if (printData.length === 0) return showToast("ไม่พบข้อมูล", "error");
+            
+            if (printData.length === 0) {
+                closePrintModal();
+                return showToast("ไม่พบข้อมูลสำหรับสร้างเอกสาร", "error");
+            }
             
             let tableContent = `<table border="1" style="border-collapse: collapse; width: 100%; text-align: left; font-family: 'Sarabun', sans-serif;">
                 <thead>
@@ -1804,16 +1873,23 @@
             ${tableContent}
             </body></html>`;
 
-            let blob = new Blob(['\ufeff', html], { type: 'application/msword' });
-            let link = document.createElement('a');
-            link.href = URL.createObjectURL(blob);
-            link.download = `รายชื่อสมาชิก_${start}-${end}.doc`;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            
-            closePrintModal();
-            showToast('ส่งออกสำเร็จ', 'success');
+            try {
+                let blob = new Blob(['\ufeff' + html], { type: 'application/msword;charset=utf-8' });
+                let url = URL.createObjectURL(blob);
+                let link = document.createElement('a');
+                link.href = url;
+                link.download = `รายชื่อสมาชิก_${start}-${end}.doc`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(url);
+                
+                closePrintModal();
+                showToast('ส่งออกเป็นตาราง Word สำเร็จ', 'success');
+            } catch (err) {
+                console.error(err);
+                showToast('เกิดข้อผิดพลาดในการดาวน์โหลด', 'error');
+            }
         }
     </script>
 </body>

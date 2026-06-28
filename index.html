@@ -1286,7 +1286,8 @@
 
         function renderKanban(container, tasks, isExecutive) {
             container.innerHTML = '';
-            container.className = "flex flex-row gap-4 overflow-x-auto pb-4 items-start w-full kanban-scroll";
+            // แก้ไขบรรทัดนี้: เพิ่ม min-h-[70vh] เข้าไป เพื่อบังคับให้กล่องสูงเต็มจอ แถบเลื่อนจะได้ลงไปอยู่ล่างสุดเสมอ
+            container.className = "flex flex-row gap-4 overflow-x-auto pb-4 items-start w-full min-h-[70vh] kanban-scroll";
             
             const columns = [
                 { id: 'q1', name: '1. ด่วน-สำคัญ', color: 'border-red-400 bg-red-50 text-red-800' },

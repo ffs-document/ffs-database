@@ -137,8 +137,8 @@
                 <!-- Right: Actions (For Executive / Owner) -->
                 <div class="md:col-span-1 bg-gray-50 rounded-xl p-4 border border-gray-100 h-fit space-y-4">
                     <p class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">การจัดการ (Actions)</p>
-
-                    <!-- เพิ่มปุ่มแจ้งเตือนให้คณะทำงาน ตรงนี้ครับ -->
+                    
+                    <!-- ส่วนที่ต้องเพิ่ม: ปุ่มแจ้งเตือนให้คณะทำงาน -->
                     <div id="action-alert-exec" class="hidden space-y-2 pb-4 border-b border-gray-200">
                         <p class="text-[10px] font-bold text-red-600 uppercase mb-1">สะกิดผู้บริหาร</p>
                         <button onclick="sendAlertToPresident()" class="w-full bg-red-100 hover:bg-red-200 text-red-600 text-sm font-bold py-2 rounded-lg flex items-center justify-center transition-colors">
@@ -1314,17 +1314,55 @@
         
         async function loadActivities() {
             try {
-                const { data, error } = await supabaseClient.from('activities').select('*').order('created_at', { ascending: false }).limit(20);
-                if (error) throw error;
-                const container = document.getElementById('activityFeedContainer'); container.innerHTML = '';
-                if(!data || data.length === 0) return container.innerHTML = '<div class="text-center text-xs text-gray-400 mt-5">ยังไม่มีประกาศความคืบหน้า</div>';
-                data.forEach(a => { 
-                    const t = new Date(a.created_at).toLocaleTimeString('th-TH', {hour: '2-digit', minute:'2-digit'}); 
-                    let dptName = deptNames[a.department] || a.department;
-                    let c = a.action.includes('เสร็จ')?'text-emerald-600 bg-emerald-100':(a.action.includes('ลบ')?'text-red-600 bg-red-100':'text-blue-600 bg-blue-100'); 
-                    container.innerHTML += `<div class="flex items-start gap-3 border-l-2 border-gray-100 pl-4 py-1 relative"><div class="absolute -left-1.5 top-2 w-3 h-3 rounded-full bg-gray-200 border-2 border-white"></div><div class="w-8 h-8 rounded-full ${c} flex items-center justify-center shrink-0 shadow-sm"><svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg></div><div class="bg-white p-3 rounded-xl rounded-tl-none w-full border border-gray-100 shadow-sm"><div class="flex justify-between items-baseline mb-1"><span class="text-sm font-bold text-gray-800">${a.user_name} <span class="text-gray-500 font-normal ml-1">(${dptName})</span></span><span class="text-[10px] text-gray-400">${t} น.</span></div><p class="text-xs font-medium text-gray-500">${a.action}</p><p class="text-sm text-gray-800 bg-gray-50 px-3 py-2 mt-1 rounded-lg inline-block">${a.details}</p></div></div>`; 
-                });
-            } catch (err) { console.error("Activity load error", err); }
+                // 1. ดึงข้อมูลงานที่เสร็จสิ้นในช่วง 24 ชั่วโมงที่ผ่านมา
+                const yesterday = new Date();
+                yesterday.setDate(yesterday.getDate() - 1);
+                
+                // ดึงงานที่เสร็จสิ้น (completed)
+                const { data: completedTasks, error: taskErr } = await supabaseClient
+                    .from('tasks')
+                    .select('*')
+                    .eq('status', 'completed')
+                    .gte('updated_at', yesterday.toISOString()); // ปรับชื่อ field ตามฐานข้อมูลคุณ
+        
+                // 2. ดึง Log กิจกรรมล่าสุด
+                const { data: activities, error: actErr } = await supabaseClient
+                    .from('activities')
+                    .select('*')
+                    .order('created_at', { ascending: false })
+                    .limit(10);
+        
+                const container = document.getElementById('activityFeedContainer');
+                container.innerHTML = '';
+        
+                // 3. แสดง Achievement ถ้ามีงานเสร็จใน 24 ชม.
+                if (completedTasks && completedTasks.length > 0) {
+                    container.innerHTML += `
+                    <div class="mb-4 bg-emerald-50 border border-emerald-200 p-3 rounded-xl">
+                        <p class="text-xs font-bold text-emerald-800">🏆 ยอดเยี่ยม! งานเสร็จใน 24 ชม. ล่าสุด:</p>
+                        <ul class="text-xs text-emerald-700 mt-1 list-disc ml-4">
+                            ${completedTasks.map(t => `<li>${t.title}</li>`).join('')}
+                        </ul>
+                    </div>`;
+                }
+        
+                // 4. แสดงประวัติกิจกรรม
+                if(!activities || activities.length === 0) {
+                    container.innerHTML += '<div class="text-center text-xs text-gray-400 mt-5">ยังไม่มีประวัติกิจกรรม</div>';
+                } else {
+                    activities.forEach(a => { 
+                        const t = new Date(a.created_at).toLocaleTimeString('th-TH', {hour: '2-digit', minute:'2-digit'}); 
+                        container.innerHTML += `
+                        <div class="text-[11px] border-b border-gray-100 py-2">
+                            <span class="font-bold text-gray-800">${a.user_name}</span>: ${a.action} 
+                            <span class="text-gray-500">${a.details}</span>
+                            <div class="text-[9px] text-gray-400">${t} น.</div>
+                        </div>`; 
+                    });
+                }
+            } catch (err) { 
+                console.error("Activity load error", err); 
+            }
         }
 
         // --- ระบบ Dashboard & Kanban ---

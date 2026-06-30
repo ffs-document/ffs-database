@@ -1597,7 +1597,13 @@
                 if (tId) { 
                     const { error } = await supabaseClient.from('tasks').update(tData).eq('id', tId); 
                     if (error) throw error;
-                    logActivity('อัปเดตงาน', `เรื่อง: ${tData.title}`); 
+                    
+                    // เพิ่มความฉลาด: ถ้าปรับสถานะเป็น completed ให้ประกาศว่าเสร็จสิ้น
+                    if (tData.status === 'completed') {
+                        logActivity('ทำงานเสร็จสิ้น 🎉', `ภารกิจ: ${tData.title}`); 
+                    } else {
+                        logActivity('อัปเดตงาน', `เรื่อง: ${tData.title}`); 
+                    }
                 } else { 
                     const { data, error } = await supabaseClient.from('tasks').insert([tData]).select(); 
                     if (error) throw error;
@@ -1611,6 +1617,7 @@
                 else loadDashboardData(); 
             } catch (err) { showToast('ข้อผิดพลาด: ' + err.message, 'error'); } 
         }
+
         async function editTask(id) { 
             try {
                 const { data, error } = await supabaseClient.from('tasks').select('*').eq('id', id).single(); 
@@ -1704,12 +1711,17 @@
                 await supabaseClient.from('tasks').update({ quadrant: newStatus }).eq('id', currentViewingTaskId);
                 showToast('อัปเดตสถานะบอร์ดสำเร็จ');
                 
+                const {data} = await supabaseClient.from('tasks').select('department, title').eq('id', currentViewingTaskId).single();
+                
                 // แจ้งเตือนฝ่าย ถ้าผู้บริหารกดอนุมัติ/ตีกลับ
                 if (['approved', 'revise'].includes(newStatus) && currentUser.role === 'Executive') {
-                    const {data} = await supabaseClient.from('tasks').select('department, title').eq('id', currentViewingTaskId).single();
                     let msg = newStatus === 'approved' ? `Executive อนุมัติงาน: ${data.title}` : `Executive แจ้งแก้ไขงาน: ${data.title}`;
                     await supabaseClient.from('notifications').insert([{target_group: data.department, message: msg, task_id: currentViewingTaskId}]);
                 }
+
+                // สั่งให้บันทึกการเปลี่ยน Quadrant ลงประกาศความคืบหน้าด้วย
+                let qName = quadNames[newStatus] || newStatus;
+                logActivity('อัปเดตสถานะบอร์ด', `ย้ายงาน "${data.title}" ไปที่กระดาน: ${qName}`);
 
                 viewTask(currentViewingTaskId); 
                 if (document.getElementById('view-executive-board').classList.contains('flex')) loadExecutiveBoard();

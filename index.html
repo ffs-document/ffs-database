@@ -49,7 +49,7 @@
                     <p class="text-sm text-gray-500 mt-1">ระบบบริหารจัดการข้อมูลองค์กร</p>
                 </div>
                 <div class="space-y-4">
-                    <div><input type="text" id="userInput" placeholder="รหัสสมาชิก (เช่น admin)" class="block w-full px-4 py-2.5 border border-gray-300 rounded-xl bg-gray-50 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"></div>
+                    <div><input type="text" id="userInput" placeholder="รหัสสมาชิก" class="block w-full px-4 py-2.5 border border-gray-300 rounded-xl bg-gray-50 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"></div>
                     <div><input type="password" id="passwordInput" placeholder="รหัสผ่าน" class="block w-full px-4 py-2.5 border border-gray-300 rounded-xl bg-gray-50 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"></div>
                     <div id="loginError" class="hidden text-[11px] text-red-600 bg-red-50 p-2 rounded-lg text-center border border-red-100"><span id="errorMessage"></span></div>
                     <button id="loginBtn" onclick="handleLogin()" class="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-2.5 rounded-xl text-sm transition-all shadow-xs"><span id="loginBtnText">เข้าสู่ระบบ</span></button>
@@ -927,16 +927,26 @@
 
             document.getElementById('userFullName').innerText = user.fullname; document.getElementById('userRole').innerText = roleDisplay; document.getElementById('userInitial').innerText = user.fullname.charAt(0);
             
+            // ซ่อนเมนูทั้งหมดไว้ก่อนเพื่อความปลอดภัย
+            document.getElementById('managementMenuSection').classList.add('hidden');
+            document.getElementById('adminOnlyMenu').classList.add('hidden');
+            document.getElementById('addTemplateBtnUI').classList.add('hidden');
+            document.getElementById('addUserBtnUI').classList.add('hidden');
+            document.getElementById('csvUploadSection').classList.add('hidden');
+
+            // เปิดเมนูตามสิทธิ์ (Role)
             if (['Administrator', 'Executive'].includes(user.role)) {
                 document.getElementById('managementMenuSection').classList.remove('hidden');
                 document.getElementById('addTemplateBtnUI').classList.remove('hidden');
-            }
-            if (user.role === 'Administrator') {
-                document.getElementById('adminOnlyMenu').classList.remove('hidden');
-            } else if (user.role === 'Executive') {
-                document.getElementById('addUserBtnUI').classList.add('hidden'); // ซ่อนปุ่มเพิ่มผู้ใช้ของ Executive
+                
+                // Executive เห็นปุ่มเพิ่มผู้ใช้ไม่ได้
+                if(user.role === 'Administrator') {
+                    document.getElementById('adminOnlyMenu').classList.remove('hidden');
+                    document.getElementById('addUserBtnUI').classList.remove('hidden');
+                }
             }
             
+            // สิทธิ์อัปโหลด CSV
             if (['Administrator', 'Executive'].includes(user.role) || (user.role === 'Working Team' && currentUser.department.includes('สมช'))) {
                 document.getElementById('csvUploadSection').classList.remove('hidden');
             }

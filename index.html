@@ -1020,13 +1020,15 @@
 
         // --- Alert Executive ---
         async function sendAlertToPresident() {
+            if(!currentViewingTaskId) return;
             try {
+                const taskTitle = document.getElementById('vt-title').innerText;
                 await supabaseClient.from('notifications').insert([{
                     target_group: 'Executive', 
-                    message: `ฝ่าย ${currentUser.department} แจ้งเตือนให้ตรวจสอบกระดานงาน`, 
-                    task_id: null 
+                    message: `ฝ่าย ${currentUser.department} แจ้งให้ตรวจงาน: "${taskTitle}"`, 
+                    task_id: currentViewingTaskId 
                 }]);
-                showToast('ส่งแจ้งเตือนถึง Executive เรียบร้อยแล้ว', 'success');
+                showToast('ส่งแจ้งเตือนถึง Executive ให้ตรวจงานนี้แล้ว', 'success');
             } catch(e) { showToast('ไม่สามารถส่งแจ้งเตือนได้', 'error'); }
         }
 
@@ -1673,6 +1675,13 @@
                     document.getElementById('action-dept').classList.add('hidden');
                 }
 
+                // ควบคุมสิทธิ์ปุ่มแจ้งเตือน Executive
+                if (currentUser.role === 'Working Team' && currentUser.department.includes(data.department)) {
+                    document.getElementById('action-alert-exec').classList.remove('hidden');
+                } else {
+                    document.getElementById('action-alert-exec').classList.add('hidden');
+                }
+
                 loadComments(id);
                 document.getElementById('viewTaskModal').classList.remove('hidden');
                 document.getElementById('viewTaskModal').classList.add('flex');
@@ -1868,11 +1877,27 @@
         
         function openAddTaskModal() { 
             document.getElementById('addTaskForm').reset(); document.getElementById('taskId').value=''; document.getElementById('taskDesc').value='';
+            
+            const deptSelect = document.getElementById('taskDept');
+
             if (['Working Team'].includes(currentUser.role)) { 
-                const dpts = currentUser.department.split(',').map(d=>d.trim());
-                if(dpts.length > 0) document.getElementById('taskDept').value = dpts[0]; 
+                // คณะทำงาน: โชว์เฉพาะฝ่ายของตัวเองเท่านั้น
+                const myDepts = currentUser.department.split(',').map(d=>d.trim());
+                deptSelect.innerHTML = ''; 
+                myDepts.forEach(d => {
+                    const optName = deptNames[d] || d;
+                    deptSelect.innerHTML += `<option value="${d}">${optName}</option>`;
+                });
+                deptSelect.disabled = myDepts.length === 1; // ล็อกถ้ามีฝ่ายเดียว
             } 
-            else if (currentDashboardView !== 'all') { document.getElementById('taskDept').value = currentDashboardView; } 
+            else { 
+                // แอดมิน/ผู้บริหาร: โชว์ทุกฝ่าย และตั้งค่าเริ่มต้นตามบอร์ดที่เปิดอยู่
+                deptSelect.innerHTML = Object.keys(deptNames).map(k => `<option value="${k}">${deptNames[k]}</option>`).join('');
+                if (currentDashboardView !== 'all') { 
+                    deptSelect.value = currentDashboardView; 
+                } 
+                deptSelect.disabled = false;
+            } 
             
             document.querySelector('input[name="t-placement"][value="both"]').checked = true;
             toggleTaskPlacementUI();

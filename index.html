@@ -8,16 +8,9 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- กำหนดภาษาไทยให้ Google Charts -->
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
     <script type="text/javascript">
-        // โหลด Google Charts
-        var head = document.getElementsByTagName('head')[0];
-        var script = document.createElement('script');
-        script.type = 'text/javascript';
-        script.src = 'https://www.gstatic.com/charts/loader.js';
-        script.onload = function() {
-            google.charts.load('current', { 'packages': ['geochart'], 'language': 'th' });
-        };
-        head.appendChild(script);
+        google.charts.load('current', { 'packages': ['geochart'], 'language': 'th' });
     </script>
     <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
@@ -56,7 +49,7 @@
                     <p class="text-sm text-gray-500 mt-1">ระบบบริหารจัดการข้อมูลองค์กร</p>
                 </div>
                 <div class="space-y-4">
-                    <div><input type="text" id="userInput" placeholder="รหัสสมาชิก" class="block w-full px-4 py-2.5 border border-gray-300 rounded-xl bg-gray-50 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"></div>
+                    <div><input type="text" id="userInput" placeholder="รหัสสมาชิก (เช่น admin)" class="block w-full px-4 py-2.5 border border-gray-300 rounded-xl bg-gray-50 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"></div>
                     <div><input type="password" id="passwordInput" placeholder="รหัสผ่าน" class="block w-full px-4 py-2.5 border border-gray-300 rounded-xl bg-gray-50 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"></div>
                     <div id="loginError" class="hidden text-[11px] text-red-600 bg-red-50 p-2 rounded-lg text-center border border-red-100"><span id="errorMessage"></span></div>
                     <button id="loginBtn" onclick="handleLogin()" class="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-2.5 rounded-xl text-sm transition-all shadow-xs"><span id="loginBtnText">เข้าสู่ระบบ</span></button>
@@ -326,8 +319,8 @@
                         <div><label class="block text-xs font-medium text-gray-700 mb-1">วันที่ลงเอกสาร *</label><input type="date" id="modalDate" required class="w-full px-3 py-2 border rounded-lg text-sm bg-gray-50 outline-none focus:ring-2 focus:ring-orange-500"></div>
                         <div class="md:col-span-2"><label class="block text-xs font-medium text-gray-700 mb-1">ชื่อเรื่อง *</label><input type="text" id="modalTitle" required class="w-full px-3 py-2 border rounded-lg text-sm bg-gray-50 outline-none focus:ring-2 focus:ring-orange-500"></div>
                         
-                        <div><label class="block text-xs font-medium text-gray-700 mb-1">เรียน</label><input type="text" id="modalAttention" placeholder="เช่น โรงเรียน..." class="w-full px-3 py-2 border rounded-lg text-sm bg-gray-50 outline-none focus:ring-2 focus:ring-orange-500"></div>
-                        <div><label class="block text-xs font-medium text-gray-700 mb-1">ผู้ประสานงาน</label><input type="text" id="modalCoordinator" placeholder="ระบุชื่อผู้ประสานงาน" class="w-full px-3 py-2 border rounded-lg text-sm bg-gray-50 outline-none focus:ring-2 focus:ring-orange-500"></div>
+                        <div><label class="block text-xs font-medium text-gray-700 mb-1">เรียน (ถึงใคร)</label><input type="text" id="modalAttention" placeholder="เช่น ผู้จัดการฝ่าย..." class="w-full px-3 py-2 border rounded-lg text-sm bg-gray-50 outline-none focus:ring-2 focus:ring-orange-500"></div>
+                        <div><label class="block text-xs font-medium text-gray-700 mb-1">หน่วยงาน/ผู้ประสานงาน</label><input type="text" id="modalCoordinator" placeholder="ชื่อหน่วยงาน หรือบุคคล" class="w-full px-3 py-2 border rounded-lg text-sm bg-gray-50 outline-none focus:ring-2 focus:ring-orange-500"></div>
 
                         <div class="md:col-span-2"><label class="block text-xs font-medium text-gray-700 mb-1">เนื้อหาโดยย่อ</label><textarea id="modalContent" rows="2" class="w-full px-3 py-2 border rounded-lg text-sm bg-gray-50 outline-none focus:ring-2 focus:ring-orange-500"></textarea></div>
                         <div class="md:col-span-2"><label class="block text-xs font-medium text-gray-700 mb-1">ลิงก์ PDF</label><input type="url" id="modalPdf" class="w-full px-3 py-2 border rounded-lg text-sm bg-gray-50 outline-none focus:ring-2 focus:ring-orange-500"></div>
@@ -1172,6 +1165,16 @@
             document.getElementById('userHistoryModal').classList.remove('flex');
         }
 
+        // --- เพิ่มฟังก์ชันเปิด/ปิดหน้าต่างพิมพ์รายชื่อ (ที่หายไป) กลับเข้ามา ---
+        function openPrintModal() { 
+            document.getElementById('printModal').classList.remove('hidden'); 
+            document.getElementById('printModal').classList.add('flex');
+        }
+        function closePrintModal() { 
+            document.getElementById('printModal').classList.add('hidden'); 
+            document.getElementById('printModal').classList.remove('flex');
+        }
+
         // --- Members CSV Upload ---
         async function handleCSVUpload(event) {
             const file = event.target.files[0]; if(!file) return;
@@ -1182,7 +1185,8 @@
                     let text = e.target.result; 
                     // ลบ BOM เผื่อมีติดมากับไฟล์ Excel
                     text = text.replace(/^\uFEFF/, '');
-                    const rows = text.split('\n'); 
+                    // แก้ไขการตัดบรรทัดให้รองรับทั้ง Windows (\r\n) และ Mac/Linux (\n)
+                    const rows = text.split(/\r?\n/); 
                     const dataToInsert = [];
                     
                     if (rows.length < 2) throw new Error("ไฟล์ว่างเปล่าหรือไม่มีข้อมูล");
@@ -1190,15 +1194,17 @@
                     for(let i=1; i<rows.length; i++) {
                         if(!rows[i].trim()) continue;
                         const vals = rows[i].split(',');
-                        if (vals.length < 7) continue; // ข้อมูลไม่ครบ
+                        // ยกเลิกการบล็อกถ้าคอลัมน์ไม่ครบ 7 ช่อง (ปล่อยให้ช่องที่ไม่มีข้อมูลเป็นค่าว่างแทน)
+                        if (vals.length < 2) continue; 
+                        
                         dataToInsert.push({ 
-                            member_id: vals[0]?.trim(), 
-                            prefix: vals[1]?.trim(), 
-                            first_name: vals[2]?.trim(), 
-                            last_name: vals[3]?.trim(), 
-                            nickname: vals[4]?.trim(), 
-                            edu_level: vals[5]?.trim(), 
-                            province: vals[6]?.trim() 
+                            member_id: vals[0] ? vals[0].trim() : '', 
+                            prefix: vals[1] ? vals[1].trim() : '', 
+                            first_name: vals[2] ? vals[2].trim() : '', 
+                            last_name: vals[3] ? vals[3].trim() : '', 
+                            nickname: vals[4] ? vals[4].trim() : '', 
+                            edu_level: vals[5] ? vals[5].trim() : '', 
+                            province: vals[6] ? vals[6].trim() : '' 
                         });
                     }
                     
@@ -1209,12 +1215,75 @@
                     showToast("นำเข้าข้อมูลสมาชิกสำเร็จ " + dataToInsert.length + " รายการ"); 
                     loadMembersData();
                 } catch(err) { 
-                    showToast("เกิดข้อผิดพลาด: โปรดตรวจสอบว่าไฟล์เป็น CSV UTF-8 และมีคอลัมน์ครบถ้วน", "error"); 
+                    showToast("เกิดข้อผิดพลาด: " + err.message, "error"); 
                     console.error(err);
                 }
                 document.getElementById('csvFileInput').value = '';
             };
             reader.readAsText(file, 'UTF-8');
+        }
+
+        async function loadMembersData() {
+            const tbody = document.getElementById('membersTableBody'); tbody.innerHTML = '<tr><td colspan="6" class="text-center py-5">กำลังโหลด...</td></tr>';
+            try {
+                const {data, error} = await supabaseClient.from('members').select('*').order('member_id');
+                if(error) throw error;
+                allMembersData = data || [];
+                
+                document.getElementById('stat-members').innerText = allMembersData.length;
+                
+                // คำนวณกราฟ
+                if (allMembersData.length > 0) {
+                    const eduCounts = {}; allMembersData.forEach(m => { let e = m.edu_level || 'ไม่ระบุ'; eduCounts[e] = (eduCounts[e] || 0) + 1; });
+                    if(eduChartInstance) eduChartInstance.destroy();
+                    eduChartInstance = new Chart(document.getElementById('eduChart').getContext('2d'), { type: 'doughnut', data: { labels: Object.keys(eduCounts), datasets: [{ data: Object.values(eduCounts), backgroundColor: ['#3b82f6', '#f97316', '#10b981', '#8b5cf6', '#ec4899', '#f59e0b', '#64748b'] }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right', labels:{font:{family:'Sarabun'}} } } } });
+                    
+                    const provCounts = {}; allMembersData.forEach(m => { let p = m.province || 'ไม่ระบุ'; provCounts[p] = (provCounts[p] || 0) + 1; });
+                    if(provChartInstance) provChartInstance.destroy();
+                    const sortedProv = Object.keys(provCounts).sort((a,b) => provCounts[b] - provCounts[a]).slice(0,10);
+                    provChartInstance = new Chart(document.getElementById('provChart').getContext('2d'), { type: 'bar', data: { labels: sortedProv, datasets: [{ label: 'จำนวน (คน)', data: sortedProv.map(p=>provCounts[p]), backgroundColor: '#3b82f6', borderRadius: 4 }] }, options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { beginAtZero: true, ticks:{stepSize:1, font:{family:'Sarabun'}} }, y: { ticks:{font:{family:'Sarabun'}} } } } });
+                    
+                    if (document.getElementById('provMapContainer').classList.contains('flex')) drawThailandMap();
+                }
+
+                currentMemberPage = 1; renderMembersTable();
+            } catch (err) { tbody.innerHTML = '<tr><td colspan="6" class="text-center py-5 text-red-500">โหลดข้อมูลไม่สำเร็จ</td></tr>'; }
+        }
+
+        function renderMembersTable() {
+            const tbody = document.getElementById('membersTableBody'); tbody.innerHTML = '';
+            const start = (currentMemberPage - 1) * membersPerPage; const end = start + membersPerPage;
+            const pageData = allMembersData.slice(start, end);
+            
+            document.getElementById('pageIndicator').innerText = `หน้า ${currentMemberPage} / ${Math.ceil(allMembersData.length / membersPerPage) || 1}`;
+            document.getElementById('btnPrevPage').disabled = currentMemberPage === 1;
+            document.getElementById('btnNextPage').disabled = end >= allMembersData.length;
+
+            if(pageData.length === 0) return tbody.innerHTML = '<tr><td colspan="6" class="text-center py-10 text-gray-400">ยังไม่มีข้อมูลสมาชิก</td></tr>';
+            
+            pageData.forEach((m, idx) => {
+                const canEditDelete = ['Administrator', 'Executive'].includes(currentUser.role) || (currentUser.role === 'Working Team' && currentUser.department.includes('สมช'));
+                let act = canEditDelete ? `<button onclick="deleteMember('${m.id}', '${m.first_name}')" class="ml-3 text-red-500 hover:text-red-700">ลบ</button>` : '';
+                tbody.innerHTML += `
+                <tr class="hover:bg-gray-50 border-b border-gray-50">
+                    <td class="px-4 py-3 text-center">${start + idx + 1}</td>
+                    <td class="px-4 py-3 font-bold">${m.member_id || '-'}</td>
+                    <td class="px-4 py-3">${m.prefix || ''}${m.first_name || ''} ${m.last_name || ''} ${act}</td>
+                    <td class="px-4 py-3">${m.nickname || '-'}</td>
+                    <td class="px-4 py-3 text-sm">${m.edu_level || '-'}</td>
+                    <td class="px-4 py-3 text-sm">${m.province || '-'}</td>
+                </tr>`;
+            });
+        }
+        function changeMemberPage(step) { currentMemberPage += step; renderMembersTable(); }
+
+        async function deleteMember(id, name) {
+            showConfirm('ยืนยันการลบสมาชิก', `ลบคุณ ${name} ออกจากระบบ?`, async () => {
+                try {
+                    await supabaseClient.from('members').delete().eq('id', id);
+                    showToast('ลบสมาชิกสำเร็จ'); loadMembersData();
+                } catch(e) { showToast('ไม่สามารถลบได้', 'error'); }
+            });
         }
 
         // --- ระบบประกาศ/แชท ---

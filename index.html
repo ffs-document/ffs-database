@@ -1002,10 +1002,12 @@
 
             // Alert Button Visibility
             const alertBtn = document.getElementById('alertPresidentBtn');
-            if (currentUser.role === 'Working Team' && currentUser.department.includes(deptCode) && deptCode !== 'all') {
-                alertBtn.classList.remove('hidden');
-            } else {
-                alertBtn.classList.add('hidden');
+            if (alertBtn) {
+                if (currentUser.role === 'Working Team' && currentUser.department.includes(deptCode) && deptCode !== 'all') {
+                    alertBtn.classList.remove('hidden');
+                } else {
+                    alertBtn.classList.add('hidden');
+                }
             }
 
             highlightStatusCard(); loadDashboardData(); loadActivities();

@@ -138,7 +138,6 @@
                 <div class="md:col-span-1 bg-gray-50 rounded-xl p-4 border border-gray-100 h-fit space-y-4">
                     <p class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">การจัดการ (Actions)</p>
                     
-                    <!-- ส่วนที่ต้องเพิ่ม: ปุ่มแจ้งเตือนให้คณะทำงาน -->
                     <div id="action-alert-exec" class="hidden space-y-2 pb-4 border-b border-gray-200">
                         <p class="text-[10px] font-bold text-red-600 uppercase mb-1">สะกิดผู้บริหาร</p>
                         <button onclick="sendAlertToPresident()" class="w-full bg-red-100 hover:bg-red-200 text-red-600 text-sm font-bold py-2 rounded-lg flex items-center justify-center transition-colors">
@@ -1023,7 +1022,7 @@
                     task_id: currentViewingTaskId 
                 }]);
                 if (error) throw error;
-                showToast('ส่งแจ้งเตือนถึง Executive เรียบร้อยแล้ว', 'success');
+                showToast('ส่งแจ้งเตือนถึง Executive ให้ตรวจงานนี้แล้ว', 'success');
             } catch(e) { 
                 console.error(e);
                 showToast('ไม่สามารถส่งแจ้งเตือนได้ โปรดตรวจสอบตาราง notifications', 'error'); 
@@ -1306,7 +1305,11 @@
 
         // --- ระบบประกาศ/แชท ---
         async function logActivity(act, dtl) { 
-            try { await supabaseClient.from('activities').insert([{ department: currentUser.department || 'Admin', user_name: currentUser.fullname, action: act, details: dtl }]); if(document.getElementById('view-dashboard').classList.contains('block')) loadActivities(); } catch (e) { console.error("Log error", e); }
+            try { 
+                const { error } = await supabaseClient.from('activities').insert([{ department: currentUser.department || 'Admin', user_name: currentUser.fullname, action: act, details: dtl }]); 
+                if (error) throw error;
+                if(document.getElementById('view-dashboard').classList.contains('block')) loadActivities(); 
+            } catch (e) { console.error("Log error", e); }
         }
         
         async function loadActivities() {
@@ -1418,6 +1421,8 @@
                 if (currentDashboardView !== 'all') q = q.eq('department', currentDashboardView);
                 const { data: tasks, error } = await q; 
                 if(error) throw error;
+                
+                console.log("Tasks loaded: ", tasks); // เพิ่มไว้ดูใน Console ว่าดึงอะไรมาได้บ้าง
                 allCurrentTasks = tasks || []; 
                 
                 // เช็คสิทธิ์การมองเห็น Kanban ก่อน เพื่อคำนวณตัวเลขให้ถูกต้อง
@@ -1437,6 +1442,10 @@
                     visibleTasks = allCurrentTasks.filter(t => t.placement === 'table' || t.placement === 'both' || !t.placement);
                 }
                 
+                // ซ่อนแบนเนอร์ด้านบนตามที่ผู้ใช้ต้องการ (ถูกย้ายไปอยู่ในประกาศความคืบหน้าแทน)
+                const banner = document.getElementById('achievementBanner');
+                if (banner) banner.classList.add('hidden');
+
                 document.getElementById('stat-total').innerText = visibleTasks.length; 
                 document.getElementById('stat-completed').innerText = visibleTasks.filter(t=>t.status==='completed').length; 
                 document.getElementById('stat-progress').innerText = visibleTasks.filter(t=>t.status==='in_progress' && !checkTaskOverdueStatus(t).isOverdue).length; 
@@ -1446,7 +1455,9 @@
                 renderTaskTable(); // Task table always shows only 'table' or 'both'
                 renderDeptChart(visibleTasks, currentDashboardView); 
                 renderKanbanBoard();
-            } catch (err) { console.error(err); }
+            } catch (err) { 
+                console.error("Dashboard error: ", err); 
+            }
         }
 
         async function loadExecutiveBoard() {
@@ -1626,7 +1637,8 @@
                 title: document.getElementById('taskTitle').value, department: document.getElementById('taskDept').value, 
                 status: document.getElementById('taskStatus').value, assignee: document.getElementById('taskAssignee').value, 
                 due_date: document.getElementById('taskDueDate').value || null, description: document.getElementById('taskDesc').value || null,
-                placement: plc, quadrant: plc !== 'table' ? document.getElementById('taskQuadrant').value : null
+                placement: plc, quadrant: plc !== 'table' ? document.getElementById('taskQuadrant').value : null,
+                updated_at: new Date().toISOString()
             };
             try { 
                 if (tId) { 
@@ -1650,7 +1662,10 @@
                 closeAddTaskModal(); showToast('บันทึกงานสำเร็จ'); 
                 if (document.getElementById('view-executive-board').classList.contains('flex')) loadExecutiveBoard();
                 else loadDashboardData(); 
-            } catch (err) { showToast('ข้อผิดพลาด: ' + err.message, 'error'); } 
+            } catch (err) { 
+                console.error(err);
+                showToast('ข้อผิดพลาด: โปรดตรวจสอบโครงสร้างตาราง tasks', 'error'); 
+            } 
         }
 
         async function editTask(id) { 
@@ -1743,7 +1758,7 @@
         async function changeQuadrantStatus(newStatus) {
             if(!currentViewingTaskId) return;
             try {
-                await supabaseClient.from('tasks').update({ quadrant: newStatus }).eq('id', currentViewingTaskId);
+                await supabaseClient.from('tasks').update({ quadrant: newStatus, updated_at: new Date().toISOString() }).eq('id', currentViewingTaskId);
                 showToast('อัปเดตสถานะบอร์ดสำเร็จ');
                 
                 const {data} = await supabaseClient.from('tasks').select('department, title').eq('id', currentViewingTaskId).single();

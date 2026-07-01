@@ -1316,12 +1316,17 @@
         
         async function loadActivities() {
             try {
-                // 1. ดึงข้อมูลประกาศทั้งหมดจากฐานข้อมูล
-                const { data: activities, error: actErr } = await supabaseClient
+                let aq = supabaseClient
                     .from('activities')
                     .select('*')
                     .order('created_at', { ascending: false })
                     .limit(30);
+                
+                if (currentDashboardView !== 'all') {
+                    aq = aq.eq('department', currentDashboardView);
+                }
+                
+                const { data: activities, error: actErr } = await aq;
                 
                 if (actErr) throw actErr;
 

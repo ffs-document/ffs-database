@@ -49,7 +49,7 @@
                     <p class="text-sm text-gray-500 mt-1">ระบบบริหารจัดการข้อมูลองค์กร</p>
                 </div>
                 <div class="space-y-4">
-                    <div><input type="text" id="userInput" placeholder="รหัสสมาชิก" class="block w-full px-4 py-2.5 border border-gray-300 rounded-xl bg-gray-50 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"></div>
+                    <div><input type="text" id="userInput" placeholder="รหัสสมาชิก (เช่น admin)" class="block w-full px-4 py-2.5 border border-gray-300 rounded-xl bg-gray-50 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"></div>
                     <div><input type="password" id="passwordInput" placeholder="รหัสผ่าน" class="block w-full px-4 py-2.5 border border-gray-300 rounded-xl bg-gray-50 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"></div>
                     <div id="loginError" class="hidden text-[11px] text-red-600 bg-red-50 p-2 rounded-lg text-center border border-red-100"><span id="errorMessage"></span></div>
                     <button id="loginBtn" onclick="handleLogin()" class="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-2.5 rounded-xl text-sm transition-all shadow-xs"><span id="loginBtnText">เข้าสู่ระบบ</span></button>
@@ -1001,6 +1001,14 @@
                 kSection.classList.add('hidden');
             }
 
+            // Alert Button Visibility
+            const alertBtn = document.getElementById('alertPresidentBtn');
+            if (currentUser.role === 'Working Team' && currentUser.department.includes(deptCode) && deptCode !== 'all') {
+                alertBtn.classList.remove('hidden');
+            } else {
+                alertBtn.classList.add('hidden');
+            }
+
             highlightStatusCard(); loadDashboardData(); loadActivities();
         }
 
@@ -1009,20 +1017,24 @@
             if(!currentViewingTaskId) return;
             try {
                 const taskTitle = document.getElementById('vt-title').innerText;
-                await supabaseClient.from('notifications').insert([{
+                const { error } = await supabaseClient.from('notifications').insert([{
                     target_group: 'Executive', 
                     message: `ฝ่าย ${currentUser.department} แจ้งให้ตรวจงาน: "${taskTitle}"`, 
                     task_id: currentViewingTaskId 
                 }]);
-                showToast('ส่งแจ้งเตือนถึง Executive ให้ตรวจงานนี้แล้ว', 'success');
-            } catch(e) { showToast('ไม่สามารถส่งแจ้งเตือนได้', 'error'); }
+                if (error) throw error;
+                showToast('ส่งแจ้งเตือนถึง Executive เรียบร้อยแล้ว', 'success');
+            } catch(e) { 
+                console.error(e);
+                showToast('ไม่สามารถส่งแจ้งเตือนได้ โปรดตรวจสอบตาราง notifications', 'error'); 
+            }
         }
 
         // --- Notifications ---
         async function checkNotifications() {
             try {
                 let target = currentUser.department;
-                if(currentUser.role === 'Executive') target = 'Executive';
+                if(currentUser.role === 'Executive' || currentUser.role === 'Administrator') target = 'Executive';
                 const { data, error } = await supabaseClient.from('notifications').select('*').eq('target_group', target).eq('is_read', false).order('created_at', { ascending: false });
                 if(data && data.length > 0) {
                     document.getElementById('notifBadge').innerText = data.length;
@@ -1046,8 +1058,12 @@
         async function renderNotifications() {
             const list = document.getElementById('notifList'); list.innerHTML = '<div class="text-center py-4 text-xs text-gray-400">กำลังโหลด...</div>';
             try {
-                let target = currentUser.department; if(currentUser.role === 'Executive') target = 'Executive';
-                const { data } = await supabaseClient.from('notifications').select('*').eq('target_group', target).order('created_at', { ascending: false }).limit(10);
+                let target = currentUser.department; 
+                if(currentUser.role === 'Executive' || currentUser.role === 'Administrator') target = 'Executive';
+                
+                const { data, error } = await supabaseClient.from('notifications').select('*').eq('target_group', target).order('created_at', { ascending: false }).limit(10);
+                if (error) throw error;
+
                 list.innerHTML = '';
                 if(!data || data.length === 0) return list.innerHTML = '<div class="text-center py-4 text-xs text-gray-400">ไม่มีการแจ้งเตือนใหม่</div>';
                 
@@ -1056,12 +1072,17 @@
                     let clickAct = n.task_id ? `viewTask(${n.task_id}); toggleNotifications();` : `toggleNotifications();`;
                     list.innerHTML += `<div class="px-3 py-2 rounded-lg ${bg} hover:bg-gray-100 transition-colors cursor-pointer" onclick="${clickAct}"><p class="text-xs text-gray-800">${n.message}</p><p class="text-[9px] text-gray-400 mt-1">${new Date(n.created_at).toLocaleString('th-TH')}</p></div>`;
                 });
-            } catch(e) {}
+            } catch(e) {
+                console.error(e);
+                list.innerHTML = '<div class="text-center py-4 text-xs text-red-500">โหลดข้อมูลไม่สำเร็จ</div>';
+            }
         }
 
         async function markAllNotifsRead(e) {
             e.stopPropagation();
-            let target = currentUser.department; if(currentUser.role === 'Executive') target = 'Executive';
+            let target = currentUser.department; 
+            if(currentUser.role === 'Executive' || currentUser.role === 'Administrator') target = 'Executive';
+            
             await supabaseClient.from('notifications').update({is_read: true}).eq('target_group', target).eq('is_read', false);
             checkNotifications(); toggleNotifications();
         }
@@ -1747,8 +1768,10 @@
             const list = document.getElementById('commentsList'); list.innerHTML = '<div class="text-xs text-gray-400">กำลังโหลดความคิดเห็น...</div>';
             try {
                 const {data, error} = await supabaseClient.from('comments').select('*').eq('task_id', taskId).order('created_at', {ascending:false});
+                if (error) throw error; // เช็ค Error
+                
                 list.innerHTML = '';
-                if(data.length === 0) return list.innerHTML = '<div class="text-xs text-gray-400">ยังไม่มีความคิดเห็น</div>';
+                if(!data || data.length === 0) return list.innerHTML = '<div class="text-xs text-gray-400">ยังไม่มีความคิดเห็น</div>';
                 data.forEach(c => {
                     list.innerHTML += `
                     <div class="flex gap-3">
@@ -1759,7 +1782,7 @@
                         </div>
                     </div>`;
                 });
-            } catch(e) { list.innerHTML = ''; }
+            } catch(e) { list.innerHTML = '<div class="text-xs text-red-400">เกิดข้อผิดพลาดในการโหลดความคิดเห็น</div>'; console.error(e); }
         }
 
         async function addComment() {
@@ -1767,17 +1790,24 @@
             const txt = document.getElementById('newCommentTxt').value.trim();
             if(!txt) return;
             try {
-                await supabaseClient.from('comments').insert([{task_id: currentViewingTaskId, user_name: currentUser.fullname, comment_text: txt}]);
+                const { error: commentErr } = await supabaseClient.from('comments').insert([{task_id: currentViewingTaskId, user_name: currentUser.fullname, comment_text: txt}]);
+                if (commentErr) throw commentErr; // ดัก Error ถ้าบันทึกไม่สำเร็จ
                 
                 // แจ้งเตือนผู้บริหาร ถ้าเจ้าของงานคอมเมนต์
                 if (currentUser.role !== 'Executive') {
                     const {data} = await supabaseClient.from('tasks').select('title').eq('id', currentViewingTaskId).single();
-                    await supabaseClient.from('notifications').insert([{target_group: 'Executive', message: `มีความคิดเห็นใหม่ในงาน: ${data.title}`, task_id: currentViewingTaskId}]);
+                    if (data) {
+                        await supabaseClient.from('notifications').insert([{target_group: 'Executive', message: `มีความคิดเห็นใหม่ในงาน: ${data.title}`, task_id: currentViewingTaskId}]);
+                    }
                 }
 
                 document.getElementById('newCommentTxt').value = '';
                 loadComments(currentViewingTaskId);
-            } catch(e) { showToast('ไม่สามารถส่งคอมเมนต์ได้', 'error'); }
+                showToast('ส่งความคิดเห็นสำเร็จ'); // แจ้งเตือนเมื่อสำเร็จ
+            } catch(e) { 
+                console.error(e);
+                showToast('ไม่สามารถส่งคอมเมนต์ได้ โปรดตรวจสอบฐานข้อมูล', 'error'); 
+            }
         }
 
         // --- คลังเอกสาร & Audit ---

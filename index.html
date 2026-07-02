@@ -195,7 +195,7 @@
                             <select id="u-dept" required class="w-full px-3 py-2 border rounded-lg text-sm bg-gray-50 outline-none">
                                 <option value="ทั้งหมด">ทั้งหมด (Admin/Exec)</option>
                                 <option value="หัวหน้าภูมิภาค">หัวหน้าภูมิภาค</option>
-                                <option value="อสพ">เอกสารสัมพันธ์ (อสพ.)</option><option value="สมช">ฝ่ายสมาชิกสัมพันธ์ (สมช.)</option><option value="สธส">ฝ่ายสาธารณสุขสัมพันธ์ (สธส.)</option>
+                                <option value="อสพ">ฝ่ายเอกสารสัมพันธ์ (อสพ.)</option><option value="สมช">ฝ่ายสมาชิกสัมพันธ์ (สมช.)</option><option value="สธส">ฝ่ายสาธารณสุขสัมพันธ์ (สธส.)</option>
                                 <option value="วนธ">ฝ่ายวัฒนธรรม (วนธ.)</option><option value="กษส">ฝ่ายเกษตรสัมพันธ์ (กษส.)</option><option value="ชสพ">ฝ่ายชุมชนสัมพันธ์ (ชสพ.)</option>
                                 <option value="กกส">ฝ่ายกิจกรรมสัมพันธ์ (กกส.)</option><option value="ศสพ">ฝ่ายศึกษาสัมพันธ์ (ศสพ.)</option><option value="อกป">ฝ่ายอำนวยการและปฏิสัมพันธ์ (อกป.)</option>
                                 <option value="ฝ่ายประชาสัมพันธ์">ฝ่ายประชาสัมพันธ์</option><option value="ฝ่ายเทคโนโลยีและสารสนเทศ">ฝ่ายเทคโนโลยีและสารสนเทศ</option><option value="ฝ่ายการศึกษาและฝึกอบรม">ฝ่ายการศึกษาและฝึกอบรม</option><option value="ฝ่ายภาพ วิดิโอ และโพรดักชัน">ฝ่ายภาพ วิดิโอ และโพรดักชัน</option>
@@ -316,19 +316,17 @@
                         <div>
                             <label class="block text-xs font-medium text-gray-700 mb-1">ส่วนงาน/ฝ่าย *</label>
                             <select id="modalDept" required class="w-full px-3 py-2 border rounded-lg text-sm bg-gray-50 outline-none focus:ring-2 focus:ring-orange-500">
-                                <option value="หัวหน้าภูมิภาค">หัวหน้าภูมิภาค</option>
-                                <option value="อสพ">เอกสารสัมพันธ์ (อสพ.)</option><option value="สมช">ฝ่ายสมาชิกสัมพันธ์ (สมช.)</option><option value="สธส">ฝ่ายสาธารณสุขสัมพันธ์ (สธส.)</option>
+                                <option value="อสพ">ฝ่ายเอกสารสัมพันธ์ (อสพ.)</option><option value="สมช">ฝ่ายสมาชิกสัมพันธ์ (สมช.)</option><option value="สธส">ฝ่ายสาธารณสุขสัมพันธ์ (สธส.)</option>
                                 <option value="วนธ">ฝ่ายวัฒนธรรม (วนธ.)</option><option value="กษส">ฝ่ายเกษตรสัมพันธ์ (กษส.)</option><option value="ชสพ">ฝ่ายชุมชนสัมพันธ์ (ชสพ.)</option>
                                 <option value="กกส">ฝ่ายกิจกรรมสัมพันธ์ (กกส.)</option><option value="ศสพ">ฝ่ายศึกษาสัมพันธ์ (ศสพ.)</option><option value="อกป">ฝ่ายอำนวยการและปฏิสัมพันธ์ (อกป.)</option>
-                                <option value="ฝ่ายประชาสัมพันธ์">ฝ่ายประชาสัมพันธ์</option><option value="ฝ่ายเทคโนโลยีและสารสนเทศ">ฝ่ายเทคโนโลยีและสารสนเทศ</option><option value="ฝ่ายการศึกษาและฝึกอบรม">ฝ่ายการศึกษาและฝึกอบรม</option><option value="ฝ่ายภาพ วิดิโอ และโพรดักชัน">ฝ่ายภาพ วิดิโอ และโพรดักชัน</option>
                             </select>
                         </div>
                         <div><label class="block text-xs font-medium text-gray-700 mb-1">เลขที่เอกสาร *</label><input type="text" id="modalDocId" required class="w-full px-3 py-2 border rounded-lg text-sm bg-gray-50 outline-none focus:ring-2 focus:ring-orange-500"></div>
                         <div><label class="block text-xs font-medium text-gray-700 mb-1">วันที่ลงเอกสาร *</label><input type="date" id="modalDate" required class="w-full px-3 py-2 border rounded-lg text-sm bg-gray-50 outline-none focus:ring-2 focus:ring-orange-500"></div>
                         <div class="md:col-span-2"><label class="block text-xs font-medium text-gray-700 mb-1">ชื่อเรื่อง *</label><input type="text" id="modalTitle" required class="w-full px-3 py-2 border rounded-lg text-sm bg-gray-50 outline-none focus:ring-2 focus:ring-orange-500"></div>
                         
-                        <div><label class="block text-xs font-medium text-gray-700 mb-1">เรียน (ถึงใคร)</label><input type="text" id="modalAttention" placeholder="เช่น ผู้จัดการฝ่าย..." class="w-full px-3 py-2 border rounded-lg text-sm bg-gray-50 outline-none focus:ring-2 focus:ring-orange-500"></div>
-                        <div><label class="block text-xs font-medium text-gray-700 mb-1">หน่วยงาน/ผู้ประสานงาน</label><input type="text" id="modalCoordinator" placeholder="ชื่อหน่วยงาน หรือบุคคล" class="w-full px-3 py-2 border rounded-lg text-sm bg-gray-50 outline-none focus:ring-2 focus:ring-orange-500"></div>
+                        <div><label class="block text-xs font-medium text-gray-700 mb-1">เรียน</label><input type="text" id="modalAttention" placeholder="เช่น ผู้จัดการฝ่าย..." class="w-full px-3 py-2 border rounded-lg text-sm bg-gray-50 outline-none focus:ring-2 focus:ring-orange-500"></div>
+                        <div><label class="block text-xs font-medium text-gray-700 mb-1">ผู้ประสานงาน</label><input type="text" id="modalCoordinator" placeholder="ชื่อหน่วยงาน หรือบุคคล" class="w-full px-3 py-2 border rounded-lg text-sm bg-gray-50 outline-none focus:ring-2 focus:ring-orange-500"></div>
 
                         <div class="md:col-span-2"><label class="block text-xs font-medium text-gray-700 mb-1">เนื้อหาโดยย่อ</label><textarea id="modalContent" rows="2" class="w-full px-3 py-2 border rounded-lg text-sm bg-gray-50 outline-none focus:ring-2 focus:ring-orange-500"></textarea></div>
                         <div class="md:col-span-2"><label class="block text-xs font-medium text-gray-700 mb-1">ลิงก์ PDF</label><input type="url" id="modalPdf" class="w-full px-3 py-2 border rounded-lg text-sm bg-gray-50 outline-none focus:ring-2 focus:ring-orange-500"></div>
@@ -367,11 +365,9 @@
                         <div>
                             <label class="block text-xs font-medium text-gray-700 mb-1">ฝ่าย *</label>
                             <select id="taskDept" required class="w-full px-3 py-2 border rounded-lg text-sm bg-gray-50 outline-none focus:ring-2 focus:ring-orange-500">
-                                <option value="หัวหน้าภูมิภาค">หัวหน้าภูมิภาค</option>
-                                <option value="อสพ">เอกสารสัมพันธ์ (อสพ.)</option><option value="สมช">ฝ่ายสมาชิกสัมพันธ์ (สมช.)</option><option value="สธส">ฝ่ายสาธารณสุขสัมพันธ์ (สธส.)</option>
+                                <option value="อสพ">ฝ่ายเอกสารสัมพันธ์ (อสพ.)</option><option value="สมช">ฝ่ายสมาชิกสัมพันธ์ (สมช.)</option><option value="สธส">ฝ่ายสาธารณสุขสัมพันธ์ (สธส.)</option>
                                 <option value="วนธ">ฝ่ายวัฒนธรรม (วนธ.)</option><option value="กษส">ฝ่ายเกษตรสัมพันธ์ (กษส.)</option><option value="ชสพ">ฝ่ายชุมชนสัมพันธ์ (ชสพ.)</option>
                                 <option value="กกส">ฝ่ายกิจกรรมสัมพันธ์ (กกส.)</option><option value="ศสพ">ฝ่ายศึกษาสัมพันธ์ (ศสพ.)</option><option value="อกป">ฝ่ายอำนวยการและปฏิสัมพันธ์ (อกป.)</option>
-                                <option value="ฝ่ายประชาสัมพันธ์">ฝ่ายประชาสัมพันธ์</option><option value="ฝ่ายเทคโนโลยีและสารสนเทศ">ฝ่ายเทคโนโลยีและสารสนเทศ</option><option value="ฝ่ายการศึกษาและฝึกอบรม">ฝ่ายการศึกษาและฝึกอบรม</option><option value="ฝ่ายภาพ วิดิโอ และโพรดักชัน">ฝ่ายภาพ วิดิโอ และโพรดักชัน</option>
                             </select>
                         </div>
                         <div id="ui-task-status"><label class="block text-xs font-medium text-gray-700 mb-1">สถานะในตาราง *</label>
@@ -536,7 +532,7 @@
                         </div>
                         <div class="flex flex-col sm:flex-row gap-3">
                             <select id="docDepartment" class="w-full sm:w-1/4 px-3 py-2.5 border border-gray-300 rounded-xl bg-gray-50 text-sm focus:ring-2 focus:ring-orange-500 outline-none">
-                                <option value="">ทุกฝ่าย (All)</option><option value="หัวหน้าภูมิภาค">หัวหน้าภูมิภาค</option><option value="อสพ">เอกสารสัมพันธ์ (อสพ.)</option><option value="สมช">ฝ่ายสมาชิกสัมพันธ์ (สมช.)</option><option value="สธส">ฝ่ายสาธารณสุขสัมพันธ์ (สธส.)</option><option value="วนธ">ฝ่ายวัฒนธรรม (วนธ.)</option><option value="กษส">ฝ่ายเกษตรสัมพันธ์ (กษส.)</option><option value="ชสพ">ฝ่ายชุมชนสัมพันธ์ (ชสพ.)</option><option value="กกส">ฝ่ายกิจกรรมสัมพันธ์ (กกส.)</option><option value="ศสพ">ฝ่ายศึกษาสัมพันธ์ (ศสพ.)</option><option value="อกป">ฝ่ายอำนวยการและปฏิสัมพันธ์ (อกป.)</option>
+                                <option value="">ทุกฝ่าย (All)</option><option value="หัวหน้าภูมิภาค">หัวหน้าภูมิภาค</option><option value="อสพ">ฝ่ายเอกสารสัมพันธ์ (อสพ.)</option><option value="สมช">ฝ่ายสมาชิกสัมพันธ์ (สมช.)</option><option value="สธส">ฝ่ายสาธารณสุขสัมพันธ์ (สธส.)</option><option value="วนธ">ฝ่ายวัฒนธรรม (วนธ.)</option><option value="กษส">ฝ่ายเกษตรสัมพันธ์ (กษส.)</option><option value="ชสพ">ฝ่ายชุมชนสัมพันธ์ (ชสพ.)</option><option value="กกส">ฝ่ายกิจกรรมสัมพันธ์ (กกส.)</option><option value="ศสพ">ฝ่ายศึกษาสัมพันธ์ (ศสพ.)</option><option value="อกป">ฝ่ายอำนวยการและปฏิสัมพันธ์ (อกป.)</option>
                             </select>
                             <select id="docCategory" class="w-full sm:w-1/4 px-3 py-2.5 border border-gray-300 rounded-xl bg-gray-50 text-sm focus:ring-2 focus:ring-orange-500 outline-none">
                                 <option value="">ทุกหมวดหมู่ (All)</option><option value="01">01 - ทั่วไป</option><option value="02">02 - รับรองการทำกิจกรรม</option><option value="03">03 - รับรองสมาชิก</option><option value="04">04 - ลาเรียน</option><option value="05">05 - เยี่ยมชม</option><option value="06">06 - ขอข้อมูล</option><option value="07">07 - ขอเข้าพบ</option><option value="08">08 - ประชาสัมพันธ์</option><option value="09">09 - ขอเชิญเข้าร่วม</option>
@@ -625,7 +621,7 @@
                     <!-- ตารางงานปกติ -->
                     <div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden mb-10">
                         <div class="px-6 py-4 border-b border-gray-100 bg-gray-50 flex justify-between items-center">
-                            <h3 class="text-sm font-bold text-gray-800" id="tableTitle">รายการงาน (มุมมองตารางปกติ)</h3>
+                            <h3 class="text-sm font-bold text-gray-800" id="tableTitle">รายการงาน</h3>
                             <button onclick="clearFilters()" id="clearFilterBtn" class="hidden text-xs text-orange-600 font-bold hover:underline">แสดงทั้งหมด (ล้างตัวกรอง)</button>
                         </div>
                         <div class="overflow-x-auto">
@@ -793,7 +789,7 @@
 
         const deptNames = { 
             "หัวหน้าภูมิภาค": "หัวหน้าภูมิภาค", 
-            "อสพ": "เอกสารสัมพันธ์ (อสพ.)", 
+            "อสพ": "ฝ่ายเอกสารสัมพันธ์ (อสพ.)", 
             "สมช": "ฝ่ายสมาชิกสัมพันธ์ (สมช.)", 
             "สธส": "ฝ่ายสาธารณสุขสัมพันธ์ (สธส.)", 
             "วนธ": "ฝ่ายวัฒนธรรม (วนธ.)", 
